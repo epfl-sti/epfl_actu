@@ -70,6 +70,35 @@ function epfl_actu_display_short($rss_xml, $max_number)
   return $tmp;
 }
 
+
+/*
+<div class="card" style="width: 20rem; margin: 10px">
+  <img class="card-img-top" src="https://placehold.it/500x400" alt="Card image cap">
+  <div class="card-body">
+    <h4 class="card-title">EPFL</h4>
+    <p class="card-text">This is the new #<?php echo $i?></p>
+    <a href="#" class="btn btn-primary">Read more</a>
+  </div>
+</div>
+*/
+function epfl_actu_display_bootstrap_card($rss_xml, $max_number)
+{
+  $count=0;
+  foreach ($rss_xml->channel->item as $item) {
+    $creator = $item->children('dc', TRUE);
+    $tmp = "<div class='card' style='width: 20rem; margin: 10px'>";
+    preg_match('/<img.+src=[\'"](?P<src>.+?)[\'"].*>/i', $item->description, $image);
+    $tmp .= '<img class="card-img-top" src="' . $image['src'] . '" title="' . $item->title . '" />';
+    $tmp .= "<div class='card-body'>";
+    $tmp .= '<h4 class="card-title">' . $item->title . '</h4>';
+    $tmp .= '<a href="' . $item->link . ' target="_blank" class="btn btn-primary">Read more</a>';
+    $tmp .= '</div>';
+    $tmp .= '</div>';
+    if ($count++ >= $max_number) break;
+    echo $tmp;
+  }
+}
+
 function epfl_actu_display_widget($rss_xml, $max_number)
 {
   $count=0;
@@ -111,10 +140,12 @@ function epfl_actu_wp_shortcode($atts, $content=null, $tag='') {
     case 'widget':
       $display_html = epfl_actu_display_widget($rss_xml, $max);
       break;
+    case 'bootstrap-card':
+      $display_html = epfl_actu_display_bootstrap_card($rss_xml, $max);
+      break;
   }
   return $display_html;
 }
 
 add_shortcode('actu', 'epfl_actu_wp_shortcode');
 ?>
-
