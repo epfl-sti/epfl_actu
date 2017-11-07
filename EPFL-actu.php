@@ -92,7 +92,7 @@ function epfl_actu_display_bootstrap_card($rss_xml, $max_number)
     $tmp .= '<img class="card-img-top" src="' . $image['src'] . '" title="' . $item->title . '" />';
     $tmp .= "<div class='card-body'>";
     $tmp .= '<h4 class="card-title">' . $item->title . '</h4>';
-    $tmp .= '<a href="' . $item->link . ' target="_blank" class="btn btn-primary">Read more</a>';
+    $tmp .= '<a href="' . $item->link . '" target="_blank" class="btn btn-primary">Read more</a>';
     $tmp .= '</div>';
     $tmp .= '</div>';
     if ($count++ >= $max_number) break;
