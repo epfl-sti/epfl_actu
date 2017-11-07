@@ -84,9 +84,10 @@ function epfl_actu_display_short($rss_xml, $max_number)
 function epfl_actu_display_bootstrap_card($rss_xml, $max_number)
 {
   $count=0;
+  $tmp = "";
   foreach ($rss_xml->channel->item as $item) {
     $creator = $item->children('dc', TRUE);
-    $tmp = "<div class='card' style='width: 20rem; margin: 10px'>";
+    $tmp .= "<div class='card' style='width: 20rem; margin: 10px'>";
     preg_match('/<img.+src=[\'"](?P<src>.+?)[\'"].*>/i', $item->description, $image);
     $tmp .= '<img class="card-img-top" src="' . $image['src'] . '" title="' . $item->title . '" />';
     $tmp .= "<div class='card-body'>";
@@ -95,8 +96,8 @@ function epfl_actu_display_bootstrap_card($rss_xml, $max_number)
     $tmp .= '</div>';
     $tmp .= '</div>';
     if ($count++ >= $max_number) break;
-    echo $tmp;
   }
+  return $tmp;
 }
 
 function epfl_actu_display_widget($rss_xml, $max_number)
