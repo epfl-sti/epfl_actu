@@ -1,34 +1,50 @@
 <?php
 /*
  * Plugin Name: EPFL Actu (shortcode)
+ * Plugin URI:  https://github.com/epfl-sti/wordpress.plugin.actu
  * Description: Insert some EPFL news on your blog (https://news.epfl.ch).
- *              Note that it uses the RSS feed.
- * Version:     0.3
+ * Version:     0.4
  * Author:      Nicolas Borboën
  * Author URI:  go.epfl.ch/nbo
+ * License:     MIT License / Copyright (c) 2017 EPFL ⋅ STI ⋅ IT
+ *
  * Usage:
- *   - [actu number=10 tmpl=full]
- *   - [actu number=5 tmpl=short]
- *   - [actu number=3 tmpl=widget]
+ *   - [actu]
+ *   - [actu tmpl=full channel=sti lang=en limit=3]
+ *   - [actu tmpl=short channel=igm lang=en limit=10 category=1 project=204 fields=title,subtitle,news_thumbnail_absolute_url,visual_and_thumbnail_description,description,absolute_slug]
+ *
  * Note:
  *   - Add `add_filter('actu','do_shortcode');` in theme to enable shortcodes in text widgets
+ *   - Item's values are: "translation_id", "title", "video", "visual_and_thumbnail_description",
+ *                        "subtitle", "text", "status", "slug", "absolute_slug", "order", "id_original",
+ *                        "creation_date", "last_modification_date", "publish_date", "trash_date",
+ *                        "delete_date", "channel_name", "news_id", "news_has_video", "news_category_id",
+ *                        "news_category_label_en", "news_category_label_fr", "news_visual_absolute_url",
+ *                        "news_thumbnail_absolute_url", "news_large_thumbnail_absolute_url", "language".
+ *
+ * Logs:
+ *   - v0.1   First WWIP
+ *   - v0.2   More template
+ *   - v0.3   Widgets enable
+ *   - v0.4   Rewritten to use the Actu REST API
+ *
  */
 
 /*
  * ToDo:
  *    - Add TinyMCE button: https://wordpress.stackexchange.com/questions/72394/how-to-add-a-shortcode-button-to-the-tinymce-editor
- *    - Check if actu webservice is better than RSS: https://actu.epfl.ch/webservice?channel=456&lang=en&template=4&sticker=no
  *    - Validate RSS's url
  *    - Add Cache (wp_cache)
  *    - Comments
- *    - Add CSS / JS
+ *    - Add CSS classes (similar to https://help-actu.epfl.ch/outils-webmasters/exporter-tri-articles ?)
+ *    - INC0203354 - Author + Source
  */
 
-function epfl_actu_get_rss_content($rss_url)
+function epfl_actu_get_items($url)
 {
   $curl = curl_init();
   curl_setopt_array($curl, Array(
-    CURLOPT_URL            => $rss_url, // 'https://actu.epfl.ch/feeds/rss/mediacom/en/',
+    CURLOPT_URL            => $url,
     CURLOPT_USERAGENT      => 'jawpb',  // just another wp blog
     CURLOPT_TIMEOUT        => 120,
     CURLOPT_CONNECTTIMEOUT => 30,
@@ -38,78 +54,93 @@ function epfl_actu_get_rss_content($rss_url)
 
   $data = curl_exec($curl);
   curl_close($curl);
-  return simplexml_load_string($data, 'SimpleXMLElement', LIBXML_NOCDATA);
+  return json_decode($data);
 }
 
-function epfl_actu_display_full($rss_xml, $max_number)
+function epfl_actu_display_full($actus)
 {
-  $count=0;
-  foreach ($rss_xml->channel->item as $item) {
-    $creator = $item->children('dc', TRUE);
-    $tmp .= '<h2>' . $item->title . '</h2>';
-    $tmp .= '<p>Created: ' . $item->pubDate . '</p>';
-    $tmp .= '<p>Author: ' . $creator . '</p>';
-    $tmp .= '<p>' . $item->description . '</p>';
-    $tmp .= '<p><a href="' . $item->link . '">Read more: ' . $item->title . '</a></p>';
-    if ($count++ >= $max_number) break;
+  foreach ($actus as $item) {
+    $actu .= '<h2>' . $item->title . '</h2>';
+    $actu .= '<p><img src="' . $item->news_visual_absolute_url . '" title="' . $item->visual_and_thumbnail_description . '">' . $item->description . '</p>';
+    $actu .= '<p>Created: ' . $item->creation_date . '</p>';
+    $actu .= '<p>' . $item->subtitle . '</p>';
+    $actu .= '<p>' . $item->text . '</p>';
+    $actu .= '<p><a href="' . $item->absolute_slug . '">Read more</a></p>';
   }
-  return $tmp;
+  return $actu;
 }
 
-function epfl_actu_display_short($rss_xml, $max_number)
+function epfl_actu_display_short($actus)
 {
-  $count=0;
-  foreach ($rss_xml->channel->item as $item) {
-    $creator = $item->children('dc', TRUE);
-    $tmp .= '<h2>' . $item->title . '</h2>';
-    $tmp .= '<p>Created: ' . $item->pubDate . '</p>';
-    preg_match('/<img.+src=[\'"](?P<src>.+?)[\'"].*>/i', $item->description, $image);
-    $tmp .= '<p><a href="' . $item->link . '" target="_blank"><img src="' . $image['src'] . '" title="' . $item->title . '" /></a></p>';
-    if ($count++ >= $max_number) break;
+  foreach ($actus as $item) {
+    $actu .= '<h2>' . $item->title . '</h2>';
+    $actu .= '<p>' . $item->subtitle . '</p>';
+    $actu .= '<img src="' . $item->news_thumbnail_absolute_url . '" title="' . $item->visual_and_thumbnail_description . '">';
+    $actu .= '<a href="' . $item->absolute_slug . '">Read more</a>';
   }
-  return $tmp;
+  return $actu;
 }
 
-function epfl_actu_display_widget($rss_xml, $max_number)
+function epfl_actu_display_widget($actus)
 {
-  $count=0;
-  foreach ($rss_xml->channel->item as $item) {
-    $creator = $item->children('dc', TRUE);
-    $tmp .= '<b>' . $item->title . '</b>';
-    preg_match('/<img.+src=[\'"](?P<src>.+?)[\'"].*>/i', $item->description, $image);
-    $tmp .= '<p><a href="' . $item->link . '" target="_blank"><img src="' . $image['src'] . '" title="' . $item->title . '" /></a></p>';
-    if ($count++ >= $max_number) break;
+  foreach ($actus as $item) {
+    $actu .= '<h2>' . $item->title . '</h2>';
+    $actu .= '<a href="' . $item->absolute_slug . '"><img src="' . $item->news_thumbnail_absolute_url . '" title="' . $item->visual_and_thumbnail_description . '"></a>';
   }
-  return $tmp;
+  return $actu;
 }
 
 /**
  * Main logic
+ *   https://wiki.epfl.ch/api-rest-actu-memento/actu
+ *   https://help-actu.epfl.ch/outils-webmasters/exporter-tri-articles
  **/
 function epfl_actu_wp_shortcode($atts, $content=null, $tag='') {
   // normalize attribute keys, lowercase
   $atts = array_change_key_case((array)$atts, CASE_LOWER);
 
   // override default attributes with user attributes
-  $actu_atts = shortcode_atts([  'number' => '10',
-                                 'tmpl'   => 'full', // full, short, widget
-                                 'url'    => 'https://actu.epfl.ch/feeds/rss/STI/en/', // https://help-actu.epfl.ch/flux-rss
+  $actu_atts = shortcode_atts([  'tmpl'      => 'full', // full, short, widget
+                                 'channel'   => 'sti',
+                                 'lang'      => 'en', //fr, en
+                                 'limit'     => '10',
+                                 'category'  => '', // https://actu.epfl.ch/api/v1/categories/
+                                 'project'   => '', // https://actu.epfl.ch/api/jahia/channels/sti/projects/
+                                 'fields'    => '', // title,slug,...
                                ], $atts, $tag);
 
-  $max = esc_attr($actu_atts['number']);
-  $tmpl = esc_attr($actu_atts['tmpl']);
-  $rss_xml = epfl_actu_get_rss_content(esc_attr($actu_atts['url']));
+  $tmpl     = esc_attr($actu_atts['tmpl']);
+  $channel  = esc_attr($actu_atts['channel']);
+  $lang     = esc_attr($actu_atts['lang']);
+  $limit    = esc_attr($actu_atts['limit']);
+  $category = esc_attr($actu_atts['category']);
+  $project  = esc_attr($actu_atts['project']);
+  $fields   = esc_attr($actu_atts['fields']);
+
+  // make the correct URL call
+  $url = 'https://actu.epfl.ch/api/jahia/channels/'.$channel.'/news/'.$lang.'/?format=json';
+  if ($limit)
+    $url .= '&limit=' . $limit;
+  if ($category)
+    $url .= '&category=' . $category;
+  if ($project)
+    $url .= '&project=' . $project;
+  if ($fields)
+    $url .= '&fields=' . $fields;
+
+  // fetch actus items
+  $actus = epfl_actu_get_items($url);
 
   switch ($tmpl) {
     default:
     case 'full':
-      $display_html = epfl_actu_display_full($rss_xml, $max);
+      $display_html = epfl_actu_display_full($actus);
       break;
     case 'short':
-      $display_html = epfl_actu_display_short($rss_xml, $max);
+      $display_html = epfl_actu_display_short($actus);
       break;
     case 'widget':
-      $display_html = epfl_actu_display_widget($rss_xml, $max);
+      $display_html = epfl_actu_display_widget($actus);
       break;
   }
   return $display_html;
@@ -117,4 +148,3 @@ function epfl_actu_wp_shortcode($atts, $content=null, $tag='') {
 
 add_shortcode('actu', 'epfl_actu_wp_shortcode');
 ?>
-
