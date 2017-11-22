@@ -30,6 +30,8 @@
  *
  */
 
+namespace EPFL\Actu;
+
 /*
  * ToDo:
  *    - Add TinyMCE button: https://wordpress.stackexchange.com/questions/72394/how-to-add-a-shortcode-button-to-the-tinymce-editor
@@ -40,7 +42,7 @@
  *    - INC0203354 - Author + Source
  */
 
-function epfl_actu_get_items($url)
+function get_items($url)
 {
   $curl = curl_init();
   curl_setopt_array($curl, Array(
@@ -57,7 +59,7 @@ function epfl_actu_get_items($url)
   return json_decode($data);
 }
 
-function epfl_actu_display_full($actus)
+function display_full($actus)
 {
   foreach ($actus as $item) {
     $actu .= '<h2>' . $item->title . '</h2>';
@@ -70,7 +72,7 @@ function epfl_actu_display_full($actus)
   return $actu;
 }
 
-function epfl_actu_display_short($actus)
+function display_short($actus)
 {
   foreach ($actus as $item) {
     $actu .= '<h2>' . $item->title . '</h2>';
@@ -81,7 +83,7 @@ function epfl_actu_display_short($actus)
   return $actu;
 }
 
-function epfl_actu_display_widget($actus)
+function display_widget($actus)
 {
   foreach ($actus as $item) {
     $actu .= '<h2>' . $item->title . '</h2>';
@@ -95,7 +97,7 @@ function epfl_actu_display_widget($actus)
  *   https://wiki.epfl.ch/api-rest-actu-memento/actu
  *   https://help-actu.epfl.ch/outils-webmasters/exporter-tri-articles
  **/
-function epfl_actu_wp_shortcode($atts, $content=null, $tag='') {
+function wp_shortcode($atts, $content=null, $tag='') {
   // normalize attribute keys, lowercase
   $atts = array_change_key_case((array)$atts, CASE_LOWER);
 
@@ -129,18 +131,18 @@ function epfl_actu_wp_shortcode($atts, $content=null, $tag='') {
     $url .= '&fields=' . $fields;
 
   // fetch actus items
-  $actus = epfl_actu_get_items($url);
+  $actus = get_items($url);
 
   switch ($tmpl) {
     default:
     case 'full':
-      $display_html = epfl_actu_display_full($actus);
+      $display_html = display_full($actus);
       break;
     case 'short':
-      $display_html = epfl_actu_display_short($actus);
+      $display_html = display_short($actus);
       break;
     case 'widget':
-      $display_html = epfl_actu_display_widget($actus);
+      $display_html = display_widget($actus);
       break;
   }
   return $display_html;
