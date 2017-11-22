@@ -51,7 +51,7 @@ class Person
                     'singular_name'      => __x( 'Person', 'post type singular name' ),
                     'menu_name'          => __x( 'People', 'admin menu' ),
                     'name_admin_bar'     => __x( 'Person', 'add new on admin bar' ),
-                    'add_new'            => __x( 'Add New', 'book' ),
+                    'add_new'            => __x( 'Add New', 'add new person' ),
                     'add_new_item'       => ___( 'Add New Person' ),
                     'new_item'           => ___( 'New Person' ),
                     'edit_item'          => ___( 'Edit Person' ),
