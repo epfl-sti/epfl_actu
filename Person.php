@@ -24,6 +24,8 @@ function __x($text, $context)
 
 class Person
 {
+    const SLUG = "epfl-person";
+
     static function hook ()
     {
         $THIS_CLASS = '\EPFL\Persons\Person';
@@ -42,7 +44,7 @@ class Person
     static function register_post_type ()
     {
         register_post_type(
-            'person',
+            Person::SLUG,
             array(
                 'labels'             => array(
                     'name'               => __x( 'People', 'post type general name' ),
@@ -66,7 +68,7 @@ class Person
                 'show_ui'            => true,
                 'show_in_menu'       => true,
                 'query_var'          => true,
-                'rewrite'            => array( 'slug' => 'people' ),
+                'rewrite'            => array( 'slug' => Person::SLUG ),
                 'capability_type'    => 'post',
                 'has_archive'        => true,
                 'hierarchical'       => false,
@@ -95,7 +97,7 @@ class Person
      */
     static function enter_title_here ($text, $post)
     {
-        if ($post->post_type != "person") return $text;
+        if ($post->post_type != Person::SLUG) return $text;
         return __x("Dr Firstname Lastname", "enter_title_here");
     }
 }
