@@ -148,5 +148,9 @@ function wp_shortcode($atts, $content=null, $tag='') {
   return $display_html;
 }
 
-add_shortcode('actu', 'epfl_actu_wp_shortcode');
+add_shortcode('actu', 'EPFL\\Actu\\wp_shortcode');
+
+require_once(dirname(__FILE__) . "/Actu.php");
+
+Actu::hook();
 ?>
