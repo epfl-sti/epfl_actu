@@ -90,6 +90,9 @@ class Person
         );
    }
 
+    /**
+     * Replace the "Enter title here" prompt for Person-typed posts
+     */
     static function enter_title_here ($text, $post)
     {
         if ($post->post_type != "person") return $text;
