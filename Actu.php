@@ -1,7 +1,7 @@
 <?php
 
 /**
- * "Actu" custom post type.
+ * "Actu" custom post type and taxonomy.
  *
  * For each entry in actus.epfl.ch that the WordPress administrators
  * are interested in, there is a local copy as a post inside the
@@ -17,7 +17,12 @@ if (! defined('ABSPATH')) {
 
 require_once(dirname(__FILE__) . "/inc/i18n.php");
 
-class Actu
+/**
+ * Configuration and WP callbacks for the post type and taxonomy (all in one class)
+ *
+ * This is a "pure static" class; no instances are ever constructed.
+ */
+class ActuConfig
 {
     const SLUG = "epfl-actu";
 

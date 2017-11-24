@@ -152,5 +152,5 @@ add_shortcode('actu', 'EPFL\\Actu\\wp_shortcode');
 
 require_once(dirname(__FILE__) . "/Actu.php");
 
-Actu::hook();
+ActuConfig::hook();
 ?>
