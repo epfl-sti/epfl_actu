@@ -24,6 +24,7 @@ class Actu
     static function hook ()
     {
         add_action('init', array(get_called_class(), 'register_post_type'));
+        add_action('init', array(get_called_class(), 'register_taxonomy'));
         add_filter('enter_title_here', array(get_called_class(), 'enter_title_here'),
                    10, 2);
         $main_plugin_file = dirname(__FILE__) . "/EPFL-actu.php";
@@ -78,6 +79,76 @@ class Actu
                 'menu_icon'          => 'dashicons-megaphone',
                 'supports'           => array( 'title' )
             ));
+    }
+
+    /**
+     * Create Actu channels as a taxonomy.
+     *
+     * A "taxonomy" is a complicated word for a category of Actu
+     * entries. Actu entries are grouped by "channels", i.e. the feed
+     * they come from. Channels have names and host suitable metadata,
+     * i.e. an API URL to fetch from.
+     */
+    function register_taxonomy ()
+    {
+        $taxonomy_slug = 'epfl-actu-channel';
+        register_taxonomy( $taxonomy_slug, array( self::SLUG ),
+            array(
+                'hierarchical'      => false,
+                'labels'            => array(
+                'name'              => __x( 'News Channels', 'taxonomy general name'),
+                'singular_name'     => __x( 'News Channel', 'taxonomy singular name'),
+                'search_items'      => ___( 'Search News Channels'),
+                'all_items'         => ___( 'All News Channels'),
+                'edit_item'         => ___( 'Edit News Channel'),
+                'update_item'       => ___( 'Update News Channel'),
+                'add_new_item'      => ___( 'Add News Channel'),
+                'new_item_name'     => ___( 'New Channel Name'),
+                'menu_name'         => ___( 'News Channels'),
+                ),
+                'show_ui'           => true,
+                'show_admin_column' => true,
+                'query_var'         => true,
+                // TODO: capabilities here.
+                'rewrite'           => array( 'slug' => $taxonomy_slug ),
+            ));
+        add_action("${taxonomy_slug}_add_form_fields", array(get_called_class(), "create_channel_widget"));
+        add_action( "${taxonomy_slug}_edit_form_fields", array(get_called_class(), "update_channel_widget"), 10, 2);
+        add_action( "created_${taxonomy_slug}", array(get_called_class(), 'created_channel'), 10, 2 );
+        add_action( "edited_${taxonomy_slug}", array(get_called_class(), 'edited_channel'), 10, 2 );
+    }
+
+    const CHANNEL_API_URL_SLUG = "epfl_actu_channel_api_url";
+    function create_channel_widget ($taxonomy)
+    {
+        self::render_channel_widget(array("placeholder" => "http://example.com/"));
+    }
+
+    function update_channel_widget ($term, $taxonomy)
+    {
+        self::render_channel_widget(array("value" => get_term_meta( $term->term_id, self::CHANNEL_API_URL_SLUG, true )));
+    }
+
+    function render_channel_widget ($input_attributes)
+    {
+      ?><div class="form-field term-group">
+        <label for="<?php echo self::CHANNEL_API_URL_SLUG ?>"><?php echo ___('Actu Channel API URL'); ?></label>
+        <input id="<?php echo self::CHANNEL_API_URL_SLUG ?>" name="<?php echo self::CHANNEL_API_URL_SLUG ?>" <?php
+           foreach ($input_attributes as $k => $v) {
+               echo "$k=" . htmlspecialchars($v);
+           }?> />
+       </div><?php
+    }
+
+    function created_channel( $term_id, $tt_id )
+    {
+        $channel_api_url = $_POST[self::CHANNEL_API_URL_SLUG];
+        add_term_meta( $term_id, self::CHANNEL_API_URL_SLUG, $channel_api_url, true );
+    }
+
+    function edited_channel( $term_id, $tt_id ){
+        $channel_api_url = $_POST[self::CHANNEL_API_URL_SLUG];
+        update_term_meta( $term_id, self::CHANNEL_API_URL_SLUG, $channel_api_url, true );
     }
 
     const ROLES_THAT_MAY_VIEW_ACTUS = array('administrator', 'editor', 'author', 'contributor');
