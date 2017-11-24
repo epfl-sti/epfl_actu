@@ -23,10 +23,12 @@ class Actu
 
     static function hook ()
     {
-        $THIS_CLASS = '\EPFL\Actu\Actu';
-        add_action('init', array($THIS_CLASS, 'register_post_type'));
-        add_filter('enter_title_here', array($THIS_CLASS, 'enter_title_here'),
+        add_action('init', array(get_called_class(), 'register_post_type'));
+        add_filter('enter_title_here', array(get_called_class(), 'enter_title_here'),
                    10, 2);
+        $main_plugin_file = dirname(__FILE__) . "/EPFL-actu.php";
+        register_activation_hook($main_plugin_file, array(get_called_class(), "register_caps"));
+        register_deactivation_hook($main_plugin_file, array(get_called_class(), "deregister_caps"));
     }
 
     /**
@@ -68,12 +70,58 @@ class Actu
                 'show_in_menu'       => true,
                 'query_var'          => true,
                 'rewrite'            => array( 'slug' => self::SLUG ),
-                'capability_type'    => 'post',
+                  // ad hoc access control, see (de|)register_caps() below:
+                'capability_type'    => array('epfl_actu', 'epfl_actus'),
                 'has_archive'        => true,
                 'hierarchical'       => false,
                 'menu_position'      => null,
                 'menu_icon'          => 'dashicons-megaphone',
-                'supports'           => array( 'title', 'editor', 'thumbnail' )
+                'supports'           => array( 'title' )
             ));
+    }
+
+    const ROLES_THAT_MAY_VIEW_ACTUS = array('administrator', 'editor', 'author', 'contributor');
+    const CAPS_FOR_VIEWERS = array(
+        'edit_epfl_actus'
+    );
+    const ALL_ROLES = array('administrator', 'editor', 'author', 'contributor', 'subscriber');
+    const ALL_CAPS = array(
+        'edit_epfl_actu', 
+        'read_epfl_actu',
+        'delete_epfl_actu', 
+        'edit_others_epfl_actus', 
+        'publish_epfl_actus',       
+        'read_private_epfl_actus', 
+        'edit_epfl_actus'
+    );
+
+    /**
+     * Register permissions ("capabilities") on Actu posts.
+     *
+     * Called at plugin activation time.
+     */
+    static function register_caps ()
+    {
+        foreach (self::ROLES_THAT_MAY_VIEW_ACTUS as $role_name) {
+            $role = get_role($role_name);
+            foreach (self::CAPS_FOR_VIEWERS as $cap) {
+                $role->add_cap($cap);
+            }
+        }
+    }
+
+    /**
+     * De-register permissions ("capabilities") on Actu posts.
+     *
+     * Called at plugin deactivation time.
+     */
+    static function deregister_caps ()
+    {
+        foreach (self::ALL_ROLES as $role_name) {
+            $role = get_role($role_name);
+            foreach (self::ALL_CAPS as $cap) {
+                $role->remove_cap($cap);
+            }
+        }
     }
 }
