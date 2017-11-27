@@ -11,6 +11,8 @@
 
 namespace EPFL\Actu;
 
+use WP_Query;
+
 if (! defined('ABSPATH')) {
     die('Access denied.');
 }
@@ -28,8 +30,8 @@ class ActuConfig
 
     static function hook ()
     {
-        add_action('init', array(get_called_class(), 'register_post_type'));
         add_action('init', array(get_called_class(), 'register_taxonomy'));
+        add_action('init', array(get_called_class(), 'register_post_type'));
         add_filter('enter_title_here', array(get_called_class(), 'enter_title_here'),
                    10, 2);
         $main_plugin_file = dirname(__FILE__) . "/EPFL-actu.php";
@@ -80,6 +82,7 @@ class ActuConfig
                 'capability_type'    => array('epfl_actu', 'epfl_actus'),
                 'has_archive'        => true,
                 'hierarchical'       => false,
+                'taxonomies'         => array(self::get_taxonomy_slug(), 'category'),
                 'menu_position'      => null,
                 'menu_icon'          => 'dashicons-megaphone',
                 'supports'           => array( 'title' )
@@ -89,6 +92,11 @@ class ActuConfig
     function get_post_type ()
     {
         return self::SLUG;
+    }
+
+    function get_taxonomy_slug ()
+    {
+        return 'epfl-actu-channel';
     }
 
     /**
@@ -101,7 +109,7 @@ class ActuConfig
      */
     function register_taxonomy ()
     {
-        $taxonomy_slug = 'epfl-actu-channel';
+        $taxonomy_slug = self::get_taxonomy_slug();
         register_taxonomy( $taxonomy_slug, array( self::SLUG ),
             array(
                 'hierarchical'      => false,
@@ -150,15 +158,24 @@ class ActuConfig
        </div><?php
     }
 
-    function created_channel( $term_id, $tt_id )
+    function created_channel ($term_id, $tt_id)
     {
         $channel_api_url = $_POST[self::CHANNEL_API_URL_SLUG];
         add_term_meta( $term_id, self::CHANNEL_API_URL_SLUG, $channel_api_url, true );
+        self::sync_actus($term_id, $channel_api_url);
     }
 
-    function edited_channel( $term_id, $tt_id ){
+    function edited_channel ($term_id, $tt_id)
+    {
         $channel_api_url = $_POST[self::CHANNEL_API_URL_SLUG];
         update_term_meta( $term_id, self::CHANNEL_API_URL_SLUG, $channel_api_url );
+        self::sync_actus($term_id, $channel_api_url);
+    }
+
+    function sync_actus ($term_id, $channel_api_url)
+    {
+        $stream = new ActuStream($term_id, $channel_api_url);
+        $stream->sync();
     }
 
     const ROLES_THAT_MAY_VIEW_ACTUS = array('administrator', 'editor', 'author', 'contributor');
@@ -185,7 +202,8 @@ class ActuConfig
     {
         foreach (self::ROLES_THAT_MAY_VIEW_ACTUS as $role_name) {
             $role = get_role($role_name);
-            foreach (self::CAPS_FOR_VIEWERS as $cap) {
+//            foreach (self::CAPS_FOR_VIEWERS as $cap) {
+            foreach (self::ALL_CAPS as $cap) {
                 $role->add_cap($cap);
             }
         }
@@ -204,5 +222,120 @@ class ActuConfig
                 $role->remove_cap($cap);
             }
         }
+    }
+}
+
+/**
+ * Object model for Actu streams
+ */
+class ActuStream
+{
+    function __construct($term_id, $url = null)
+    {
+        $this->ID = $term_id;
+        if ($url !== null) {
+            $this->url = $url;
+        } else {
+            $this->url = get_term_meta( $term_id, ActuConfig::CHANNEL_API_URL_SLUG, true );
+        }
+    }
+
+    function get_url ()
+    {
+        return $this->url;
+    }
+
+    function as_category ()
+    {
+        return $this->ID;
+    }
+
+    function sync ()
+    {
+        require_once (dirname(__FILE__) . "/ActuAPI.php");
+        $client = new ActuAPIClient($this);
+        foreach ($client->fetch() as $APIelement) {
+            $actuItem = Actu::get_or_create($this->stream, $APIelement["news_id"], $APIelement["translation_id"]);
+            $actuItem->update($APIelement);
+            $actuItem->add_found_in_stream($this);
+        }
+    }
+}
+
+/**
+ * Object model for Actu posts
+ */
+class Actu
+{
+    var $ID;
+    var $news_ID;
+    var $translation_ID;
+
+    function __construct ($id)
+    {
+        $this->ID = $id;
+    }
+
+    static function get_or_create ($news_id, $translation_id)
+    {
+        $search_query = new WP_Query(array(
+           'post_type'  => ActuConfig::get_post_type(),
+           'meta_query' => array(
+               'relation' => 'AND',
+               array(
+                   'key'     => 'news_id',
+                   'value'   => $news_id,
+                   'compare' => '='
+               ),
+                array(
+                   'key'     => 'translation_id',
+                   'value'   => $translation_id,
+                   'compare' => '='
+               )
+           )
+        ));
+        $results = $search_query->get_posts();
+        if (0 === sizeof($results)) {
+            $id = wp_insert_post(array(
+                "post_type" => ActuConfig::get_post_type(),
+                "meta_input" => array(
+                    "news_id" => $news_id,
+                    "translation_id" => $translation_id
+                )), true);
+            $self = new Actu($id);
+        } else {
+            $self = new Actu($results[0]->ID);
+        }
+        $self->news_id = $news_id;
+        $self->translation_id = $translation_id;
+        return $self;
+    }
+
+    function add_found_in_stream($stream_object)
+    {
+        $terms = wp_get_post_terms(
+            $this->ID, ActuConfig::get_taxonomy_slug(),
+            array('fields' => 'ids'));
+        if (! in_array($stream_object->ID, $terms)) {
+            wp_set_post_terms($this->ID, array($stream_object->ID),
+                              ActuConfig::get_taxonomy_slug(),
+                              true);  // Append
+        }
+    }
+
+    function update($details)
+    {
+        wp_update_post(
+            array(
+                "ID"         => $this->ID,
+                "post_type"  => ActuConfig::get_post_type(),
+                "post_title" => $details["title"],
+                "content"    => sprintf("[ActuItem news_id=%s translation_id=%s]", $this->news_id, $this->translation_id),
+                "meta_input" => array(
+                    "news_id" => $details["news_id"],
+                    "translation_id" => $details["translation_id"],
+                )
+            )
+        );
     }
 }
