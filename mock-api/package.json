@@ -1,0 +1,16 @@
+{
+  "name": "mock-api",
+  "version": "0.0.1",
+  "description": "Mock of the EPFL Actu API",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.2",
+    "express-json": "^1.0.0"
+  }
+}
