@@ -227,6 +227,10 @@ class ActuConfig
 
 /**
  * Object model for Actu streams
+ *
+ * One stream corresponds to one so-called "term" in the
+ * 'epfl-actu-channel' WordPress taxonomy. Each stream has an API URL
+ * from which news are continuously fetched.
  */
 class ActuStream
 {
@@ -264,6 +268,11 @@ class ActuStream
 
 /**
  * Object model for Actu posts
+ *
+ * There is one instance of the Actu class for every unique piece of
+ * news (identified by the "news_id" and "translation_id" API fields,
+ * and materialized as a WordPress "post" object of post_type ==
+ * 'epfl-accred').
  */
 class Actu
 {
@@ -271,11 +280,22 @@ class Actu
     var $news_ID;
     var $translation_ID;
 
+
+    /**
+     * Private constructor — Call @link get_or_create instead
+     */
     function __construct ($id)
     {
         $this->ID = $id;
     }
 
+    /**
+     * Retrieve one Actu item per its primary key components.
+     *
+     * If the corresponding post does not exist in-database, it will
+     * be created with no contents besides the `meta_input` made up
+     * of $news_id and $translation_id (but see @link update).
+     */
     static function get_or_create ($news_id, $translation_id)
     {
         $search_query = new WP_Query(array(
@@ -312,6 +332,14 @@ class Actu
         return $self;
     }
 
+    /**
+     * Mark in the database that this piece of news was found by
+     * fetching from $stream_object.
+     *
+     * This is materialized by a relationship in the
+     * wp_term_relationships SQL table, using the @link
+     * wp_set_post_terms API.
+     */
     function add_found_in_stream($stream_object)
     {
         $terms = wp_get_post_terms(
@@ -324,6 +352,13 @@ class Actu
         }
     }
 
+    /**
+     * Update this news post with $details, overwriting most of the
+     * mutable state of it.
+     *
+     * Only taxonomy terms (managed by @link add_found_in_stream) are
+     * left unchanged.
+     */
     function update($details)
     {
         wp_update_post(
