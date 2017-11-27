@@ -56,7 +56,7 @@ class ActuConfig
     static function register_post_type ()
     {
         register_post_type(
-            self::SLUG,
+            self::get_post_type(),
             array(
                 'labels'             => array(
                     'name'               => __x( 'EPFL News', 'post type general name' ),
@@ -84,6 +84,11 @@ class ActuConfig
                 'menu_icon'          => 'dashicons-megaphone',
                 'supports'           => array( 'title' )
             ));
+    }
+
+    function get_post_type ()
+    {
+        return self::SLUG;
     }
 
     /**
