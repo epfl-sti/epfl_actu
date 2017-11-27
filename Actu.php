@@ -153,7 +153,7 @@ class ActuConfig
 
     function edited_channel( $term_id, $tt_id ){
         $channel_api_url = $_POST[self::CHANNEL_API_URL_SLUG];
-        update_term_meta( $term_id, self::CHANNEL_API_URL_SLUG, $channel_api_url, true );
+        update_term_meta( $term_id, self::CHANNEL_API_URL_SLUG, $channel_api_url );
     }
 
     const ROLES_THAT_MAY_VIEW_ACTUS = array('administrator', 'editor', 'author', 'contributor');
