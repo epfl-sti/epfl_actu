@@ -298,6 +298,7 @@ class Actu
         if (0 === sizeof($results)) {
             $id = wp_insert_post(array(
                 "post_type" => ActuConfig::get_post_type(),
+                "post_status" => "publish",
                 "meta_input" => array(
                     "news_id" => $news_id,
                     "translation_id" => $translation_id
