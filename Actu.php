@@ -180,11 +180,12 @@ class Actu
     {
         wp_update_post(
             array(
-                "ID"         => $this->ID,
-                "post_type"  => Actu::get_post_type(),
-                "post_title" => $details["title"],
-                "content"    => sprintf("[ActuItem news_id=%s translation_id=%s]", $this->news_id, $this->translation_id),
-                "meta_input" => array(
+                "ID"            => $this->ID,
+                "post_type"     => Actu::get_post_type(),
+                "post_title"    => $details["title"],
+                "post_excerpt"  => $details["subtitle"],
+                "post_content"  => $details["text"],
+                "meta_input"    => array(
                     "news_id" => $details["news_id"],
                     "translation_id" => $details["translation_id"],
                 )
