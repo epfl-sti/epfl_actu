@@ -1,11 +1,11 @@
 <?php
 /*
- * Plugin Name: EPFL Actu (shortcode)
+ * Plugin Name: EPFL Actu (shortcodes)
  * Plugin URI:  https://github.com/epfl-sti/wordpress.plugin.actu
  * Description: Insert EPFL news on your WordPress site from <a href="https://news.epfl.ch">Actu</a>.
- * Version:     0.4
- * Author:      Nicolas Borboën
- * Author URI:  go.epfl.ch/nbo
+ * Version:     0.5
+ * Author:      STI-IT Web
+ * Author URI:  mailto:stiitweb@groupes.epfl.ch
  * License:     MIT License / Copyright (c) 2017 EPFL ⋅ STI ⋅ IT
  *
  * Usage:
@@ -148,5 +148,8 @@ function wp_shortcode($atts, $content=null, $tag='') {
   return $display_html;
 }
 
-add_shortcode('actu', 'epfl_actu_wp_shortcode');
+add_shortcode('actu', 'EPFL\\Actu\\wp_shortcode');
+
+require_once(dirname(__FILE__) . "/Actu.php");
+
 ?>
