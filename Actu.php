@@ -5,8 +5,8 @@
  *
  * For each entry in actus.epfl.ch that the WordPress administrators
  * are interested in, there is a local copy as a post inside the
- * WordPress database whose contents typically consists of a single
- * shortcode. This allows e.g. putting actus news into the newsletter.
+ * WordPress database. This allows e.g. putting actus news into the
+ * newsletter or using the full-text search on them.
  */
 
 namespace EPFL\Actu;
