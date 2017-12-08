@@ -5,8 +5,8 @@
  *
  * For each entry in actus.epfl.ch that the WordPress administrators
  * are interested in, there is a local copy as a post inside the
- * WordPress database whose contents typically consists of a single
- * shortcode. This allows e.g. putting actus news into the newsletter.
+ * WordPress database. This allows e.g. putting actus news into the
+ * newsletter or using the full-text search on them.
  */
 
 namespace EPFL\Actu;
@@ -334,7 +334,9 @@ class ActuConfig
 
     const ROLES_THAT_MAY_VIEW_ACTUS = array('administrator', 'editor', 'author', 'contributor');
     const CAPS_FOR_VIEWERS = array(
-        'edit_epfl_actus'
+        'edit_epfl_actus',
+        'read_epfl_actu',
+        'delete_epfl_actu'
     );
     const ALL_ROLES = array('administrator', 'editor', 'author', 'contributor', 'subscriber');
     const ALL_CAPS = array(
@@ -351,6 +353,9 @@ class ActuConfig
      * Register permissions ("capabilities") on Actu posts.
      *
      * Called at plugin activation time.
+     *
+     * The permission map is made so that administrators and editors can view and
+     * delete Actus, but not edit them.
      */
     static function register_caps ()
     {
