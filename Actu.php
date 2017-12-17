@@ -169,6 +169,8 @@ class Actu
         }
     }
 
+    const THUMBNAIL_META = "epfl_actu_external_thumbnail";
+
     /**
      * Update this news post with $details, overwriting most of the
      * mutable state of it.
@@ -178,12 +180,33 @@ class Actu
      */
     function update ($details)
     {
-        $meta_array = array();
-        foreach (["news_id", "translation_id", "news_thumbnail_absolute_url"]
+        $meta = array();
+        foreach (["news_id", "translation_id", "news_thumbnail_absolute_url",
+                  "video"]
                  as $keep_this_as_meta)
         {
-            $meta_array[$keep_this_as_meta] = $details[$keep_this_as_meta];
+            if ($details[$keep_this_as_meta]) {
+                $meta[$keep_this_as_meta] = $details[$keep_this_as_meta];
+            }
         }
+
+        $matched = array();
+        if (preg_match('#youtube.com/embed/([A-Za-z0-9]+)#', $details["video"],
+                       $matched)) {
+            $meta["youtube_id"] = $matched[1];
+        }
+
+        if ($meta["youtube_id"]) {
+            // The "right" thumbnail for a YouTube video is the one
+            // YouTube serves - See also
+            // https://stackoverflow.com/a/2068371/435004
+            $meta[self::THUMBNAIL_META] = sprintf(
+                "https://img.youtube.com/vi/%s/default.jpg",
+                $meta["youtube_id"]);
+        } elseif ($meta["news_thumbnail_absolute_url"]) {
+            $meta[self::THUMBNAIL_META] = $meta["news_thumbnail_absolute_url"];
+        }
+
         wp_update_post(
             array(
                 "ID"            => $this->ID,
@@ -191,14 +214,14 @@ class Actu
                 "post_title"    => $details["title"],
                 "post_excerpt"  => $details["subtitle"],
                 "post_content"  => $details["text"],
-                "meta_input"    => $meta_array
+                "meta_input"    => $meta
             )
         );
     }
 
     function get_external_thumbnail_url ()
     {
-        return get_post_meta($this->ID, "news_thumbnail_absolute_url", true);
+        return get_post_meta($this->ID, self::THUMBNAIL_META, true);
     }
 }
 
