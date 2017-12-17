@@ -176,8 +176,14 @@ class Actu
      * Only taxonomy terms (managed by @link add_found_in_stream) are
      * left unchanged.
      */
-    function update($details)
+    function update ($details)
     {
+        $meta_array = array();
+        foreach (["news_id", "translation_id", "news_thumbnail_absolute_url"]
+                 as $keep_this_as_meta)
+        {
+            $meta_array[$keep_this_as_meta] = $details[$keep_this_as_meta];
+        }
         wp_update_post(
             array(
                 "ID"            => $this->ID,
@@ -185,12 +191,14 @@ class Actu
                 "post_title"    => $details["title"],
                 "post_excerpt"  => $details["subtitle"],
                 "post_content"  => $details["text"],
-                "meta_input"    => array(
-                    "news_id" => $details["news_id"],
-                    "translation_id" => $details["translation_id"],
-                )
+                "meta_input"    => $meta_array
             )
         );
+    }
+
+    function get_external_thumbnail_url ()
+    {
+        return get_post_meta($this->ID, "news_thumbnail_absolute_url", true);
     }
 }
 
@@ -286,9 +294,13 @@ class ActuConfig
     static function hook ()
     {
         add_action('init', array(get_called_class(), 'register_post_type'));
+
         $main_plugin_file = dirname(__FILE__) . "/EPFL-actu.php";
         register_activation_hook($main_plugin_file, array(get_called_class(), "register_caps"));
         register_deactivation_hook($main_plugin_file, array(get_called_class(), "deregister_caps"));
+
+        add_action( sprintf('manage_%s_posts_columns', Actu::get_post_type()) , array(get_called_class(), "alter_columns"));
+        add_action( sprintf('manage_%s_posts_custom_column', Actu::get_post_type()) , array(get_called_class(), "render_thumbnail_column"), 10, 2 );
     }
 
     /**
@@ -380,6 +392,26 @@ class ActuConfig
             foreach (self::ALL_CAPS as $cap) {
                 $role->remove_cap($cap);
             }
+        }
+    }
+
+    /**
+     * Alter the columns shown in the Actu list admin page
+     */
+    static function alter_columns ($columns)
+    {
+        // https://stackoverflow.com/a/3354804/435004
+        return array_merge(
+            array_slice($columns, 0, 1, true),
+            array('thumbnail' => __( 'Thumbnail' )),
+            array_slice($columns, 1, count($columns) - 1, true));
+    }
+
+    static function render_thumbnail_column ($column, $post_id)
+    {
+        $post = new Actu($post_id);
+        if ($column === 'thumbnail') {
+            echo sprintf('<img src="%s">', $post->get_external_thumbnail_url());
         }
     }
 }
