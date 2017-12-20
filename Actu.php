@@ -468,7 +468,10 @@ class ActuConfig
         $post = Actu::get($post_id);
         if (! $post) return $orig_html;
 
-        $html = sprintf("<img src=\"%s\"", $post->get_external_thumbnail_url());
+        $src = $post->get_external_thumbnail_url();
+        if (! $src) return $orig_html;
+
+        $html = sprintf("<img src=\"%s\"", $src);
         if ($attr) {
             foreach ( $attr as $name => $value ) {
                 $html .= " $name=" . '"' . $value . '"';
