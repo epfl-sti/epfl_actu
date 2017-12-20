@@ -150,6 +150,20 @@ class Actu
     }
 
     /**
+     * Retrieve one Actu item, only if it does exist.
+     *
+     * @return an instance of Actu or null.
+     */
+    static function get ($post_id)
+    {
+        if (get_post_type($post_id) !== Actu::get_post_type()) {
+            return null;
+        }
+        $theclass = get_called_class();
+        return new $theclass($post_id);
+    }
+
+    /**
      * Mark in the database that this piece of news was found by
      * fetching from $stream_object.
      *
@@ -323,7 +337,10 @@ class ActuConfig
         register_deactivation_hook($main_plugin_file, array(get_called_class(), "deregister_caps"));
 
         add_action( sprintf('manage_%s_posts_columns', Actu::get_post_type()) , array(get_called_class(), "alter_columns"));
-        add_action( sprintf('manage_%s_posts_custom_column', Actu::get_post_type()) , array(get_called_class(), "render_thumbnail_column"), 10, 2 );
+        add_action( sprintf('manage_%s_posts_custom_column', Actu::get_post_type()),
+                    array(get_called_class(), "render_thumbnail_column"), 10, 2);
+        add_filter("post_thumbnail_html",
+                   array(get_called_class(), "filter_post_thumbnail_html"), 10, 5);
     }
 
     /**
@@ -432,10 +449,35 @@ class ActuConfig
 
     static function render_thumbnail_column ($column, $post_id)
     {
-        $post = new Actu($post_id);
         if ($column === 'thumbnail') {
-            echo sprintf('<img src="%s">', $post->get_external_thumbnail_url());
+            echo get_the_post_thumbnail($post_id);
         }
+    }
+
+    /**
+     * Arrange for get_the_post_thumbnail() to return the external thumbnail for Actus.
+     *
+     * This is set as a filter for WordPress' @link post_thumbnail_html hook. Note that
+     * it is impossible to hijack the return value of @link get_the_post_thumbnail_url
+     * in this way (but you can always call the @link get_external_thumbnail_url instance
+     * method on an Actu object).
+     */
+    static function filter_post_thumbnail_html ($orig_html, $post_id, $unused_thumbnail_id,
+                                                $unused_size, $attr)
+    {
+        $post = Actu::get($post_id);
+        if (! $post) return $orig_html;
+
+        error_log("filter_post_thumbnail_html for post ID $post_id");  // XXX
+
+        $html = sprintf("<img src=\"%s\"", $post->get_external_thumbnail_url());
+        if ($attr) {
+            foreach ( $attr as $name => $value ) {
+                $html .= " $name=" . '"' . $value . '"';
+            }
+        }
+        $html .= " />";
+        return $html;
     }
 }
 
