@@ -154,10 +154,14 @@ class Actu
      *
      * @return an instance of Actu or null.
      */
-    static function get ($post_id)
+    static function get ($post_or_post_id)
     {
-        if (get_post_type($post_id) !== Actu::get_post_type()) {
-            return null;
+        if (is_object($post_or_post_id)) {
+            if ($post_or_post_id->post_type !== Actu::get_post_type()) return;
+            $post_id = $post_or_post_id->ID;
+        } else {
+            $post_id = $post_or_post_id;
+            if (get_post_type($post_id) !== Actu::get_post_type()) return;
         }
         $theclass = get_called_class();
         return new $theclass($post_id);
@@ -196,7 +200,7 @@ class Actu
     {
         $meta = array();
         foreach (["news_id", "translation_id", "news_thumbnail_absolute_url",
-                  "video"]
+                  "absolute_slug", "video"]
                  as $keep_this_as_meta)
         {
             if ($details[$keep_this_as_meta]) {
@@ -236,6 +240,11 @@ class Actu
     function get_external_thumbnail_url ()
     {
         return get_post_meta($this->ID, self::THUMBNAIL_META, true);
+    }
+
+    function get_permalink ()
+    {
+        return get_post_meta($this->ID, "absolute_slug", true);
     }
 }
 
@@ -341,6 +350,8 @@ class ActuConfig
                     array(get_called_class(), "render_thumbnail_column"), 10, 2);
         add_filter("post_thumbnail_html",
                    array(get_called_class(), "filter_post_thumbnail_html"), 10, 5);
+        add_filter("post_type_link",
+                   array(get_called_class(), "filter_post_link"), 10, 4);
     }
 
     /**
@@ -465,10 +476,10 @@ class ActuConfig
     static function filter_post_thumbnail_html ($orig_html, $post_id, $unused_thumbnail_id,
                                                 $unused_size, $attr)
     {
-        $post = Actu::get($post_id);
-        if (! $post) return $orig_html;
+        $actu = Actu::get($post_id);
+        if (! $actu) return $orig_html;
 
-        $src = $post->get_external_thumbnail_url();
+        $src = $actu->get_external_thumbnail_url();
         if (! $src) return $orig_html;
 
         $html = sprintf("<img src=\"%s\"", $src);
@@ -479,6 +490,19 @@ class ActuConfig
         }
         $html .= " />";
         return $html;
+    }
+
+    /**
+     * Serve the permalink from actu.epfl.ch instead of our own.
+     *
+     * Mostly, we keep the full text of the article in-database for the search engine.
+     */
+    static function filter_post_link ($orig_link, $post, $unused_leavename, $unused_is_sample) {
+        $actu = Actu::get($post);
+        if (! $actu) return $orig_link;
+        error_log($orig_link);
+        $true_permalink = $actu->get_permalink();
+        return $true_permalink ? $true_permalink : $orig_link;
     }
 }
 
