@@ -1,7 +1,7 @@
 <?php
 /*
- * Plugin Name: EPFL WS
- * Plugin URI:  https://github.com/epfl-sti/wordpress.plugin.ws
+ * Plugin Name: EPFL Actu (shortcodes)
+ * Plugin URI:  https://github.com/epfl-sti/wordpress.plugin.actu
  * Description: Insert EPFL news on your WordPress site from <a href="https://news.epfl.ch">Actu</a>.
  * Version:     0.5
  * Author:      STI-IT Web
