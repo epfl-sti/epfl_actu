@@ -500,7 +500,6 @@ class ActuConfig
     static function filter_post_link ($orig_link, $post, $unused_leavename, $unused_is_sample) {
         $actu = Actu::get($post);
         if (! $actu) return $orig_link;
-        error_log($orig_link);
         $true_permalink = $actu->get_permalink();
         return $true_permalink ? $true_permalink : $orig_link;
     }
