@@ -1,6 +1,19 @@
-# EPFL Actu WordPress Plugin
-Insert EPFL news on your WordPress site from [Actu](https://news.epfl.ch).
+# EPFL Web Services Plugin
+This Wordpress plugin aim to unify all EPFL web services in one place.
 
+<!-- toc -->
+
+- [EPFL Actu (news)](#epfl-actu-news)
+  * [Info](#info)
+  * [Usage examples](#usage-examples)
+  * [Releases](#releases)
+- [EPFL Memento (events)](#epfl-memento-events)
+- [EPFL Infoscience](#epfl-infoscience)
+- [EPFL People](#epfl-people)
+
+<!-- tocstop -->
+
+# EPFL Actu (news)
 ## Info
 * ShortCode **`[actu]`** available from page, post or text widget;
 * Actu shortcode can takes arguments:
@@ -22,3 +35,11 @@ Insert EPFL news on your WordPress site from [Actu](https://news.epfl.ch).
 
 ## Releases
 * https://github.com/epfl-sti/wordpress.plugin.actu/releases
+
+# EPFL Memento (events)
+
+
+# EPFL Infoscience
+
+
+# EPFL People
