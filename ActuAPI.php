@@ -6,7 +6,7 @@
  * @see https://wiki.epfl.ch/api-rest-actu-memento
  */
 
-namespace EPFL\Actu;
+namespace EPFL\WS\Actu;
 
 class APIException extends \Exception { }
 

@@ -9,7 +9,7 @@
  * newsletter or using the full-text search on them.
  */
 
-namespace EPFL\Actu;
+namespace EPFL\WS\Actu;
 
 use WP_Query;
 
@@ -341,7 +341,7 @@ class ActuConfig
     {
         add_action('init', array(get_called_class(), 'register_post_type'));
 
-        $main_plugin_file = dirname(__FILE__) . "/EPFL-actu.php";
+        $main_plugin_file = dirname(__FILE__) . "/EPFL-actu.php"; // TODO: change and test to EPFL-ws
         register_activation_hook($main_plugin_file, array(get_called_class(), "register_caps"));
         register_deactivation_hook($main_plugin_file, array(get_called_class(), "deregister_caps"));
 
@@ -403,12 +403,12 @@ class ActuConfig
     );
     const ALL_ROLES = array('administrator', 'editor', 'author', 'contributor', 'subscriber');
     const ALL_CAPS = array(
-        'edit_epfl_actu', 
+        'edit_epfl_actu',
         'read_epfl_actu',
-        'delete_epfl_actu', 
-        'edit_others_epfl_actus', 
-        'publish_epfl_actus',       
-        'read_private_epfl_actus', 
+        'delete_epfl_actu',
+        'edit_others_epfl_actus',
+        'publish_epfl_actus',
+        'read_private_epfl_actus',
         'edit_epfl_actus'
     );
 

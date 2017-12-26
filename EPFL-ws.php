@@ -47,4 +47,6 @@ function memento_options() {
 	echo '</div>';
 }
 
+require_once(dirname(__FILE__) . "/Actu_shortcode.php");
+require_once(dirname(__FILE__) . "/Actu.php");
 ?>

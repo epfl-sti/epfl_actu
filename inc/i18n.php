@@ -1,6 +1,6 @@
 <?php
 
-namespace EPFL\Actu;
+namespace EPFL\WS\Actu;
 
 function ___($text)
 {
@@ -11,4 +11,3 @@ function __x($text, $context)
 {
     return _x($text, $context, "epfl-actu");
 }
-
