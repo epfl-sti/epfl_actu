@@ -65,12 +65,15 @@ class epflws {
   }
 
   /*
-   *
+   * Basic URL validation
+   * At some point it might be useful to get the HTTP status code returned by
+   * the response.
    */
-  function validate_url( $url, $hostname) {
-    // https://codex.wordpress.org/Data_Validation #URLS
-    var_dump(parse_url($url, PHP_URL_HOST));
-    // https://developer.wordpress.org/reference/functions/esc_url/
-    wp_http_validate_url( $url ); // https://developer.wordpress.org/reference/functions/wp_http_validate_url/#
+  function validate_url( $url, $hostname=null) {
+    if (  ( $hostname && parse_url($url, PHP_URL_HOST) === $hostname ) || !$hostname ) {
+      return wp_http_validate_url( $url ); // https://developer.wordpress.org/reference/functions/wp_http_validate_url/#
+    } else {
+      return false;
+    }
   }
 }
