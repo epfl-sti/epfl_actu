@@ -1,4 +1,4 @@
-// https://actu.epfl.ch/api/jahia/channels/sti/news/fr/ as of
+// https://actu.epfl.ch/api/jahia/channels/sti/news/fr/?format=json as of
 // Nov 27th, 2017
 module.exports = [
     {
