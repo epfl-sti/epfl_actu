@@ -34,8 +34,12 @@ function actu_options() {
 		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
 	}
 	echo '<div class="wrap">';
-	echo '<p>Here is where the form would go if I actually had options.</p>';
+	echo '  <h1>EPFL Actu</h1>';
+	echo '  <h2>Short code</h2>';
+	echo '  <p>Actu Shortcode allows you to integrate EPFL News (actus) in any Wordpress pages or posts. It uses <a href="https://actu.epfl.ch/api-docs/">https://actu.epfl.ch/api-docs/</a> as an application programming interface (API).</p>';
+	echo '  <p>This documentation is kept short as it will change as soon as the actu API integrates news features.</p>';
 	echo '</div>';
+
 }
 
 function memento_options() {
