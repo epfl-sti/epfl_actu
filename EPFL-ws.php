@@ -39,7 +39,6 @@ function actu_options() {
 	echo '  <p>Actu Shortcode allows you to integrate EPFL News (actus) in any Wordpress pages or posts. It uses <a href="https://actu.epfl.ch/api-docs/">https://actu.epfl.ch/api-docs/</a> as an application programming interface (API).</p>';
 	echo '  <p>This documentation is kept short as it will change as soon as the actu API integrates news features.</p>';
 	echo '</div>';
-
 }
 
 function memento_options() {
