@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Search-Engine-Total-Number-Of-Results: 85 -->
+<collection>
+<oai_dc:dc xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+  <dc:identifier>http://infoscience.epfl.ch/record/229021</dc:identifier>
+  <dc:language>en</dc:language>
+  <dc:title>Method and system for combining video sequences with spatio-temporal alignment</dc:title>
+  <dc:date>2010</dc:date>
+  <dc:description>Given two video sequences, a composite video sequence can be generated which includes visual elements from each of the given sequences, suitably synchronized and represented in a chosen focal plane. For example, given two video sequences with each showing a different contestant individually racing the same down-hill course, the composite sequence can include elements from each of the given sequences to show the contestants as if racing simultaneously. A composite video sequence can be made also by similarly combining a video sequence with an audio sequence.</dc:description>
+  <dc:creator>Ayer, Serge</dc:creator>
+  <dc:creator>Vetterli, Martin</dc:creator>
+  <dc:type>Text</dc:type>
+  <dc:format>text/html</dc:format>
+</oai_dc:dc>
+
+<oai_dc:dc xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+  <dc:identifier>http://infoscience.epfl.ch/record/211763</dc:identifier>
+  <dc:language>en</dc:language>
+  <dc:title>Image annotation on portable devices</dc:title>
+  <dc:date>2010</dc:date>
+  <dc:description>A system for automated annotation of images and videos points a mobile device towards an object of interest, such as a building or landscape scenery, for the device to display an image of the scene with an annotation for the object. An annotation can include names, historical information, and links to databases of images, videos, and audio files. Different techniques can be used for determining positional placement of annotations, and, by using multiple techniques, positioning can be made more precise and reliable. The level of detail of annotation information can be adjusted according to the precision of the techniques used. Required computations can be distributed in an annotation system including mobile devices, servers and an inter-connecting network, allowing for tailoring of annotated images to mobile devices of different levels of complexity. A trade-off can be taken into account between precision of annotation and communication cost, delay and/or power consumption. An annotation database can be updated in a self-organizing way. Public information as available on the web can be converted to annotation data.</dc:description>
+  <dc:creator>Sbaiz, Luciano</dc:creator>
+  <dc:creator>Vetterli, Martin</dc:creator>
+  <dc:type>Text</dc:type>
+  <dc:format>text/html</dc:format>
+</oai_dc:dc>
+
+<oai_dc:dc xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+  <dc:identifier>http://infoscience.epfl.ch/record/188184</dc:identifier>
+  <dc:identifier>doi:10.1016/S1076-5670(10)61004-X</dc:identifier>
+  <dc:language>en</dc:language>
+  <dc:title>Sparse Image Representation by Directionlets</dc:title>
+  <dc:date>2010</dc:date>
+  <dc:publisher>Elsevier</dc:publisher>
+  <dc:description>Despite the success of the standard wavelet transform (WT) in image processing in recent years, the efficiency and sparsity of its representation are limited by the spatial symmetry and separability of its basis functions built in the horizontal and vertical directions. One-dimensional discontinuities in images (edges or contours), which are important elements in visual perception, intersect too many wavelet basis functions and lead to a non-sparse representation. To capture efficiently these elongated structures characterized by geometrical regularity along different directions (not only the horizontal and vertical), a more complex multidirectional (M-DIR) and asymmetric transform is required. We present a lattice-based perfect reconstruction and critically sampled asymmetric M-DIR WT. The transform retains the separable filtering and subsampling and the simplicity of computations and filter design from the standard two-dimensional (2D) WT, unlike the case for some other directional transform constructions (e.g., curvelets, contourlets, or edgelets). The corresponding asymmetric basis functions, called direction-lets, have directional vanishing moments along any two directions with rational slopes, which allows for a sparser representation of elongated and oriented features. As a consequence of the improved sparsity, directionlets provide an efficient tool for nonlinear approximation of images, significantly outperforming the standard 2D WT. Furthermore, directionlets combined with wavelet-based image compression methods lead to a gain in performance in terms of both the mean square error and visual quality, especially at low bit-rate compression, while retaining the same complexity. Finally, a shift-invariant non-subsampled version of directionlets is successfully implemented in image interpolation, where critical sampling is not a key requirement.</dc:description>
+  <dc:subject>Directional transforms</dc:subject>
+  <dc:subject>Directional vanishing moments</dc:subject>
+  <dc:subject>Image coding</dc:subject>
+  <dc:subject>Image interpolation</dc:subject>
+  <dc:subject>Image orientation analysis</dc:subject>
+  <dc:subject>Multiresolution analysis</dc:subject>
+  <dc:subject>Separable transforms</dc:subject>
+  <dc:subject>Sparse representation</dc:subject>
+  <dc:subject>Wavelet transforms</dc:subject>
+  <dc:creator>Hawkes, Peter W.</dc:creator>
+  <dc:creator>Velisavljevic, Vladan</dc:creator>
+  <dc:creator>Vetterli, Martin</dc:creator>
+  <dc:creator>Beferull-Lozano, Baltasar</dc:creator>
+  <dc:creator>Dragotti, Pier Luigi</dc:creator>
+  <dc:type>Text</dc:type>
+  <dc:format>text/html</dc:format>
+</oai_dc:dc>
+
+<oai_dc:dc xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+  <dc:identifier>http://infoscience.epfl.ch/record/186727</dc:identifier>
+  <dc:language>en</dc:language>
+  <dc:title>Algorithms for the Computation of Continuous Transforms of Rectilinear Polygons from IC Layouts</dc:title>
+  <dc:date>2009</dc:date>
+  <dc:description>In this work, we present a novel way of computing the continuous Haar, Fourier and cosine series coefficients of rectilinear polygons. We derive algorithms to compute the inner products with the continuous basis functions directly from the vertices of the polygons. We show that the overall computational complexity of those algorithms is lower than that of the traditional corresponding discrete transforms when the number of vertices is small, in addition to sparing the memory needed for a discrete image. This makes those continuous transforms particularly suitable for applications in Computational Lithography (CL) where speed and memory are critical requirements. We validate the presented algorithms through an implementation in a CL software under development at the IBM Zurich Research Laboratory and benchmark against discrete state of the art transforms on real Integrated Circuit (IC) layouts. Finally, we measure the approximation power of the Haar transform when applied to rectilinear polygons from IC layouts in order to evaluate its potential for pattern matching applications.</dc:description>
+  <dc:subject>Algorithms</dc:subject>
+  <dc:subject>Polygons</dc:subject>
+  <dc:subject>FFT</dc:subject>
+  <dc:subject>Lithography</dc:subject>
+  <dc:subject>Fourier</dc:subject>
+  <dc:subject>Continuous transforms</dc:subject>
+  <dc:subject>Haar</dc:subject>
+  <dc:creator>Scheibler, Robin</dc:creator>
+  <dc:contributor>Hurley, Paul</dc:contributor>
+  <dc:contributor>Chebira, Amina</dc:contributor>
+  <dc:contributor>Vetterli, Martin</dc:contributor>
+  <dc:type>Text</dc:type>
+  <dc:format>text/html</dc:format>
+</oai_dc:dc>
+
+<oai_dc:dc xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+  <dc:identifier>http://infoscience.epfl.ch/record/168077</dc:identifier>
+  <dc:language>en</dc:language>
+  <dc:title>Conceptual design of a wastewater treatment plant</dc:title>
+  <dc:date>2008</dc:date>
+  <dc:creator>Vetterli, Nadège</dc:creator>
+  <dc:contributor>Maréchal, François</dc:contributor>
+  <dc:type>Text</dc:type>
+  <dc:format>text/html</dc:format>
+</oai_dc:dc>
+
+<oai_dc:dc xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+  <dc:identifier>http://infoscience.epfl.ch/record/167747</dc:identifier>
+  <dc:identifier>doi:10.1109/IPSN.2008.28</dc:identifier>
+  <dc:language>en</dc:language>
+  <dc:title>SensorScope: Out-of-the-Box Environmental Monitoring</dc:title>
+  <dc:date>2008</dc:date>
+  <dc:publisher>IEEE</dc:publisher>
+  <dc:description>Environmental monitoring constitutes an important field of application for wireless sensor networks. Given the severity of potential climate changes, environmental impact on cities, and pollution, it is a domain where sensor networks can have great impact and as such, is getting more and more attention. Current data collection techniques are indeed rather limited and make use of very expensive sensing stations, leading to a lack of appropriate observations. In this paper, we present SensorScope, a collaborative project between environmental and network researchers, that aims at providing an efficient and inexpensive out-of-the-box environmental monitoring system, based on a wireless sensor network. We especially focus on data gathering and present the hardware and network architecture of SensorScope. We also describe a real-world deployment, which took place on a rock glacier in Switzerland, as well as the results we obtained.</dc:description>
+  <dc:creator>Barrenetxea, Guillermo</dc:creator>
+  <dc:creator>Ingelrest, Fran</dc:creator>
+  <dc:creator>Schaefer, Gunnar</dc:creator>
+  <dc:creator>Vetterli, Martin</dc:creator>
+  <dc:creator>Couach, Olivier</dc:creator>
+  <dc:creator>Parlange, Marc</dc:creator>
+  <dc:type>Text</dc:type>
+  <dc:format>text/html</dc:format>
+</oai_dc:dc>
+
+<oai_dc:dc xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+  <dc:identifier>http://infoscience.epfl.ch/record/163067</dc:identifier>
+  <dc:language>en</dc:language>
+  <dc:title>Multichannel Sampling with Unknown Gains and Offsets: A Fast Reconstruction Algorithm</dc:title>
+  <dc:date>2010</dc:date>
+  <dc:description>We study a multichannel sampling scheme, where different channels observe scaled and shifted versions of a common bandlimited signal. The channel gains and offsets are unknown a priori, and each channel samples at sub-Nyquist rates. This setup appears in many practical signal processing applications, including time-interleaved ADC with timing skews, unsynchronized distributed sampling in sensor networks, and superresolution imaging. In this paper, we propose a new algorithm to efficiently estimate the unknown channel gains and offsets. Key to our algorithm is a novel linearization technique, which converts a system of trigonometric polynomial equations of the unknown parameters to an overparameterized linear system. The computation steps of the proposed algorithm boil down to forming a fixed data matrix from the discrete-time Fourier transforms of the observed channel samples and computing the singular value decomposition of that matrix. Numerical simulations verify the effectiveness, efficiency, and robustness of the proposed algorithm in the presence of noise. In the high SNR regime (40 dB and above), the proposed algorithm significantly outperforms a previous method in the literature in terms of estimation accuracy, at the same time being three orders of magnitudes faster.</dc:description>
+  <dc:creator>Vetterli, Martin</dc:creator>
+  <dc:creator>Lu, Yue</dc:creator>
+  <dc:type>Text</dc:type>
+  <dc:format>text/html</dc:format>
+</oai_dc:dc>
+
+<oai_dc:dc xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+  <dc:identifier>http://infoscience.epfl.ch/record/154796</dc:identifier>
+  <dc:identifier>doi:10.1080/17588921003743581</dc:identifier>
+  <dc:language>en</dc:language>
+  <dc:title>Feeling in control of your footsteps: Conscious gait monitoring and the auditory consequences of footsteps</dc:title>
+  <dc:date>2010</dc:date>
+  <dc:description>A fundamental aspect of the “I” of conscious experience is that the self is experienced as a single coherent representation of the entire, spatially situated body. The purpose of the present study was to investigate agency for the entire body. We provided participants with performance-related auditory cues and induced online sensorimotor conflicts in free walking conditions investigating the limits of human consciousness in moving agents. We show that the control of full-body locomotion and the building of a conscious experience of it are at least partially distinct brain processes. The comparable effects on agency using audio-motor and visuo-motor cues as found in the present and previous agency work may reflect common supramodal mechanisms in conscious action monitoring. Our data may help to refine the scientific criteria of selfhood and are of relevance for the investigation of neurological and psychiatric patients with disturbance of selfhood</dc:description>
+  <dc:subject>Motor awareness</dc:subject>
+  <dc:subject>Self</dc:subject>
+  <dc:subject>Agency</dc:subject>
+  <dc:subject>Sensorimotor</dc:subject>
+  <dc:subject>Auditory</dc:subject>
+  <dc:subject>Gait</dc:subject>
+  <dc:subject>Consciousness</dc:subject>
+  <dc:subject>Self-Consciousness</dc:subject>
+  <dc:subject>Temporal Parameters</dc:subject>
+  <dc:subject>Agency</dc:subject>
+  <dc:subject>Sense</dc:subject>
+  <dc:subject>Recognition</dc:subject>
+  <dc:subject>Locomotion</dc:subject>
+  <dc:subject>Walking</dc:subject>
+  <dc:subject>Induction</dc:subject>
+  <dc:subject>Awareness</dc:subject>
+  <dc:subject>Oneself</dc:subject>
+  <dc:creator>Menzer, Fritz</dc:creator>
+  <dc:creator>Brooks, Anna</dc:creator>
+  <dc:creator>Halje, Pär</dc:creator>
+  <dc:creator>Faller, Christof</dc:creator>
+  <dc:creator>Vetterli, Martin</dc:creator>
+  <dc:creator>Blanke, Olaf</dc:creator>
+  <dc:type>Text</dc:type>
+  <dc:format>text/html</dc:format>
+</oai_dc:dc>
+
+<oai_dc:dc xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+  <dc:identifier>http://infoscience.epfl.ch/record/153438</dc:identifier>
+  <dc:identifier>doi:10.1109/ALLERTON.2010.5707034</dc:identifier>
+  <dc:language>en</dc:language>
+  <dc:title>Distributed Successive Approximation Coding using Broadcast Advantage: the Two-Encoder Case</dc:title>
+  <dc:date>2010</dc:date>
+  <dc:description>Traditional distributed source coding rarely considers the possible link between separate encoders. However, the broadcast nature of wireless communication in sensor networks provides a free gossip mechanism which can be used to simplify encoding/decoding and reduce transmission power. Using this broadcast advantage, we present a new two-encoder scheme which imitates the ping-pong game and has a successive approximation structure. For the quadratic Gaussian case, we prove that this scheme is successively refinable on the {sum-rate, distortion pair} surface, which is characterized by the rate-distortion region of the distributed two-encoder source coding. A potential energy saving over conventional distributed coding is also illustrated. This ping-pong distributed coding idea can be extended to the multiple encoder case and provides the theoretical foundation for a new class of distributed image coding method in wireless scenarios.</dc:description>
+  <dc:subject>Information theory</dc:subject>
+  <dc:subject>Cooperative communication</dc:subject>
+  <dc:subject>NCCR-MICS/ESDM</dc:subject>
+  <dc:subject>NCCR-MICS</dc:subject>
+  <dc:creator>Chen, Zichong</dc:creator>
+  <dc:creator>Barrenetxea, Guillermo</dc:creator>
+  <dc:creator>Vetterli, Martin</dc:creator>
+  <dc:type>Text</dc:type>
+  <dc:format>text/html</dc:format>
+</oai_dc:dc>
+
+<oai_dc:dc xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+  <dc:identifier>http://infoscience.epfl.ch/record/153198</dc:identifier>
+  <dc:identifier>doi:10.1109/TIT.2010.2060050</dc:identifier>
+  <dc:language>en</dc:language>
+  <dc:title>Order-Optimal Consensus Through Randomized Path Averaging</dc:title>
+  <dc:date>2010</dc:date>
+  <dc:publisher>Institute of Electrical and Electronics Engineers</dc:publisher>
+  <dc:description>Gossip algorithms have recently received significant attention, mainly because they constitute simple and robust mes- sage-passing schemes for distributed information processing over networks. However, for many topologies that are realistic for wire- less ad-hoc and sensor networks (like grids and random geometric graphs), the standard nearest-neighbor gossip converges as slowly as flooding ( O(n^2) messages). A recently proposed algorithm called geographic gossip improves gossip efficiency by a n^1/2 factor, by exploiting geographic information to enable multihop long-distance communications. This paper proves that a variation of geographic gossip that averages along routed paths, improves efficiency by an additional n^1/2 factor, and is order optimal (O(n) messages) for grids and random geometric graphs with high prob- ability. We develop a general technique (travel agency method) based on Markov chain mixing time inequalities which can give bounds on the performance of randomized message-passing algo- rithms operating over various graph topologies.</dc:description>
+  <dc:subject>Average Consensus</dc:subject>
+  <dc:subject>Distributed Algorithms</dc:subject>
+  <dc:subject>Gossip Algorithms</dc:subject>
+  <dc:subject>Sensor Networks</dc:subject>
+  <dc:creator>Bénézit, Florence</dc:creator>
+  <dc:creator>Dimakis, Alexandros G.</dc:creator>
+  <dc:creator>Thiran, Patrick</dc:creator>
+  <dc:creator>Vetterli, Martin</dc:creator>
+  <dc:type>Text</dc:type>
+  <dc:format>text/html</dc:format>
+</oai_dc:dc>
+
+</collection>
