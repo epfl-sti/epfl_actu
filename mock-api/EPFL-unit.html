@@ -1,0 +1,1929 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+        <meta name="headerversion" content="2.15">
+    <meta name="headerdate" content="2017-03-06">
+    <link rel="shortcut icon" href="https://www.epfl.ch/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="EPFL-unit_fichiers/print.css" type="text/css" media="print">
+
+    <link rel="shortcut icon" href="https://www.epfl.ch/favicon.ico" type="image/x-icon">
+    <title>EPFL | Moteur de recherche : EPFL unit browse results for ASL</title>
+    <link href="EPFL-unit_fichiers/epfl.css" media="all" rel="stylesheet" type="text/css">
+    <link href="EPFL-unit_fichiers/applications.css" media="all" rel="stylesheet" type="text/css">
+    <link href="EPFL-unit_fichiers/print.css" media="print" rel="stylesheet" type="text/css">
+
+    <link href="EPFL-unit_fichiers/print_002.css" media="print" rel="stylesheet" type="text/css">
+    <link href="https://search.epfl.ch/styles/search.less" media="all" rel="stylesheet/less" type="text/css">
+    <link href="https://search.epfl.ch/styles/new_main_form.less" media="all" rel="stylesheet/less" type="text/css">
+    <link href="https://search.epfl.ch/styles/search_unit.less" media="all" rel="stylesheet/less" type="text/css">
+
+    <script async="" src="EPFL-unit_fichiers/analytics.js"></script><script type="text/javascript" src="EPFL-unit_fichiers/jquery-epfl.js"></script>
+    <script type="text/javascript">jQuery.noConflict();</script>
+    <script type="text/javascript" src="EPFL-unit_fichiers/globalnav.js"></script>
+    <script type="text/javascript" src="EPFL-unit_fichiers/jquery.js"></script>
+    <script type="text/javascript" src="EPFL-unit_fichiers/jquery_002.js"></script>
+    <script type="text/javascript" src="EPFL-unit_fichiers/search.js"></script>
+    <script type="text/javascript" src="EPFL-unit_fichiers/less.js"></script><style type="text/css" media="all" id="less:styles-search">@charset "utf-8";
+/* Prevent mobile zooming while remain desktop zooming.
+   github.com/shichuan/mobile-html5-boilerplate/issues/closed#issue/14
+ */
+body {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: none;
+  background: url('/images/bkg.png') no-repeat;
+}
+.content {
+  border-top: none !important;
+  overflow: visible;
+  width: 645px;
+  padding-right: 7px;
+}
+#content .navigation-bar {
+  border-top: 1px solid #000;
+  margin: 10px 0 4px 0;
+  padding: 1px 0 0 0;
+  background: url('//www.epfl.ch/img/main-navigation.png') repeat 0 0 #eeeeee;
+  height: 24px;
+  width: 645px;
+  font-size: 11px;
+  font: bold italic 11px Georgia, "Times New Roman", Times, serif;
+  color: black;
+  letter-spacing: 0;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+#content .navigation-bar span {
+  height: 19px;
+  float: left;
+  padding-top: 3px;
+  margin-right: 4px;
+  line-height: 18px;
+}
+#content .navigation-bar .topnav {
+  margin: 0;
+  padding: 0;
+}
+#content .navigation-bar .topnav li {
+  margin: 0 4px 0 0;
+  padding-left: 6px;
+}
+#content .navigation-bar .topnav a {
+  cursor: pointer;
+}
+#content .navigation-bar .topnav li.nav {
+  margin: 4px 4px 0 0;
+  padding: 0;
+}
+#content .navigation-bar .topnav li.next {
+  background: url(/images/navigation/next.gif) no-repeat;
+  margin: 4px 4px 0 0;
+}
+#content .navigation-bar .topnav li.prev {
+  background: url(/images/navigation/prev.gif) no-repeat;
+  margin: 4px 4px 0 0;
+}
+#content .navigation-bar .menu ul {
+  float: left;
+  margin: 4px;
+}
+#content .navigation-bar .menu li {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+#content .navigation-bar .menu .disabled {
+  color: #aaa;
+  cursor: default;
+}
+#content .navigation-bar .menu .disabled:hover {
+  background-color: #fff;
+  color: #aaaaaa;
+}
+#content .navigation-bar .menu a {
+  letter-spacing: 1px;
+}
+#main-content .menu label {
+  cursor: pointer;
+  display: block;
+  font-weight: 400;
+  padding-left: 8px;
+}
+#main-content .menu li {
+  margin-left: 0;
+  padding-left: 0;
+}
+#main-content .menu li:hover {
+  color: #fff;
+  background-color: #000;
+}
+#main-content .menu li input[type="radio"] {
+  display: none;
+}
+.dropdown {
+  cursor: pointer;
+}
+.dropdown .sorting {
+  padding-left: 2px;
+}
+.dropdown:hover .sorting {
+  color: #FFF;
+}
+/*
+*   Right col modifs
+*/
+.right-col h3 {
+  border-bottom: 1px solid #000;
+  color: #000;
+  font-family: Impact, "Arial Black", "DejaVu Sans", Arial, Helvetica, sans-serif;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  line-height: 26px;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+  padding: 1px 0 4px;
+}
+/*
+* jQuery UI Autocomplete 1.8.16
+*
+* Copyright 2011, AUTHORS.txt (//jqueryui.com/about)
+* Dual licensed under the MIT or GPL Version 2 licenses.
+* //jquery.org/license
+*
+* //docs.jquery.com/UI/Autocomplete#theming
+*/
+.ui-autocomplete {
+  position: absolute;
+  cursor: default;
+}
+.ui-autocomplete .ui-menu-item.more {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-size: 11px;
+  font-style: italic;
+  font-weight: 700;
+  text-align: right;
+  padding-right: 10px;
+}
+/* workarounds */
+* html .ui-autocomplete {
+  width: 1px;
+}
+/* without this, the menu expands to 100% in IE6 */
+/*
+ * jQuery UI Menu 1.8.16
+ *
+ * Copyright 2010, AUTHORS.txt (//jqueryui.com/about)
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * //jquery.org/license
+ *
+ * //docs.jquery.com/UI/Menu#theming
+ */
+.ui-menu li {
+  list-style-image: none;
+  margin: 0;
+}
+.ui-menu li a {
+  color: black;
+  padding-left: 7px;
+  display: block;
+  background: none;
+}
+.ui-menu li a span.highlight {
+  font-weight: 700;
+  color: #222;
+}
+#main-searchform .ui-autocomplete {
+  top: 21px !important;
+  left: 0px !important;
+  z-index: 6000 !important;
+  width: 616px !important;
+  /* max-height:200px; HIDE scrollbar! */
+
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  cursor: pointer;
+  border-color: #B8B8B8;
+}
+/** END autocomplete **/
+/**
+*   Main search form
+**/
+#main-searchform {
+  padding-top: 2px;
+  margin: 0;
+  position: relative;
+  width: 652px;
+  /*
+    .search-button {
+        background:url(//www.epfl.ch/img/search.png) no-repeat 0 0;
+        width:25px;
+        height:25px;
+        cursor:pointer;
+        vertical-align:bottom;
+        text-indent:-999em;
+        border:1px solid #b8b8b8;
+        float:left;
+    }
+    */
+
+}
+#main-searchform input[type="text"] {
+  color: #666;
+}
+#main-searchform input[type="text"] .focused {
+  color: #000;
+}
+#main-searchform input.search {
+  width: 493px /* 582px without dropdown */;
+  height: 23px;
+  line-height: 22px;
+  font-size: 11pt;
+  float: left;
+  border-color: #b8b8b8 #fff #b8b8b8 #b8b8b8;
+  border-style: solid none solid solid;
+  border-width: 1px 0 1px 1px;
+  font-family: Arial, Helvetica, sans-serif;
+  padding: 0 0 0 8px;
+}
+#main-searchform .search-button {
+  background-image: url(//www.epfl.ch/img/magnifier.png);
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  vertical-align: bottom;
+  text-indent: -999em;
+  border: none;
+  float: left;
+}
+#main-searchform .search-filter {
+  float: left;
+  height: 23px;
+  border-top: 1px solid #B8B8B8;
+  border-bottom: 1px solid #B8B8B8;
+  background: #ffffff url(https://search.epfl.ch/styles/../images/main_search_form.png) no-repeat 0 0;
+  padding-left: 0;
+  line-height: 24px;
+  font-size: 12px;
+  font-family: Arial, Helvetica, sans-serif;
+  position: relative;
+}
+#main-searchform .search-filter .menu {
+  width: 141px;
+  position: absolute;
+  left: 0;
+  top: 18px;
+  padding: 6px 0 2px 0;
+  border: 1px solid #B8B8B8;
+  border-top: none;
+}
+#main-searchform .search-filter .menu li {
+  display: list-item;
+  float: none;
+  margin-bottom: 0;
+  border-bottom: 1px solid white;
+  list-style-image: none;
+  margin-left: 2px;
+}
+#main-searchform .search-filter ul.hidden {
+  position: absolute;
+  left: -999em;
+}
+form#advanced-search DIV.search-filter .menu {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-size: 11px;
+  font-style: italic;
+}
+.search-filter .menu {
+  background: white none;
+  left: 0;
+  line-height: 18px;
+  list-style-type: none;
+  padding: 6px 0 2px;
+  position: absolute;
+  top: 14px;
+  width: 140px;
+  z-index: 9000;
+  border: 1px solid #b8b8b8;
+}
+.search-filter .menu ul li {
+  list-type: none;
+}
+.search-filter .menu ul li:hover {
+  cursor: pointer;
+  background-color: #000;
+  color: #fff;
+}
+.search-filter li.search-filter-checked {
+  font-weight: bold;
+  /*
+        color: white;
+        background-color: black; //#AE0010;
+        font-weight: 900;
+        */
+
+}
+.toggler {
+  margin: 4px 0;
+}
+/* loader */
+#loader_container {
+  position: relative;
+  text-align: center;
+  height: 72px;
+}
+li.has-mime {
+  padding-left: 25px !important;
+}
+li.has-mime:before {
+  background: url(//www.epfl.ch/img/icons-plancours.png) no-repeat;
+  background-position: -108px 0;
+  position: absolute;
+  margin: -3px 0 0 -25px;
+  min-height: 30px;
+  width: 17px;
+  content: "";
+  vertical-align: middle;
+}
+div.has-video {
+  position: absolute;
+  margin: 20px 0 0 -25px;
+  min-height: 30px;
+  width: 17px;
+  content: "";
+  vertical-align: middle;
+}
+div.mime_video {
+  background: url(/images/mime/video.png) no-repeat;
+}
+li.allemand:before {
+  background-position: -72px 0;
+}
+li.francais:before {
+  background-position: -90px 0;
+}
+li.anglais:before {
+  background-position: -108px 0;
+}
+li.pdf:before {
+  margin: 1px 0 0 -25px;
+  background: url('/images/mime/icon_pdf.png') no-repeat;
+}
+li.doc:before {
+  margin: 1px 0 0 -25px;
+  background: url('/images/mime/icon_doc.png') no-repeat;
+}
+li.coursebook:before {
+  margin: 1px 0 0 -25px;
+  background: url('/images/mime/icon_coursebook.png') no-repeat;
+}
+li.studyplan:before {
+  margin: 1px 0 0 -25px;
+  background: url('/images/mime/icon_studyplan.png') no-repeat;
+}
+/*
+*   Results
+*/
+#search-results {
+  margin-bottom: 10px;
+  margin-top: 10px;
+  /* There is a hook, has to override the definitions for ol.search-results > li, as extracted snippets can contain HTML markup */
+
+}
+#search-results .header-info {
+  color: #000;
+  font: italic 11px/18px Georgia, "Times New Roman", Times, serif;
+  font-weight: bold;
+  font-size: 11px;
+  letter-spacing: 1px;
+  margin-top: 10px;
+  height: 25px;
+  position: relative;
+  width: 616px;
+}
+#search-results ol.search-results {
+  margin-right: 0;
+}
+#search-results ol.search-results > li.has-mime {
+  list-style-image: none;
+  margin: 0 0 1px 15px;
+  padding-left: 3px;
+  line-height: 18px;
+  padding-bottom: 8px;
+  margin: 8px 0;
+  border-bottom: 1px solid #999C98;
+}
+#search-results ol.search-results > li.has-mime a {
+  line-height: 16px;
+  padding: 0 0 2px 0;
+}
+#search-results ol.search-results > li.has-mime div {
+  font-size: 12px;
+}
+#search-results ol.search-results > li.has-mime div a {
+  background-position: 0 13px;
+}
+#search-results ol.search-results > li.has-mime li {
+  list-style-image: url(//www.epfl.ch/img/dot.png);
+  margin: 0 0 1px 15px;
+  padding-left: 3px;
+  line-height: 18px;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+#search-results .dropdown .menu {
+  margin: 0;
+}
+.footer-info {
+  font-size: 11px;
+  position: relative;
+  width: 616px;
+  width: 100%;
+  height: 15px;
+  color: #000;
+  margin: 9px 0;
+}
+.footer-info .results-nb {
+  width: 170px;
+  text-align: right;
+  font-weight: 400;
+  margin: 0 35px 0 0;
+  padding-top: 0;
+}
+.footer-info .pagination {
+  color: #7F7F7F;
+}
+.footer-info .pagination ul {
+  margin-top: 0;
+}
+.results-nb {
+  color: #000;
+  font-weight: 700;
+  float: right;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-size: 11px;
+  font-style: italic;
+  letter-spacing: 1px;
+  height: 19px;
+  margin-right: 4px;
+  line-height: 18px;
+  padding-top: 3px;
+}
+.results-nb span.elapsed {
+  float: none;
+  font-weight: 300;
+  display: none;
+}
+div.status {
+  border: 1px dotted gray;
+  color: gray;
+  padding: 5px;
+}
+.dropdown ul.menu {
+  margin-top: 0;
+}
+/** organizational unit hierarchy */
+.parents {
+  float: left;
+  width: 20px;
+}
+.parents img {
+  margin: 0;
+}
+.parents .unit-name {
+  font-weight: bold;
+}
+.tooltip.top:after {
+  content: url("//www.epfl.ch/img/bubble_arrow_down.png");
+  bottom: -15px;
+}
+/**  definition group */
+.menu .current a,
+.keymatch a,
+.dropdown .current label {
+  font-weight: 700;
+}
+.warn {
+  text-align: center;
+  margin-bottom: 10px;
+}
+ol.people_results li a.name span.highlight {
+  color: white;
+  background-color: black;
+}
+ol.units_results li span.highlight {
+  color: white;
+  background-color: black;
+}
+#main-searchform .clearButton {
+  background-color: white;
+  cursor: pointer;
+  padding-left: 2px;
+  position: absolute;
+  right: 160px;
+  top: 5px;
+}
+#main-navigation ul.topnav {
+  z-index: 5000;
+}
+ul.tree {
+  padding-top: 0;
+}
+.epfl-panel {
+  /* background-color: #ae0010 ; */
+
+  padding: 2px 0 7px 8px;
+  color: #fff ;
+  width: 316px;
+}
+.epfl-panel a {
+  color: #fff ;
+  background-image: url(//www.epfl.ch/img/underline-white.gif);
+}
+.epfl-panel h3 {
+  color: #fff ;
+  font-family: "Arial black", Arial, Helvetica, sans-serif;
+  font-weight: bold ;
+  text-transform: none ;
+  font-size: 18px ;
+  line-height: 20px ;
+  letter-spacing: 1px ;
+  border: none ;
+  margin-top: 3px ;
+}
+ul.treeview > li > ul {
+  padding-top: 0 !important;
+}
+div.box-col > ul > li {
+  list-style-image: none;
+}
+#tools > div.button > span.label.current {
+  background-image: none;
+  /* color:white;
+    background-color: #000; */
+
+}
+.keymatch {
+  background-color: #EEE;
+  border-bottom: 1px dotted #000;
+  border-top: 1px solid #000;
+  padding: 10px 0;
+  margin-right: 0;
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+.keymatch p {
+  margin-bottom: 0;
+}
+/* video in studyplans */
+div.coursebook_video {
+  position: absolute;
+  margin: 21px 0 0 -16px;
+  min-height: 30px;
+  width: 17px;
+  content: "";
+  vertical-align: middle;
+}
+</style><style type="text/css" media="all" id="less:styles-new_main_form">/* mixins */
+#main-searchform .search-filter div {
+  font-weight: bold;
+}
+#main-searchform .search-filter div li.search-filter-checked label {
+  font-weight: bold;
+}
+#main-searchform .selected-field,
+#main-search-form-options .selected-field {
+  width: 80px;
+  background: url("/styles/images/sprites.png") no-repeat scroll right -1px transparent;
+  border: 1px solid #B8B8B8;
+  height: 18px;
+  margin-right: 2px;
+  padding: 2px 18px 0 8px;
+  position: relative;
+  z-index: 2000;
+}
+#main-searchform .selected-field:hover,
+#main-search-form-options .selected-field:hover {
+  background: #000000 url("/styles/images/sprites.png") no-repeat right -24px;
+  color: #fff;
+}
+.search-filter .menu.hidden {
+  position: absolute;
+  left: -999em;
+}
+.search-filter .menu input {
+  margin-right: 4px;
+}
+.search-filter .menu li {
+  display: inline-block;
+  float: none;
+  border-bottom: 1px solid #fff;
+  list-style-image: none;
+  margin: 0 !important;
+}
+#main-searchform .selected-field {
+  width: 92px;
+  background: url("/styles/images/sprites.png") no-repeat scroll right 2px transparent;
+  height: 22px;
+  margin-right: 0;
+  border: 0;
+}
+#main-searchform .selected-field:hover {
+  background: #000000 url("/styles/images/sprites.png") no-repeat right -24px;
+  color: #fff;
+}
+/**
+*   Advanced search - Directory / web EPFL
+*/
+#main-search-form-options input[type="reset"],
+#main-search-form-options input[type="submit"] {
+  background: url("//www.epfl.ch/img/button.png") repeat-x scroll left -1px transparent;
+  border: 1px solid #B8B8B8;
+  color: #000000;
+  cursor: pointer;
+  font: italic 11px Georgia, "Times New Roman", Times, serif;
+  height: 22px;
+  margin: 6px 4px 0;
+}
+#main-search-form-options input[type="reset"]:hover,
+#main-search-form-options input[type="submit"]:hover {
+  background: url("//www.epfl.ch/img/button.png") repeat-x scroll 0 -23px transparent;
+  border-color: black;
+  color: white;
+}
+#main-search-form-options input[type="text"] {
+  margin-left: 5px;
+  width: 300px;
+}
+#main-search-form-options .type-opt {
+  display: inline-block;
+  width: 95px;
+  padding-left: 8px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+#main-search-form-options .selected-field {
+  width: 95px;
+  height: 20px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+#main-search-form-options li {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+}
+#main-search-form-options .search-filter {
+  display: inline-block;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-style: italic;
+  font-size: 11px;
+  line-height: 16px;
+  padding-left: 0;
+  position: relative;
+  cursor: pointer;
+  width: 95px;
+  height: 20px;
+  vertical-align: middle;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+/* eduweb: orientation */
+#main-search-form-options .orientation,
+#main-search-form-options .orientation .selected-field {
+  width: 459px;
+  vertical-align: middle;
+  height: 20px;
+  padding-left: 2px;
+}
+#main-search-form-options div.cycle {
+  width: 459px;
+}
+#main-search-form-options div.cycle div#label-cycle {
+  width: 100%;
+}
+#main-search-form-options div.cycle ul.menu {
+  width: 457px;
+}
+#main-search-form-options div.section_id {
+  width: 459px;
+  /* label { width: 427px !important;} */
+
+}
+#main-search-form-options div.section_id div#label-section_id {
+  width: 100%;
+}
+#main-search-form-options div.section_id ul.menu {
+  width: 457px;
+}
+#main-search-form-options .orientation .selected-field {
+  white-space: nowrap;
+  padding-right: 16px;
+  text-overflow: ellipsis;
+}
+#main-search-form-options .orientation .menu {
+  width: 457px;
+  margin-left: 2px;
+  height: 240px;
+  overflow: auto;
+  height: 304px;
+}
+#main-search-form-options .orientation .menu label {
+  width: 100%;
+  border-bottom: 1px dotted #b8b8b8;
+}
+/** directory fields specs **/
+#main-search-form-options .sstatus,
+#main-search-form-options .sstatus .selected-field,
+#main-search-form-options .sclass,
+#main-search-form-options .sclass .selected-field,
+#main-search-form-options .ssection,
+#main-search-form-options .ssection .selected-field,
+#main-search-form-options .ssemester,
+#main-search-form-options .ssemester .selected-field {
+  width: 226px;
+  vertical-align: middle;
+  height: 20px;
+}
+#main-search-form-options .sclass .selected-field,
+#main-search-form-options .ssection .selected-field,
+#main-search-form-options .ssemester .selected-field,
+#main-search-form-options .sstatus .selected-field {
+  white-space: nowrap;
+  padding-right: 16px;
+  text-overflow: ellipsis;
+}
+#label-section,
+#label-class,
+#label-section {
+  overflow-x: hidden;
+  height: 20px;
+}
+#main-search-form-options .sstatus .menu,
+#main-search-form-options .sclass .menu,
+#main-search-form-options .ssection .menu,
+#main-search-form-options .ssemester .menu {
+  width: 224px;
+  height: 120px;
+  overflow: auto;
+}
+#main-search-form-options .sstatus .menu {
+  height: 104px;
+}
+#main-search-form-options .sstatus .menu label,
+#main-search-form-options .sclass .menu label,
+#main-search-form-options .ssection .menu label,
+#main-search-form-options .ssemester .menu label {
+  width: 100%;
+  border-bottom: 1px dotted #b8b8b8;
+}
+/* main search form options */
+#main-search-form-options .column {
+  width: 335px;
+  display: block;
+  float: left;
+  margin: 0;
+}
+#main-search-form-options .column li input[type="text"] {
+  height: 20px;
+  margin-left: 2px;
+  width: 126px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+#main-search-form-options .clearBtnContainer {
+  display: inline-block;
+  position: relative;
+  vertical-align: bottom;
+}
+#main-search-form-options .column.align-r {
+  width: 310px;
+}
+#main-search-form-options .column.align-r li {
+  margin-right: 0;
+  margin-left: 4px;
+}
+#main-search-form-options .menu li {
+  float: none !important;
+  width: 100%;
+}
+#main-search-form-options .menu li label {
+  width: 110px;
+  margin: 0;
+  font-weight: normal;
+  padding-left: 8px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+#main-search-form-options .menu li:hover label {
+  color: #fff;
+}
+#main-search-form-options .ssemester .menu li,
+#main-search-form-options .sclass .menu li,
+#main-search-form-options .ssection .menu li {
+  width: 206px;
+}
+#main-search-form-options .clearButton {
+  background-color: #FFF;
+  border-left: 1px dotted #B8B8B8;
+  cursor: pointer;
+  padding-left: 2px;
+  position: absolute;
+  right: 4px;
+  top: 2px;
+}
+#main-search-form-options .column label {
+  display: inline-block;
+  color: #000;
+  font-weight: bold;
+  width: 70px;
+  margin-right: 3px;
+  vertical-align: middle;
+}
+#button-bar-search {
+  padding-top: 5px;
+}
+/* Web search form ... first jet ... */
+#main-search-form-options .one-column {
+  margin: 10px 0 4px 0;
+  width: 652px;
+}
+#main-search-form-options .one-column input[type="text"] {
+  height: 20px;
+  margin-left: 2px;
+  width: 456px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+#main-search-form-options .one-column label {
+  display: inline-block;
+  color: black;
+  font-weight: bold;
+  width: 180px;
+  margin-right: 3px;
+  vertical-align: middle;
+}
+#main-search-form-options .two-columns {
+  width: 322px;
+  display: block;
+  float: left;
+  margin: 0;
+}
+#main-search-form-options .two-columns label {
+  display: inline-block;
+  color: black;
+  font-weight: bold;
+  width: 182px;
+  margin-right: 3px;
+  vertical-align: middle;
+}
+#main-search-form-options .two-columns input[type="text"] {
+  height: 20px;
+  margin-left: 2px;
+  width: 90px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+#main-search-form-options .two-columns.align-r label {
+  width: 180px;
+  margin-right: 0;
+  margin-left: 4px;
+  text-align: right;
+  padding-right: 5px;
+}
+#main-search-form-options .two-columns.align-r li {
+  float: right;
+}
+#main-search-form-options .two-columns.align-r li label {
+  text-align: left;
+}
+#main-search-form-options ul.vspace {
+  padding-top: 15px;
+}
+.two-columns .search-filter .menu {
+  width: 93px;
+}
+#main-search-form-options .one-column.with-radio input[type="text"] {
+  width: 355px;
+}
+#main-search-form-options .one-column.with-radio div.search-filter {
+  margin-left: 2px;
+}
+#advanced-search input[type="text"].filler {
+  font-style: italic;
+  color: #7F7F7F;
+}
+#main-search-form-options .two-columns.align-r li label.section {
+  width: 90px;
+}
+#main-search-form-options .search-filter.section {
+  width: 185px;
+}
+#main-search-form-options .search-filter.section ul.menu {
+  width: 183px;
+}
+#main-search-form-options .selected-field.section {
+  width: 185px;
+}
+li.radio label {
+  width: 80px;
+}
+#main-navigation .dropdown .menu {
+  width: 350px;
+}
+</style><style type="text/css" media="all" id="less:styles-search_unit">@charset "utf-8";
+/** unit search **/
+.content ul .admindatas-popup {
+  background-color: #FFF;
+  border: 1px solid #000;
+  position: absolute;
+  top: 30px;
+  margin-left: 10px;
+  padding: 8px 4px;
+  z-index: 4000;
+  width: 285px;
+}
+.content ul .admindatas-popup li {
+  list-style: none;
+}
+.content ul .admindatas-popup:after {
+  content: url("//www.epfl.ch/img/bubble_arrow_top.png");
+  position: absolute;
+  top: -10px;
+}
+.content ul .browse-structure-popup {
+  background-color: #FFF;
+  border: 1px solid #000;
+  position: absolute;
+  top: 30px;
+  margin-left: 10px;
+  padding: 8px 4px;
+  z-index: 4000;
+  width: 100px;
+}
+.content ul .browse-structure-popup li {
+  list-style: none;
+}
+.content ul .browse-structure-popup:after {
+  content: url("//www.epfl.ch/img/bubble_arrow_top.png");
+  position: absolute;
+  top: -10px;
+}
+/**
+*  Unit display
+*/
+#unit_path {
+  margin-right: 0;
+}
+#unit_path .lvl1 {
+  margin-left: 15px;
+}
+#unit_path .lvl2 {
+  margin-left: 30px;
+}
+#unit_path .lvl3 {
+  margin-left: 45px;
+}
+#unit_path .lvl4 {
+  margin-left: 60px;
+}
+/* info item mixin for fax, adress etc */
+/* contact infos */
+.unit_contact {
+  width: 652px;
+}
+.unit_contact h3 {
+  border-bottom: solid 1px #000;
+  font-size: 14px;
+}
+.unit_contact .people,
+.unit_contact .address {
+  width: 341px;
+  float: left;
+}
+.unit_contact .people h3,
+.unit_contact .address h3 {
+  margin: 20px 4px 4px 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.unit_contact .website,
+.unit_contact .fax {
+  width: 309px;
+  float: left;
+}
+.unit_contact .website h3,
+.unit_contact .fax h3 {
+  margin: 20px 4px 4px 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+/*
+*   Results
+*/
+ol.people_list,
+ol.units_results,
+ol.subunits {
+  width: 616px;
+  margin: 0;
+  list-style: none;
+}
+ol.people_list li,
+ol.units_results li,
+ol.subunits li {
+  margin: 0;
+  line-height: 18px;
+  border-bottom: 1px dotted #000;
+  padding: 5px 0;
+}
+ol.people_list div.person div,
+ol.units_results div.person div,
+ol.subunits div.person div {
+  width: 175px;
+  margin-right: 4px;
+  float: left;
+}
+ol.people_list div.person div.function,
+ol.units_results div.person div.function,
+ol.subunits div.person div.function {
+  color: #7f7f7f;
+}
+ol.people_list div.person div.office,
+ol.units_results div.person div.office,
+ol.subunits div.person div.office {
+  width: 100px;
+}
+ol.people_list div.person div.phone,
+ol.units_results div.person div.phone,
+ol.subunits div.person div.phone {
+  width: 150px;
+  margin-right: 0;
+  text-align: right;
+}
+ol.people_list div.unit_name,
+ol.units_results div.unit_name,
+ol.subunits div.unit_name {
+  width: 300px;
+  margin-right: 4px;
+  float: left;
+  color: #7f7f7f;
+}
+ol.people_list div.unit_parents,
+ol.units_results div.unit_parents,
+ol.subunits div.unit_parents {
+  width: 310px;
+  margin-right: 0;
+  float: left;
+}
+ol.subunits div.unit_name {
+  font-weight: 700;
+}
+ol.units_results li a.unit_accronym {
+  font-size: 13px;
+  font-family: arial;
+  font-weight: 700;
+}
+#administrative-datas,
+#browse-structure {
+  position: relative;
+}
+ul.admindatas-popup,
+ul.browse-structure-popup {
+  background-color: #FFF;
+  border: 1px solid #000;
+  position: absolute;
+  top: 30px;
+  margin-left: 10px;
+  width: 100px;
+  padding: 8px 4px;
+  z-index: 4000;
+}
+ul.admindatas-popup li,
+ul.browse-structure-popup li {
+  list-style: none;
+  padding-left: 3px;
+  margin: 0 0 1px 15px;
+}
+ul.admindatas-popup:after,
+ul.browse-structure-popup:after {
+  content: url("//www.epfl.ch/img/bubble_arrow_top.png");
+  position: absolute;
+  top: -10px;
+}
+ul.admindatas-popup {
+  width: 285px;
+}
+</style>
+    
+<style></style></head>
+<body><div role="dialog" aria-live="polite" aria-label="cookieconsent" aria-describedby="cookieconsent:desc" class="cc-window cc-banner cc-type-info cc-theme-block cc-bottom cc-color-override--1624237425 cc-invisible" style="display: none;"><!--googleoff: all--><span id="cookieconsent:desc" class="cc-message">By
+ continuing your browsing on this site, you agree to the use of cookies 
+to improve your user experience and to make statistics of visits. <a aria-label="learn more about cookies" role="button" tabindex="0" class="cc-link" href="https://mediacom.epfl.ch/disclaimer" target="_blank">Read the legal notice</a></span><div class="cc-compliance"><a aria-label="dismiss cookie message" role="button" tabindex="0" class="cc-btn cc-dismiss">OK</a></div><!--googleon: all--></div>
+    
+    
+
+    
+
+    <a name="top"></a>
+    <div id="accessibility" class="hidden" title="École Polytechnique Fédérale de Lausanne - Accès rapide">
+      <ul>
+        <li><a href="http://www.epfl.ch/accessibility.fr.shtml" title="Accès spécifique pour personnes handicapées" accesskey="0">Accessibilité</a></li>
+        <li><a href="http://www.epfl.ch/" title="Page d'accueil de l'EPFL" accesskey="1">Accueil</a></li>
+        <li><a href="#navigation" accesskey="2">Navigation dans les sites de l'École</a></li>
+        <li><a href="#main-navigation" accesskey="3">Navigation dans ce site</a></li>
+        <li><a href="#search" id="searchlink" accesskey="4">Accès au champ de recherche</a></li>
+        <li><a href="#content" accesskey="5">Début du contenu de la page</a></li>
+        <li><a href="mailto:webmaster@epfl.ch" accesskey="9">Contact technique</a></li>
+      </ul>
+    </div>
+
+
+    <div id="header2013">
+      <div id="nav-logo">
+        <a href="http://www.epfl.ch/" title="Page d'accueil de l'EPFL"><img src="EPFL-unit_fichiers/epfl_small.png"></a>
+      </div>
+
+      <div id="nav-menus">
+        <a name="navigation"></a>
+        <ul id="main-menus">
+          <li class="portal menu" id="public-menu-link">
+            <a class="main-link" href="http://www.epfl.ch/navigate.fr.shtml" title="Navigation par public cible"><span>Par</span>public</a>
+            <div class="navigation-panel hidden" id="public-panel">
+              <ul>
+                <li class="group-2-cols">
+                  <h3><a href="http://futuretudiant.epfl.ch/fr">Portail Futurs Étudiants</a></h3>
+                  <ul>
+                    <li><a href="http://bachelor.epfl.ch/etudes">Bachelor</a>, <a href="http://master.epfl.ch/fr">Master</a>, <a href="http://phd.epfl.ch/accueil">Doctorat</a></li>
+                    <li><a href="http://futuretudiant.epfl.ch/mobilite">Étudiants en échange</a></li>
+                  </ul>
+                </li>
+                <li class="group-2-cols">
+                  <h3><a href="http://studying.epfl.ch/portail-etudiants">Portail Étudiants</a></h3>
+                  <ul>
+                    <li><a href="http://studying.epfl.ch/guichet_etudiants">Guichet étudiants</a></li>
+                    <li><a href="http://memento.epfl.ch/academic-calendar/">Calendrier académique</a></li>
+                  </ul>
+                </li>
+                <li class="group-2-cols last">
+                  <h3><a href="http://recherche.epfl.ch/">Portail Chercheurs</a></h3>
+                  <ul>
+                    <li><a href="http://research-office.epfl.ch/financements">Sources de financement</a></li>
+                    <li><a href="http://actu.epfl.ch/search/research_awards/">Prix et distinctions</a></li>
+                  </ul>
+                </li>
+                <li class="group-2-cols">
+                  <h3><a href="http://working.epfl.ch/portail-collaborateurs">Portail Collaborateurs</a></h3>
+                  <ul>
+                    <li><a href="http://rh.epfl.ch/">Ressources humaines</a></li>
+                    <li><a href="http://polylex.epfl.ch/page-26060-fr.html">Polylex: lois, directives</a></li>
+                  </ul>
+                </li>
+                <li class="group-2-cols">
+                  <h3><a href="http://entreprises.epfl.ch/fr">Portail Entreprises</a></h3>
+                  <ul>
+                    <li><a href="http://vpi.epfl.ch/fr">Innovation &amp; valorisation</a></li>
+                    <li><a href="http://vpi.epfl.ch/innovationpark_fr">EPFL Innovation Park</a></li>
+                  </ul>
+                </li>
+                <li class="group-2-cols last">
+                  <h3><a href="http://medias.epfl.ch/fr">Portail Médias</a></h3>
+                  <ul>
+                    <li><a href="http://actu.epfl.ch/search/mediacom/?keywords=&amp;date_filter=all&amp;projects=190&amp;search=Rechercher">Communiqués de presse</a></li>
+                    <li><a href="http://mediacom.epfl.ch/epfl-magazine">EPFL Magazine</a></li>
+                    <li><a href="http://mediatheque.epfl.ch/">Banque d'images</a></li>
+                  </ul>
+                </li>
+                <li class="group-2-cols">
+                  <h3><a href="http://teaching.epfl.ch/fr">Portail Enseignants</a></h3>
+                  <ul>
+                    <li>Gestion des <a href="http://teaching.epfl.ch/cms/site/teaching/lang/fr/preparer-un-cours_1">cours</a> et des <a href="http://teaching.epfl.ch/mes-etudiants_1">étudiants</a></li>
+                    <li><a href="http://gymnases.epfl.ch/page-92859-fr.html">Interface Gymnases</a></li>
+                  </ul>
+                </li>
+                <li class="group-2-cols">
+                  <h3><a href="http://www.epflalumni.ch/">Portail EPFL Alumni</a></h3>
+                  <ul>
+                    <li><a href="https://www.epflalumni.ch/avantages/formulaire-de-demande/">Rejoindre la communauté</a></li>
+                    <li><a href="http://www.epflalumni.ch/nos-evenements/">Evénements Alumni</a></li>
+                  </ul>
+                </li>
+              </ul>
+              <div class="clear"></div>
+            </div>
+          </li>
+
+          <li class="school menu" id="school-menu-link">
+            <a class="main-link" href="http://www.epfl.ch/navigate.fr.shtml" title="Navigation par faculté EPFL"><span>Par</span>faculté</a>
+            <div class="navigation-panel hidden" id="school-panel">
+              <ul>
+                <li class="group-2-cols">
+                  <h3><a href="http://enac.epfl.ch/fr" class="enac">Environnement Naturel, Architectural et Construit <acronym title="Environnement Naturel, Architectural et Construit">ENAC</acronym></a></h3>
+                  <ul>
+                    <li><a href="http://enac.epfl.ch/architecture">Architecture</a></li>
+                    <li><a href="http://enac.epfl.ch/ingenierie-civile">Ingénierie civile</a></li>
+                    <li><a href="http://enac.epfl.ch/ingenierie-de-l-environnement">Ingénierie de l'environnement</a></li>
+                  </ul>
+                </li>
+                <li class="group-2-cols">
+                  <h3><a href="http://sb.epfl.ch/fr" class="sb">Sciences de Base <acronym title="Sciences de Base">SB</acronym></a></h3>
+                  <ul>
+                    <li><a href="http://sb.epfl.ch/chimie">Chimie et génie chimique</a></li>
+                    <li><a href="http://sb.epfl.ch/mathematiques">Mathématiques</a></li>
+                    <li><a href="http://sb.epfl.ch/physique">Physique</a></li>
+                  </ul>
+                </li>
+                <li class="group-2-cols last">
+                  <h3><a href="http://sti.epfl.ch/fr" class="sti">Sciences et Techniques de l'Ingénieur <acronym title="Sciences et Techniques de l'Ingénieur">STI</acronym></a></h3>
+                  <ul>
+                    <li><a href="http://sti.epfl.ch/genie-electrique-et-electronique">Génie électrique et électronique</a></li>
+                    <li><a href="http://sti.epfl.ch/genie-mecanique">Génie mécanique</a></li>
+                    <li><a href="http://sti.epfl.ch/science-et-genie-des-materiaux">Science et génie des matériaux</a></li>
+                    <li><a href="http://sti.epfl.ch/microtechnique">Microtechnique</a></li>
+                    <li><a href="http://ibi.epfl.ch/">Bioengineering</a></li>
+                  </ul>
+                </li>
+                <li class="group-2-cols">
+                  <h3><a href="http://ic.epfl.ch/fr" class="ic">Informatique et Communications <acronym title="Informatique et Communications">IC</acronym></a></h3>
+                  <ul>
+                    <li><a href="http://ic.epfl.ch/informatique">Informatique</a></li>
+                    <li><a href="http://ic.epfl.ch/syscom">Systèmes de communication</a></li>
+                    <li><a href="http://ic.epfl.ch/science-donnees">Data Science</a></li>
+                  </ul>
+                </li>
+                <li class="group-2-cols">
+                  <h3><a href="http://sv.epfl.ch/fr" class="sv">Sciences de la Vie <acronym title="Sciences de la Vie">SV</acronym></a></h3>
+                  <ul>
+                    <li><a href="http://bioengineering.epfl.ch/">Bioingénierie</a></li>
+                    <li><a href="http://sv.epfl.ch/neurosciences">Neurosciences Brain Mind &amp; Blue Brain</a></li>
+                    <li><a href="http://sv.epfl.ch/infectiologie">Infectiologie</a></li>
+                    <li><a href="http://sv.epfl.ch/isrec">Cancer</a></li>
+                  </ul>
+                </li>
+                <li class="group-2-cols last">
+                  <h3><a href="http://cdm.epfl.ch/accueil" class="cdm">Collège du Management de la Technologie <acronym title="Collège du Management de la Technologie">CDM</acronym></a></h3>
+                  <ul>
+                    <li><a href="http://cdm.epfl.ch/page-116734-fr.html">Management de la Technologie</a></li>
+                    <li><a href="http://cdm.epfl.ch/page-116778-fr.html">Technologie et politiques publiques</a></li>
+                    <li><a href="http://sfi.epfl.ch/">Ingénierie financière</a></li>
+                  </ul>
+                </li>
+                <li class="group-2-cols" style="clear:left;">
+                  <h3><a href="http://cdh.epfl.ch/fr" class="cdh">Collège des Humanités <acronym title="Collège des Humanités">CDH</acronym></a></h3>
+                  <ul>
+                    <li><a href="http://cdh.epfl.ch/shs">Sciences humaines et sociales</a></li>
+                    <li><a href="http://iags.epfl.ch/">Area and Global Studies</a></li>
+                    <li><a href="http://cdh.epfl.ch/dh-fr">Humanités digitales</a></li>
+                  </ul>
+                </li>
+              </ul>
+              <div class="clear"></div>
+            </div>
+          </li>
+
+          <li class="short menu" id="brief-menu-link">
+            <a class="main-link" href="http://www.epfl.ch/navigate.fr.shtml" title="Navigation dans la structure de l'EPFL"><acronym title="École Polytechnique Fédérale de Lausanne">EPFL</acronym> en bref</a>
+            <div class="navigation-panel hidden" id="brief-panel">
+              <ul>
+                <li class="group-2-cols">
+                  <h3><a href="http://information.epfl.ch/presentation"><acronym title="École Polytechnique Fédérale de Lausanne">EPFL</acronym></a></h3>
+                  <ul>
+                    <li><a href="http://direction.epfl.ch/presentation">Direction</a></li>
+                    <li><a href="http://library.epfl.ch/">Bibliothèque</a></li>
+                    <li><a href="http://emploi.epfl.ch/fr">Offres d'emploi</a></li>
+                    <li><a href="http://international.epfl.ch/accueil">Relations internationales</a></li>
+                  </ul>
+                </li>
+                <li class="group-2-cols">
+                  <h3><a href="http://futuretudiant.epfl.ch/fr">Formations</a></h3>
+                  <ul>
+                    <li><a href="http://cms.epfl.ch/"><acronym title="Cours de Mathématiques Spéciales">CMS</acronym> Cours Préparatoire</a></li>
+                    <li><a href="http://bachelor.epfl.ch/etudes">Bachelor</a>, <a href="http://master.epfl.ch/fr">Master</a>, <a href="http://phd.epfl.ch/accueil">Ecole doctorale</a></li>
+                    <li><a href="http://www.formation-continue-unil-epfl.ch/">Formation continue</a> (EPFL-UNIL)</li>
+                    <li><a href="http://moocs.epfl.ch/cede">MOOCS</a></li>
+                  </ul>
+                </li>
+                <li class="group-2-cols last">
+                  <h3><a href="http://recherche.epfl.ch/accueil">Recherche</a></h3>
+                  <ul>
+                    <li><a href="http://research-office.epfl.ch/fr">Research Office</a></li>
+                    <li><a href="http://recherche.epfl.ch/fr/research-commission">Commission de la recherche</a></li>
+                    <li><a href="http://recherche.epfl.ch/centres">Centres de recherche</a></li>
+                    <li><a href="http://infoscience.epfl.ch/?ln=fr">Publications <acronym title="École polytechnique fédérale de Lausanne">EPFL</acronym></a></li>
+                  </ul>
+                </li>
+                <li class="group-2-cols" style="clear: left;">
+                  <h3><a href="http://vpi.epfl.ch/fr">Innovation &amp; Valorisation</a></h3>
+                  <ul>
+                    <li><a href="http://vpi.epfl.ch/partenariats">Partenariats</a></li>
+                    <li><a href="http://vpi.epfl.ch/innogrant">Soutien aux start-ups</a></li>
+                    <li><a href="http://www.alliance-tt.ch/">Liaison industrielle</a></li>
+                    <li><a href="http://tto.epfl.ch/homepage">Transfert de technologies, brevets</a></li>
+                  </ul>
+                </li>
+                <li class="group-2-cols">
+                  <h3><a href="http://information.epfl.ch/batiments">Campus EPFL</a></h3>
+                  <ul>
+                    <li><a href="http://fribourg.epfl.ch/fr/home">Fribourg</a>, <a href="http://geneva.epfl.ch/page-121741-fr.html">Genève</a>, <a href="http://neuchatel.epfl.ch/page-121739-fr.html">Neuchâtel</a>, <a href="http://valais.epfl.ch/Home">Valais</a></li>
+                    <li><a href="http://rolexlearningcenter.epfl.ch/presentation">Rolex Learning Center</a></li>
+                    <li><a href="http://www.stcc.ch/home/">SwissTech Convention Center</a></li>
+                    <li><a href="http://artlab.epfl.ch/accueil">ArtLab</a></li>
+                  </ul>
+                </li>
+              </ul>
+              <div class="clear"></div>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div id="nav-search">
+        <div id="search-box">
+          <a name="search"></a>
+          <form name="search" action="https://search.epfl.ch/process_web2010" class="searchform" id="header_searchform">
+            <input name="lang" value="fr" type="hidden">
+            <input name="as_site_search" value="" id="header_local_site" type="hidden">
+            <input class="search ui-autocomplete-input" name="q" id="header_searchfield" autocomplete="off" role="textbox" aria-autocomplete="list" aria-haspopup="true" type="text">
+            <div class="search-filter">
+              <a href="#" class="selected-field">Unités EPFL</a>
+              <ul class="menu hidden">
+                <li>
+                  <input class="hidden" name="engine" id="search-engine-person" value="person" title="Chercher une personne" type="radio">
+                  <label for="search-engine-person" class="current" title="Chercher une personne">Personnes</label>
+                </li>
+                <li>
+                  <input class="hidden" name="engine" id="search-engine-epfl" value="epfl" title="Chercher dans toute l'EPFL" type="radio">
+                  <label for="search-engine-epfl" title="Chercher dans toute l'EPFL">Sites web EPFL</label>
+                </li>
+                <li>
+                  <input class="hidden" name="engine" id="search-engine-place" value="place" title="Chercher un lieu" type="radio">
+                  <label for="search-engine-place" title="Chercher un lieu">Lieu</label>
+                </li>
+                <li>
+                  <input class="hidden" name="engine" id="search-engine-eduweb" value="eduweb" title="Chercher des cours" type="radio">
+                  <label for="search-engine-eduweb" title="Chercher des cours">Cours</label>
+                </li>
+                <li>
+                  <input class="hidden" name="engine" id="search-engine-publication" value="publication" title="Chercher des publications" type="radio">
+                  <label for="search-engine-publication" title="Chercher des publications">Publications</label>
+                </li>
+                <li>
+                  <input class="hidden" name="engine" id="search-engine-actuweb" value="actuweb" title="Chercher des actualités" type="radio">
+                  <label for="search-engine-actuweb" title="Chercher des actualités">Actualités</label>
+                </li>
+                <li>
+                  <input class="hidden" name="engine" id="search-engine-unit" value="unit" title="Chercher des unités EPFL" checked="checked" type="radio">
+                  <label for="search-engine-unit" title="Chercher des unités EPFL">Unités EPFL</label>
+                </li>
+
+              </ul>
+            </div>
+            <button type="submit" class="search-button local-color" title="Rechercher">Rechercher</button>
+          <ul class="ui-autocomplete ui-menu ui-widget ui-widget-content ui-corner-all ui-autocomplete-disabled ui-state-disabled" role="listbox" aria-activedescendant="ui-active-menuitem" style="z-index: 1; top: 0px; left: 0px; display: none;" aria-disabled="true"></ul></form>
+        </div>
+      </div>
+      <div class="clear"></div>
+    </div>
+
+    <script type="text/javascript">change_search_base2003('search-engine-unit');</script>
+
+    <div id="main-content">
+        <ul id="breadcrumbs" title="Navigation dans l'arborescence de l'EPFL">
+            <li><a href="http://www.epfl.ch/index.fr.html" title="EPFL">EPFL</a></li>
+            <li><a href="https://search.epfl.ch/">EPFL | Moteur de recherche</a></li>
+            
+    <li>Parcourir les unités</li>
+    
+        <li>
+            <a title="Ecole polytechnique fédérale de Lausanne" href="https://search.epfl.ch/ubrowse.action?acro=EPFL">EPFL</a>
+        </li>
+    
+        <li>
+            <a title="Faculté des sciences et techniques de l'ingénieur" href="https://search.epfl.ch/ubrowse.action?acro=STI">STI</a>
+        </li>
+    
+        <li>
+            <a title="Institut de génie électrique et électronique" href="https://search.epfl.ch/ubrowse.action?acro=IEL">IEL</a>
+        </li>
+    
+        <li class="last">
+            <a title="Laboratoire de Systèmes Adaptatifs" href="https://search.epfl.ch/ubrowse.action?acro=ASL">ASL</a>
+        </li>
+    
+
+        </ul>
+        <ul id="languages" title="Choix de la langue">
+            <li class="current">français</li><li><a href="https://search.epfl.ch/ubrowse.action?acro=ASL&amp;request_locale=en">English</a></li>
+        </ul>
+        <div class="clear"></div>
+        
+        <h1>EPFL | Moteur de recherche&nbsp;<span class="local-color-text">Unités EPFL</span></h1>
+        <div id="main-navigation" class="navigation-bar">&nbsp;</div>
+        <div id="tools">
+            <div class="button print"><a href="javascript:window.print()" title="Imprimer la page"><button class="icon"></button><span class="label">Imprimer</span></a></div>
+            
+    
+
+
+<div id="browse-structure" class="button hierarchy">
+    <button class="icon" title="Parcourir les unités"></button><span class="label">Parcourir les unités</span>
+    <ul class="browse-structure-popup hidden">
+        <li><a href="https://search.epfl.ch/ubrowse.action?acro=EPFL" title="Parcourir les unités EPFL">EPFL</a></li>
+        <li><a href="https://search.epfl.ch/ubrowse.action?acro=EHE" title="Parcourir les unités des Entités Hôtes de l'EPFLl">EHE</a></li>
+        <li><a href="https://search.epfl.ch/ubrowse.action?acro=entreprises" title="Parcourir les unités des entreprises sur le site EPFL">Entreprises</a></li>
+    </ul>
+</div>
+
+
+    <div id="administrative-datas" class="button administration">
+        <button class="icon" title="Administrative datas"></button><span class="label">Données administratives</span>
+        <ul class="admindatas-popup hidden">
+            
+            
+                <li><a href="https://cadiwww.epfl.ch/listes?unite=ASL" title="Listes d'emails associés">Listes d'emails associés</a></li>
+            
+            <li><a href="http://infowww.epfl.ch/imon-public/OrgUnites.detail?ww_i_unite=13470" title="Données administratives">Données administratives</a></li>
+            <li><a href="http://accred.epfl.ch/cgi-bin/adminsofunite.pl?unite=13470" title="Accréditeurs, rôles et droits pour cette unité">Accréditeurs, rôles et droits pour cette unité</a></li>
+            
+                <li><a href="https://search.epfl.ch/extract/extract.action?acro=ASL&amp;what=unitbrowse" title="Liste formatée de membres de l'unité">Liste formatée de membres de l'unité</a></li>
+            
+        </ul>
+    </div>
+
+
+
+        </div>
+        <div id="content" class="content">
+            <form id="main-searchform" name="search" action="/usearch.action" method="GET" class="main-search-form unit">
+    <span class="clearBtnContainer"><input name="q" value="ASL" id="main-searchfield" class="search ui-autocomplete-input" title="Chercher une unité" style="padding-right: 17px; width: 476px;" autocomplete="off" role="textbox" aria-autocomplete="list" aria-haspopup="true" type="text"><img src="EPFL-unit_fichiers/clear.gif" style="display: none;" class="clearButton"></span>
+    
+
+
+<div class="search-filter">
+    <div class="selected-field" id="label-name">Unités EPFL</div>
+    <ul class="menu hidden">
+        <li>
+            <input name="f" id="field-directory" value="directory" type="radio">
+            <label for="field-directory" class="current">Personnes</label>
+        </li>
+        <li>
+            <input name="f" id="field-web" value="web" type="radio">
+            <label for="field-web">Sites web EPFL</label>
+        </li>
+        <li>
+            <input name="f" id="field-place" value="place" type="radio">
+            <label for="field-place">Lieu</label>
+        </li>
+        <li>
+            <input name="f" id="field-eduweb" value="eduweb" type="radio">
+            <label for="field-eduweb">Cours</label>
+        </li>
+        <li>
+            <input name="f" id="field-publication" value="publication" type="radio">
+            <label for="field-publication">Publications</label>
+        </li>
+        <li>
+            <input name="f" id="field-actuweb" value="actuweb" type="radio">
+            <label for="field-actuweb">Actualités</label>
+        </li>
+
+        <li class="search-filter-checked">
+            <input name="f" id="field-unit" value="unit" checked="checked" type="radio">
+            <label for="field-unit">Unités EPFL</label>
+        </li>
+    </ul>
+</div>
+
+
+
+    <button type="submit" class="search-button local-color" title="Lancer la recherche">Rechercher</button>
+    <input name="lang" value="fr" id="main-searchform_lang" type="hidden">
+    <input name="pageSize" value="10" id="main-searchform_pageSize" type="hidden">
+    <input name="sort" value="" id="main-searchform_sort" type="hidden">
+    <div class="clear">&nbsp;</div>
+<ul class="ui-autocomplete ui-menu ui-widget ui-widget-content ui-corner-all" role="listbox" aria-activedescendant="ui-active-menuitem" style="z-index: 1; top: 0px; left: 0px; display: none;"></ul></form>
+
+
+
+<div class="clear"></div>
+
+
+
+<div id="main-search-form-options-toggler" class=""><span class="label">&nbsp;</span></div>
+
+
+
+
+<script type="text/javascript">
+    jQuery(document).ready(function() {
+        
+        
+            var actions={directory: '/psearch.action', place: '//search.epfl.ch/process_web2010', person: '/psearch.action', unit: '/usearch.action', web: '/web.action', eduweb: '/eduweb.action', publication: '/publication.action', actuweb:'/actuweb.action', memento: '/memento.action'};
+        
+
+        jQuery('#main-searchform').attr('action', actions['unit']);
+        jQuery('#main-searchform div.selected-field').text("Unités EPFL");
+        var defVal= jQuery('#main-searchfield').attr('title');
+        if (jQuery('#main-searchfield').val() === '') { jQuery('#main-searchfield').val(defVal); }
+        jQuery('#main-searchfield').focus(function(){ if (jQuery(this).val() === defVal){ jQuery(this).val(''); } jQuery(this).addClass('focused'); });
+        jQuery('#main-searchfield').blur(function() { if (jQuery(this).val() === '') { jQuery(this).val(defVal); } jQuery(this).removeClass('focused'); });
+        jQuery('#main-searchfield').keypress(function(e){ if (e.which === 13) { jQuery(this).parent('form').submit();} });
+
+        jQuery('#main-searchform').submit(function() {
+            (jQuery('#main-searchfield').val() == jQuery('#main-searchfield').attr('title')) && jQuery('#main-searchfield').val('');
+        });
+        jQuery('#main-searchform .search-filter input[type=radio]').click(function(){
+            jQuery('#main-searchform').attr('action', actions[jQuery(this).attr('value')]);
+            jQuery('#main-searchform').submit();
+        });
+        if (jQuery.browser.msie || navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPad/i)) {
+            jQuery('#main-searchform .search-filter label').click(
+                    function () {
+                        var el = jQuery(this).attr('for');
+                        // change_search_field(jQuery(this).parent().parent().siblings('.selected-field'), jQuery('#' + el));
+                        // alert('#'+el+" ... "+jQuery('#'+el));
+                        // alert( "el= "+el.replace('field-',''));
+                        jQuery('#main-searchform').attr('action', actions[el.replace('field-','')]);
+                        jQuery('#'+el).attr("checked", "checked");
+                        jQuery('#main-searchform').submit();
+                    });
+        }
+
+
+        jQuery('#main-searchfield input[type=text]').quickClear({clearImg: '<img src=\"/images/clear.gif\" />'});
+        jQuery('#main-searchform .search-filter input[type="radio"]:checked').parent().addClass('search-filter-checked');
+        jQuery('#search-help').tooltip({
+                position: "bottom right",
+                offset: [10, -70],
+                delay: 500
+        });
+
+        
+        jQuery('#main-searchform.unit').length && web_autocomplete_init('https://search.epfl.ch/gsasuggest', '#main-searchfield','#main-searchform', '', '');
+         // or: "http://search.epfl.ch/gsasuggest",
+        /*
+        jQuery('#main-searchform.web').length && web_autocomplete_init('#main-searchfield','#main-searchform', '', '');
+        jQuery('#main-searchform.eduweb').length && web_autocomplete_init('#main-searchfield','#main-searchform', 'education_test', 'education');
+        jQuery('#main-searchform.publication').length && web_autocomplete_init('#main-searchfield','#main-searchform', 'infoscience', 'education');
+        jQuery('#main-searchform.actuweb').length && web_autocomplete_init('#main-searchfield','#main-searchform', 'actualites', 'education');
+        */
+        
+        jQuery('#main-searchform.person').length && autocomplete_init('#main-searchfield','#main-searchform' );
+
+
+    });
+</script>
+
+
+    <div id="search-results">
+        
+
+<h2>Laboratoire de Systèmes Adaptatifs
+    <acronym title="Laboratoire de Systèmes Adaptatifs" class="local-color-text">ASL</acronym>
+</h2>
+<ul id="unit_path">
+    
+        <li class="lvl1">
+                <a title="Ecole polytechnique fédérale de Lausanne" href="https://search.epfl.ch/ubrowse.action?acro=EPFL">
+            Ecole polytechnique fédérale de Lausanne
+            <acronym title="EPFL" class="local-color-text">EPFL</acronym></a>
+        </li>
+    
+        <li class="lvl2">
+                <a title="Faculté des sciences et techniques de l'ingénieur" href="https://search.epfl.ch/ubrowse.action?acro=STI">
+            Faculté des sciences et techniques de l'ingénieur
+            <acronym title="STI" class="local-color-text">STI</acronym></a>
+        </li>
+    
+        <li class="lvl3">
+                <a title="Institut de génie électrique et électronique" href="https://search.epfl.ch/ubrowse.action?acro=IEL">
+            Institut de génie électrique et électronique
+            <acronym title="IEL" class="local-color-text">IEL</acronym></a>
+        </li>
+    
+        <li class="lvl4">
+                <a title="Laboratoire de Systèmes Adaptatifs" href="https://search.epfl.ch/ubrowse.action?acro=ASL">
+            Laboratoire de Systèmes Adaptatifs
+            <acronym title="ASL" class="local-color-text">ASL</acronym></a>
+        </li>
+    
+</ul>
+
+    <div class="clear">&nbsp;</div>
+    <div class="unit_contact">
+        <div class="people">
+            
+                <h3>Responsable</h3>
+                <a href="http://people.epfl.ch/ali.sayed?lang=fr">Ali H. Sayed</a>
+            
+        </div>
+        <div class="website">
+            
+        </div>
+        <div class="clear">&nbsp;</div>
+        <div class="address">
+            
+                <h3>Adresse postale</h3>
+                <p>EPFL STI IEL ASL <br> BM 4102 (Bâtiment BM) <br> Station 17 <br> CH-1015 Lausanne <br> </p>
+            
+        </div>
+        <div class="fax">
+            
+        </div>
+        <div class="clear">&nbsp;</div>
+    </div>
+
+
+        
+            <h3>Personnel</h3>
+            
+
+<div class="results-filter navigation-bar">
+    <div class="group">
+        <span>Trier par</span>
+        <ul class="topnav">
+            <li class="dropdown"><a id="current-sort" href="#sortable_part">Nom</a>
+                <ul id="sort" class="menu hidden">
+                    
+                        <li id="sort-name" class="current"><a href="javascript:header_sort('/ubrowse.action?acro=ASL',%20'name',%20jQuery('ul#order%20li.current').attr('id').replace('order-',%20''))">Nom
+                        </a></li>
+                    
+                        <li id="sort-firstname"><a href="javascript:header_sort('/ubrowse.action?acro=ASL',%20'firstname',%20jQuery('ul#order%20li.current').attr('id').replace('order-',%20''))">Prénom
+                        </a></li>
+                    
+                        <li id="sort-position"><a href="javascript:header_sort('/ubrowse.action?acro=ASL',%20'position',%20jQuery('ul#order%20li.current').attr('id').replace('order-',%20''))">Fonction
+                        </a></li>
+                    
+                        <li id="sort-office"><a href="javascript:header_sort('/ubrowse.action?acro=ASL',%20'office',%20jQuery('ul#order%20li.current').attr('id').replace('order-',%20''))">Bureau
+                        </a></li>
+                    
+                        <li id="sort-phone"><a href="javascript:header_sort('/ubrowse.action?acro=ASL',%20'phone',%20jQuery('ul#order%20li.current').attr('id').replace('order-',%20''))">Téléphone
+                        </a></li>
+                    
+                </ul></li>
+            <li class="dropdown"><a id="current-order" href="#sortable_part">A .. Z</a>
+                <ul id="order" class="menu hidden">
+                    
+                        <li id="order-ascending" class="current"><a href="javascript:header_sort('/ubrowse.action?acro=ASL',%20jQuery('ul#sort%20li.current').attr('id').replace('sort-',''),%20'ascending')">A .. Z
+                        </a></li>
+                    
+                        <li id="order-descending"><a href="javascript:header_sort('/ubrowse.action?acro=ASL',%20jQuery('ul#sort%20li.current').attr('id').replace('sort-',''),%20'descending')">Z .. A
+                        </a></li>
+                    
+                </ul>
+            </li>
+        </ul>
+    </div>
+    
+        <div class="results-nb">
+             6 résultats
+            <span class="elapsed"> (0,00 s)</span>
+        </div>
+    
+</div>
+<script type="text/javascript">
+    function header_sort(url, sortBy, arrangeBy) {
+        url= url.replace(/sort=[^&]+&?/g, '').replace('?&', '?');
+        document.location.href=url+"&sort="+(arrangeBy=='descending'?'-':'+') + sortBy +"#sortable_part";
+    }
+</script>
+
+
+            <ol class="people_list">
+                
+                    <li>
+                        <div class="person">
+                            <div class="name">
+                                <a class="name" href="http://people.epfl.ch/roula.nassif?lang=fr" title="Page personnelle">Nassif, Roula </a>
+                            </div>
+                            <div class="function">
+                                Assistante scientifique
+                                
+                            </div>
+                            <div class="office">
+                                
+                                &nbsp;
+                            </div>
+                            <div class="phone">
+                                
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </li>
+                
+                    <li>
+                        <div class="person">
+                            <div class="name">
+                                <a class="name" href="http://people.epfl.ch/augusto.santos?lang=fr" title="Page personnelle">Rabelo Almeida Santos, Augusto José </a>
+                            </div>
+                            <div class="function">
+                                Collaborateur scientifique
+                                
+                            </div>
+                            <div class="office">
+                                
+                                    
+                                        <a title="Localiser le bureau sur une carte" href="http://plan.epfl.ch/?room=ELD+134&amp;lang=fr">ELD 134</a>
+                                    
+                                
+                                
+                            </div>
+                            <div class="phone">
+                                
+                                    <a title="Phone Number" href="tel:+41216931123">+41 21 69 <span class="local-color-text">31123</span></a>
+                                
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </li>
+                
+                    <li>
+                        <div class="person">
+                            <div class="name">
+                                <a class="name" href="http://people.epfl.ch/alejandro.salamanca?lang=fr" title="Page personnelle">Salamanca, Alejandro </a>
+                            </div>
+                            <div class="function">
+                                Responsable informatique
+                                
+                            </div>
+                            <div class="office">
+                                
+                                    
+                                        <a title="Localiser le bureau sur une carte" href="http://plan.epfl.ch/?room=BM+2110&amp;lang=fr">BM 2110</a>
+                                    
+                                
+                                
+                            </div>
+                            <div class="phone">
+                                
+                                    <a title="Phone Number" href="tel:+41216937741">+41 21 69 <span class="local-color-text">37741</span></a>
+                                
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </li>
+                
+                    <li>
+                        <div class="person">
+                            <div class="name">
+                                <a class="name" href="http://people.epfl.ch/ali.sayed?lang=fr" title="Page personnelle">Sayed, Ali H. </a>
+                            </div>
+                            <div class="function">
+                                Professeur ordinaire
+                                
+                            </div>
+                            <div class="office">
+                                
+                                    
+                                        <a title="Localiser le bureau sur une carte" href="http://plan.epfl.ch/?room=BM+4102&amp;lang=fr">BM 4102</a>
+                                    
+                                
+                                
+                            </div>
+                            <div class="phone">
+                                
+                                    <a title="Phone Number" href="tel:+41216936944">+41 21 69 <span class="local-color-text">36944</span></a><br>
+                                
+                                    <a title="Phone Number" href="tel:+41216936961">+41 21 69 <span class="local-color-text">36961</span></a>
+                                
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </li>
+                
+                    <li>
+                        <div class="person">
+                            <div class="name">
+                                <a class="name" href="http://people.epfl.ch/stefan.vlaski?lang=fr" title="Page personnelle">Vlaski, Stefan </a>
+                            </div>
+                            <div class="function">
+                                Assistant-doctorant
+                                
+                            </div>
+                            <div class="office">
+                                
+                                &nbsp;
+                            </div>
+                            <div class="phone">
+                                
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </li>
+                
+                    <li>
+                        <div class="person">
+                            <div class="name">
+                                <a class="name" href="http://people.epfl.ch/patricia.vonlanthen?lang=fr" title="Page personnelle">Vonlanthen Randin, Patricia </a>
+                            </div>
+                            <div class="function">
+                                Secrétaire
+                                
+                            </div>
+                            <div class="office">
+                                
+                                    
+                                        <a title="Localiser le bureau sur une carte" href="http://plan.epfl.ch/?room=BM+4101&amp;lang=fr">BM 4101</a>
+                                    
+                                
+                                
+                            </div>
+                            <div class="phone">
+                                
+                                    <a title="Phone Number" href="tel:+41216936961">+41 21 69 <span class="local-color-text">36961</span></a>
+                                
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </li>
+                
+            </ol>
+            <div class="clear"></div>
+        
+    </div>
+    <div class="clear"></div>
+    
+	<script type="text/javascript">
+    jQuery(document).ready(function() {
+        // arrange "sort" menu
+        jQuery('li#current-sort>a').html('Nom');
+        jQuery('ul#sort li').filter(function() {return this.id.match('sort-[a-z]*');}).removeClass('current');
+        jQuery('ul#sort li#sort-name').addClass('current');
+
+        // arrange "order" menu
+        jQuery('#current-order>a').html('A .. Z');
+        jQuery('ul#order li').filter(function() {return this.id.match('order-[a-z]*');}).removeClass('current');
+        jQuery('ul#order li#order-ascending').addClass('current');
+    });
+    </script>
+            <div class="clear"></div>
+        </div>
+        <div class="right-col">
+            <div class="box box-flat-panel home-navpanel local-color">
+                <h4>Vous cherchez</h4>Trouver les unités administratives de l'EPFL, les entités hôtes et les entreprises.<br><br><h4>Vous contribuez</h4>Ajouter l’adresse de votre site web<br><a href="mailto:bottin@epfl.ch">bottin@epfl.ch</a>
+            </div>
+            
+        </div>
+        <div class="clear"></div>
+    </div>
+    
+<div id="footer" role="contentinfo">
+    <h2 class="visuallyhidden">Liens de bas de page</h2>
+    <ul>
+        <li><a href="mailto:bottin@epfl.ch">Contact</a></li>
+        <li><a href="http://www.epfl.ch/accessibility.fr.shtml">Accessibilité</a></li>
+        <li class="visuallyhidden"><a title="Sauter vers : Retour en haut de la page" href="#top">Retour en haut de la page</a></li>
+        <li class="copyright">© <span itemprop="copyrightHolder">EPFL</span> <span itemprop="copyrightYear">2016</span></li>
+    </ul>
+</div>
+
+
+
+<script type="text/javascript">
+    // change_search_base2003('search-engine-unit');
+    jQuery(document).ready(function() {
+        // change_search_base(jQuery("#search-engine-person"));
+        jQuery('#searchform').submit(function() {
+            return jQuery('#searchfield').val() != jQuery('#searchform label.current').attr('title');
+        });
+
+        // PAGER:
+        // arrange "sort" menu
+        jQuery('li#current-sort>a').html('Nom');
+        jQuery('ul#sort li').filter(function() {return this.id.match('sort-[a-z]*');}).removeClass('current');
+        jQuery('ul#sort li#sort-name').addClass('current');
+
+        // arrange "order" menu
+        jQuery('#current-order>a').html('A .. Z');
+        jQuery('ul#order li').filter(function() {return this.id.match('order-[a-z]*');}).removeClass('current');
+        jQuery('ul#order li#order-ascending').addClass('current');
+
+        // # of results
+        jQuery('#current-nb-results>a').html('10 r&eacute;sultats');
+        jQuery('ul#nb-results li').filter(function() {return this.id.match('#nb-results-.*');}).removeClass('current');
+        jQuery('li#nb-results-10').addClass('current');
+
+        // pager in toolbar
+        jQuery('#current-pager-page>a').html('Page ');
+        jQuery('ul#pager li').filter(function() {return this.id.match('current-pager-page-[0-9]+');}).removeClass('current');
+        jQuery('li#current-pager-page-').addClass('current');
+
+
+    });
+</script>
+<script type="text/javascript">
+    ga('create', 'UA-42643897-1', 'auto');
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+</script>
+
+
+</body></html>

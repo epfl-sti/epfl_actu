@@ -18,12 +18,23 @@ var app = express()
       res.json(mock_actus_fr_jahia);
     } else if (req.url.match(/\/api\/v1\/news/)) {
       res.json(mock_actus_fr_v1);
-      return;
+    } else if (req.url.match(/^\/[1-9][0-9]{5}/)) {
+      res.type("text/html").sendFile(__dirname + "/people.html");
+    } else if (req.url.startsWith("/cgi-bin/people/showcv")) {
+      res.type("text/html").sendFile(__dirname + "/people-admin.html");
+    } else if (req.url.startsWith("/ubrowse.action?acro=")) {
+      res.type("text/html").sendFile(__dirname + "/EPFL-unit.html");
+    } else if (req.url.startsWith("/listes?sciper=")) {
+      res.type("text/html").sendFile(__dirname + "/cadi-listes.html");
     } else {
       res.status(404).type("text/html")
         .send(`<body>
         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Peugeot_404_Familiale_1968.jpg/351px-Peugeot_404_Familiale_1968.jpg"></img>
         <ul>
+              <li><a href="/243371">People</a></li>
+              <li><a href="/cgi-bin/people/showcv">People administrative details</a></li>
+              <li><a href="/listes?sciper=243371">CADI listes</a></li>
+              <li><a href="/ubrowse.action?acro=ASL">Unit</a></li>
               <li><a href="/search?p=infoscience">Infoscience</a></li>
               <li><a href="/jahia/memento">Memento (Jahia API)</a></li>
               <li><a href="/jahia/channels">Actu (Jahia API)</a></li>
