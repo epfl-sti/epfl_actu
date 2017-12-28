@@ -26,10 +26,13 @@ var app = express()
       res.type("text/html").sendFile(__dirname + "/EPFL-unit.html");
     } else if (req.url.startsWith("/listes?sciper=")) {
       res.type("text/html").sendFile(__dirname + "/cadi-listes.html");
+    } else if (req.url === ("/Peugeot_404_Familiale_1968.jpg")) {
+      res.type("image/jpeg")
+        .sendFile(__dirname + "/Peugeot_404_Familiale_1968.jpg");
     } else {
       res.status(404).type("text/html")
         .send(`<body>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Peugeot_404_Familiale_1968.jpg/351px-Peugeot_404_Familiale_1968.jpg"></img>
+        <img src="/Peugeot_404_Familiale_1968.jpg"></img>
         <ul>
               <li><a href="/243371">People</a></li>
               <li><a href="/cgi-bin/people/showcv">People administrative details</a></li>
