@@ -341,7 +341,7 @@ class ActuConfig
     {
         add_action('init', array(get_called_class(), 'register_post_type'));
 
-        $main_plugin_file = dirname(__FILE__) . "/EPFL-actu.php"; // TODO: change and test to EPFL-ws
+        $main_plugin_file = dirname(__FILE__) . "/EPFL-ws.php";
         register_activation_hook($main_plugin_file, array(get_called_class(), "register_caps"));
         register_deactivation_hook($main_plugin_file, array(get_called_class(), "deregister_caps"));
 
