@@ -22,8 +22,9 @@ class EPFLWSmain {
 	function ws_menu() {
 		if ( is_admin() ) {
 			add_menu_page( 'EPFL Web Services Options', 'EPFL WS', 'manage_options', 'epfl-ws', array( $this, 'ws_home'), 'dashicons-carrot', 80 );
-			add_submenu_page( 'epfl-ws', 'Actu', 'Actu (news)', 'manage_options', 'epfl-actu', array( $this, 'actu_home'));
-			add_submenu_page( 'epfl-ws', 'Memento', 'Memento (events)', 'manage_options', 'epfl-memento', array( $this, 'memento_home'));
+			add_submenu_page( 'epfl-ws', 'Actu', ' • Actu (news)', 'manage_options', 'epfl-actu', array( $this, 'actu_home'));
+			add_submenu_page( 'epfl-ws', 'Memento', ' • Memento (events)', 'manage_options', 'epfl-memento', array( $this, 'memento_home'));
+			add_submenu_page( 'epfl-ws', 'Infoscience', ' • Infoscience (publications)', 'manage_options', 'epfl-infoscience', array( $this, 'infoscience_home'));
 		}
 	}
 
@@ -48,6 +49,18 @@ class EPFLWSmain {
 		echo '</div>';
 	}
 
+	function infoscience_home() {
+		if ( !current_user_can( 'manage_options' ) )  {
+			wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+		}
+		echo '<div class="wrap">';
+		echo '  <h1>EPFL Infoscience</h1>';
+		echo '  <h2>Short code</h2>';
+		echo '  <p>The <code>[infoscience url=https://infoscience.epfl.ch/curator/export/123456]</code> shortcode allows you to integrate EPFL Publication (infoscience) in any Wordpress pages or posts. It uses <a href="https://help-infoscience.epfl.ch/page-59729-en.html">https://infoscience.epfl.ch</a> HTML export as input.</p>';
+		echo '  <p>Details on how to find the correct URL to fetch the publications list to integrate with the shortcode can be found <a href="https://help-infoscience.epfl.ch/page-59729-en.html">here</a></p>';
+		echo '</div>';
+	}
+
 	function memento_home() {
 		if ( !current_user_can( 'manage_options' ) )  {
 			wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
@@ -69,6 +82,7 @@ $epflwsmain->setup();
 // "subplugins"
 require_once(dirname(__FILE__) . "/Actu_shortcode.php");
 require_once(dirname(__FILE__) . "/Actu.php");
+require_once(dirname(__FILE__) . "/Infoscience_shortcode.php");
 require_once(dirname(__FILE__) . "/Memento_shortcode.php");
 
 
