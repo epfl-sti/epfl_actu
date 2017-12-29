@@ -1,12 +1,31 @@
 <?php
 /*
- * Plugin Name: EPFL WS
+ * Plugin Name: EPFL Web Services and shortcodes
  * Plugin URI:  https://github.com/epfl-sti/wordpress.plugin.ws
  * Description: Integrate EPFL Web Services on your WordPress site.
- * Version:     0.0.1
+ * Version:     0.5
  * Author:      STI-IT Web
  * Author URI:  mailto:stiitweb@groupes.epfl.ch
- * License:     MIT License / Copyright (c) 2017 EPFL ⋅ STI ⋅ IT
+ * License:     MIT License / Copyright (c) 2017-2018 EPFL ⋅ STI ⋅ IT
+ *
+ * Usage:
+ *   - [actu]
+ *   - [actu tmpl=full channel=10 lang=en limit=3]
+ *   - [actu tmpl=short channel=10 lang=en limit=20 category=1 title=EPFL subtitle=EPFL text=EPFL faculties=6 themes=1 publics=6]
+ *
+ * Note:
+ *   - Add `add_filter('actu','do_shortcode');` in theme to enable shortcodes in text widgets
+ *   - Doc
+ *       + https://wiki.epfl.ch/api-rest-actu-memento/actu
+ *       + https://help-actu.epfl.ch/outils-webmasters/exporter-tri-articles
+ *       + https://actu.epfl.ch/api-docs/
+ *
+ * Logs:
+ *   - v0.1   First WWIP
+ *   - v0.2   More template
+ *   - v0.3   Widgets enable
+ *   - v0.4   Rewritten to use the Actu REST API
+ *   - v0.5   Integration to EPFL-WS, full OOP class, TinyMCE button, new API
  */
 
 if (! defined('ABSPATH')) {
