@@ -384,8 +384,26 @@ class ActuConfig
                 'show_in_menu'       => true,
                 'query_var'          => true,
                 'rewrite'            => array( 'slug' => Actu::get_post_type() ),
-                  // ad hoc access control, see (de|)register_caps() below:
-                'capability_type'    => array('epfl_actu', 'epfl_actus'),
+                // ad hoc access control, see (de|)register_caps() below:
+                'capabilities'       => array(
+                    'read'                 => 'read_epfl_actus',
+                    // Name notwithstanding, this is actually the
+                    // permission to see the list of actus.
+                    'edit_posts'           => 'read_epfl_actus',
+                    'create_posts'         => '__NEVER_PERMITTED__',
+
+                    'edit_post'            => 'edit_epfl_actus',
+                    'edit_private_posts'   => 'edit_epfl_actus',
+                    'edit_published_posts' => 'edit_epfl_actus',
+                    'assign_categories'    => 'edit_epfl_actus',
+                    'assign_post_tags'     => 'edit_epfl_actus',
+                    // One is not actually supposed to delete posts manually —
+                    // This is just an escape hatch in case an ActuStream was
+                    // deleted and referential integrity was breached.
+                    'delete_posts'         => 'edit_epfl_actus',
+                    'delete_private_posts' => 'edit_epfl_actus',
+                    'delete_others_posts'  => 'edit_epfl_actus',
+                ),
                 'has_archive'        => true,
                 'hierarchical'       => false,
                 'taxonomies'         => array(ActuStream::get_taxonomy_slug(), 'category'),
@@ -396,20 +414,17 @@ class ActuConfig
     }
 
     const ROLES_THAT_MAY_VIEW_ACTUS = array('administrator', 'editor', 'author', 'contributor');
+    const ROLES_THAT_MAY_MANAGE_ACTUS = array('administrator', 'editor');
+    const ALL_ROLES = array('administrator', 'editor', 'author', 'contributor', 'subscriber');
     const CAPS_FOR_VIEWERS = array(
+        'read_epfl_actus',
+    );
+    const ALL_CAPS = array(
+        'read_epfl_actus',
         'edit_epfl_actus',
+        // Obsolete caps, that still need to be remmoved upon plugin deactivation:
         'read_epfl_actu',
         'delete_epfl_actu'
-    );
-    const ALL_ROLES = array('administrator', 'editor', 'author', 'contributor', 'subscriber');
-    const ALL_CAPS = array(
-        'edit_epfl_actu',
-        'read_epfl_actu',
-        'delete_epfl_actu',
-        'edit_others_epfl_actus',
-        'publish_epfl_actus',
-        'read_private_epfl_actus',
-        'edit_epfl_actus'
     );
 
     /**
@@ -422,10 +437,16 @@ class ActuConfig
      */
     static function register_caps ()
     {
+        error_log("register_caps");
         foreach (self::ROLES_THAT_MAY_VIEW_ACTUS as $role_name) {
             $role = get_role($role_name);
             foreach (self::CAPS_FOR_VIEWERS as $cap) {
-//            foreach (self::ALL_CAPS as $cap) {
+                $role->add_cap($cap);
+            }
+        }
+        foreach (self::ROLES_THAT_MAY_MANAGE_ACTUS as $role_name) {
+            $role = get_role($role_name);
+            foreach (self::ALL_CAPS as $cap) {
                 $role->add_cap($cap);
             }
         }
@@ -438,6 +459,7 @@ class ActuConfig
      */
     static function deregister_caps ()
     {
+        error_log("deregister_caps");
         foreach (self::ALL_ROLES as $role_name) {
             $role = get_role($role_name);
             foreach (self::ALL_CAPS as $cap) {
