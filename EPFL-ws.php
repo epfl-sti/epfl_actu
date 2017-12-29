@@ -30,10 +30,19 @@ class EPFLWSmain {
 
 	function ws_home() {
 		echo '<div class="wrap">';
-		echo '<h1>EPFL WS</h1>';
-		echo '<i>This is the summary page of the plugin EPFL WS</i>';
-		echo '<p>This Wordpress plugin aim to unify all EPFL web services in one place.</p>';
-		echo '<p>Please visit the plugin\'s <a href="https://github.com/epfl-sti/wordpress.plugin.ws">GitHub repository</a> to get latest news, open <a href="https://github.com/epfl-sti/wordpress.plugin.ws/issues">issues</a>, <a href="https://github.com/epfl-sti/wordpress.plugin.ws/pulls">contribute</a> or ask <a href="https://github.com/epfl-sti/wordpress.plugin.ws/issues/new">question</a> to find help.</p>';
+		echo '  <h1>EPFL WS 🍅</h1>';
+		echo '  <i>This is the summary page of the plugin EPFL WS</i>';
+		echo '  <p>This Wordpress plugin aim to unify all EPFL web services in one place.</p>';
+		echo '  <p></p>';
+		echo '  <p><u>Shortcodes</u>:';
+		echo '    <ul style="list-style: square outside;margin-left: 20px;">';
+		echo '      <li><a href="'.admin_url( "admin.php?page=epfl-actu" ).'">Actu (news)</a></li>';
+		echo '      <li><a href="'.admin_url( "admin.php?page=epfl-infoscience" ).'">Infoscience (publications)</a></li>';
+		echo '      <li><a href="'.admin_url( "admin.php?page=epfl-memento" ).'">Memento (events)</a></li>';
+		echo '    </ul>';
+		echo '  </p>';
+		echo '  <p><u>Help, resources and contributing</u>:';
+		echo '  <p>Please visit the plugin\'s <a href="https://github.com/epfl-sti/wordpress.plugin.ws">GitHub repository</a> to get latest news, open <a href="https://github.com/epfl-sti/wordpress.plugin.ws/issues">issues</a>, <a href="https://github.com/epfl-sti/wordpress.plugin.ws/pulls">contribute</a> or ask <a href="https://github.com/epfl-sti/wordpress.plugin.ws/issues/new">question</a> to find help.</p>';
 		echo '</div>';
 	}
 
@@ -43,6 +52,7 @@ class EPFLWSmain {
 		}
 		echo '<div class="wrap">';
 		echo '  <h1>EPFL Actu</h1>';
+		echo '  <p>&lt; <a href="'.admin_url( "admin.php?page=epfl-ws" ).'">Back to EPFL WS</a></p>';
 		echo '  <h2>Short code</h2>';
 		echo '  <p>The <code>[actu]</code> shortcode allows you to integrate EPFL News (actus) in any Wordpress pages or posts. It uses <a href="https://actu.epfl.ch/api-docs/">https://actu.epfl.ch/api-docs/</a> as an application programming interface (API).</p>';
 		echo '  <p>This documentation is kept short as it will change as soon as the actu API integrates news features.</p>';
@@ -55,6 +65,7 @@ class EPFLWSmain {
 		}
 		echo '<div class="wrap">';
 		echo '  <h1>EPFL Infoscience</h1>';
+		echo '  <p>&lt; <a href="'.admin_url( "admin.php?page=epfl-ws" ).'">Back to EPFL WS</a></p>';
 		echo '  <h2>Short code</h2>';
 		echo '  <p>The <code>[infoscience url=https://infoscience.epfl.ch/curator/export/123456]</code> shortcode allows you to integrate EPFL Publication (infoscience) in any Wordpress pages or posts. It uses <a href="https://help-infoscience.epfl.ch/page-59729-en.html">https://infoscience.epfl.ch</a> HTML export as input.</p>';
 		echo '  <p>Details on how to find the correct URL to fetch the publications list to integrate with the shortcode can be found <a href="https://help-infoscience.epfl.ch/page-59729-en.html">here</a></p>';
@@ -67,6 +78,7 @@ class EPFLWSmain {
 		}
 		echo '<div class="wrap">';
 		echo '  <h1>EPFL Memento</h1>';
+		echo '  <p>&lt; <a href="'.admin_url( "admin.php?page=epfl-ws" ).'">Back to EPFL WS</a></p>';
 		echo '  <h2>Short code</h2>';
 		echo '  <p>The <code>[memento]</code> shortcode allows you to integrate EPFL Events (memento) in any Wordpress pages or posts. It uses <a href="https://memento.epfl.ch/api-docs/">https://memento.epfl.ch/api-docs/ TODO</a> as an application programming interface (API).</p>';
 		echo '  <p>This documentation is kept short as it will change as soon as the memento API integrates news features.</p>';
