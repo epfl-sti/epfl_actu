@@ -164,7 +164,11 @@ class Actu
             if (get_post_type($post_id) !== Actu::get_post_type()) return;
         }
         $theclass = get_called_class();
-        return new $theclass($post_id);
+        $that = new $theclass($post_id);
+        if (is_object($post_or_post_id)) {
+            $that->_wp_post = $post_or_post_id;
+        }
+        return $that;
     }
 
     /**
@@ -209,7 +213,7 @@ class Actu
         }
 
         $matched = array();
-        if (preg_match('#youtube.com/embed/([A-Za-z0-9]+)#', $details["video"],
+        if (preg_match('#youtube.com/embed/([^/?]+)#', $details["video"],
                        $matched)) {
             $meta["youtube_id"] = $matched[1];
         }
@@ -245,6 +249,14 @@ class Actu
     function get_permalink ()
     {
         return get_post_meta($this->ID, "absolute_slug", true);
+    }
+
+    function wp_post ()
+    {
+        if (! $this->_wp_post) {
+            $this->_wp_post = get_post($this->ID);
+        }
+        return $this->_wp_post;
     }
 }
 
