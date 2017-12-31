@@ -357,13 +357,19 @@ class ActuConfig
         register_activation_hook($main_plugin_file, array(get_called_class(), "register_caps"));
         register_deactivation_hook($main_plugin_file, array(get_called_class(), "deregister_caps"));
 
-        add_action( sprintf('manage_%s_posts_columns', Actu::get_post_type()) , array(get_called_class(), "alter_columns"));
-        add_action( sprintf('manage_%s_posts_custom_column', Actu::get_post_type()),
-                    array(get_called_class(), "render_thumbnail_column"), 10, 2);
+        // Behavior of Actu posts on the main site
         add_filter("post_thumbnail_html",
                    array(get_called_class(), "filter_post_thumbnail_html"), 10, 5);
         add_filter("post_type_link",
                    array(get_called_class(), "filter_post_link"), 10, 4);
+
+        // Behavior of Actu posts in the wp-admin area
+        add_action( sprintf('manage_%s_posts_columns', Actu::get_post_type()) , array(get_called_class(), "alter_columns"));
+        add_action( sprintf('manage_%s_posts_custom_column', Actu::get_post_type()),
+                    array(get_called_class(), "render_thumbnail_column"), 10, 2);
+        add_action("edit_form_after_title", array(get_called_class(), "render_in_edit_form"));
+        add_action("admin_enqueue_scripts", array(get_called_class(), "editor_css"));
+
     }
 
     /**
@@ -420,7 +426,7 @@ class ActuConfig
                 'taxonomies'         => array(ActuStream::get_taxonomy_slug(), 'category'),
                 'menu_position'      => null,
                 'menu_icon'          => 'dashicons-megaphone',
-                'supports'           => array( 'title' )
+                'supports'           => false
             ));
     }
 
@@ -530,11 +536,38 @@ class ActuConfig
      *
      * Mostly, we keep the full text of the article in-database for the search engine.
      */
-    static function filter_post_link ($orig_link, $post, $unused_leavename, $unused_is_sample) {
+    static function filter_post_link ($orig_link, $post, $unused_leavename, $unused_is_sample)
+    {
         $actu = Actu::get($post);
         if (! $actu) return $orig_link;
         $true_permalink = $actu->get_permalink();
         return $true_permalink ? $true_permalink : $orig_link;
+    }
+
+    function render_in_edit_form ($wp_post)
+    {
+        $actu = Actu::get($wp_post);
+        if (! $actu) return;
+
+        $permalink = get_permalink($wp_post);
+        ?>
+    <h1><?php echo $wp_post->post_title; ?></h1>
+	<div id="edit-slug-box" class="hide-if-no-js">
+    <img class="actu-thumbnail" src="<?php echo $actu->get_external_thumbnail_url() ?>"/>
+    <p><b>Permalink:</b> <a href="<?php echo $permalink; ?>"><?php echo $permalink; ?></a></p>
+    <?php echo $wp_post->post_content; ?>
+	</div>
+        <?php
+    }
+
+    static function editor_css ($hook)
+    {
+        if (! ('post.php' === $hook &&
+               Actu::get($_GET["post"])) ) return;
+        wp_register_style(
+            'ws-editor',
+            plugins_url( 'ws-editor.css', __FILE__ ) );
+        wp_enqueue_style('ws-editor');
     }
 }
 
