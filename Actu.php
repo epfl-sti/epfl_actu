@@ -395,7 +395,6 @@ class ActuConfig
                 'show_ui'            => true,
                 'show_in_menu'       => true,
                 'query_var'          => true,
-                'rewrite'            => array( 'slug' => Actu::get_post_type() ),
                 // ad hoc access control, see (de|)register_caps() below:
                 'capabilities'       => array(
                     'read'                 => 'read_epfl_actus',
