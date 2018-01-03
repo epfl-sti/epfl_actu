@@ -47,9 +47,13 @@ class epflws {
   /*
    * Use the WP build in fonction to get remote content
    * Return decoded JSON data if the content-type is 'application/json'
+   * @param url  : the fetchable url
+   * @param args : array('timeout' => 10), see https://codex.wordpress.org/Function_Reference/wp_remote_get
+   * @return the data or log an error
    */
-  function get_items( $url ) {
-    $response = wp_remote_get( $url );
+  function get_items( $url, $args=array() ) {
+    $response = wp_remote_get( $url, $args );
+    //$this->debug($response);
     if ( is_array( $response ) ) {
       $header = $response['headers']; // array of http header lines
       $data = $response['body']; // use the content
