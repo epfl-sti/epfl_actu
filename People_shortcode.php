@@ -1,6 +1,6 @@
 <?php
 
-namespace EPFL\WS\People2;
+namespace EPFL\WS\People;
 
 
 use WP_Error;
@@ -80,7 +80,7 @@ class PeopleShortCode {
 
 
   /*
-   * Add the Actu button to TinyMCE
+   * Add the People button to TinyMCE
    */
   function people_shortcode_button_script() {
     if(wp_script_is("quicktags")) {

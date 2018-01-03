@@ -42,10 +42,11 @@ class EPFLWSmain {
 	function ws_menu() {
 		if ( is_admin() ) {
 			add_menu_page( 'EPFL Web Services Options', 'EPFL WS', 'manage_options', 'epfl-ws', array( $this, 'ws_home'), 'dashicons-carrot', 80 );
-			add_submenu_page( 'epfl-ws', 'Actu',        ' • Actu (news)',                'manage_options', 'epfl-actu',        array( $this, 'actu_home'));
-			add_submenu_page( 'epfl-ws', 'Memento',     ' • Memento (events)',           'manage_options', 'epfl-memento',     array( $this, 'memento_home'));
-			add_submenu_page( 'epfl-ws', 'Infoscience', ' • Infoscience (publications)', 'manage_options', 'epfl-infoscience', array( $this, 'infoscience_home'));
-			add_submenu_page( 'epfl-ws', 'People',      ' • People (trombinoscope)',     'manage_options', 'epfl-people',      array( $this, 'people_home'));
+			add_submenu_page( 'epfl-ws', 'Actu',         ' • Actu (news)',                          'manage_options', 'epfl-actu',         array( $this, 'actu_home'));
+			add_submenu_page( 'epfl-ws', 'Memento',      ' • Memento (events)',                     'manage_options', 'epfl-memento',      array( $this, 'memento_home'));
+			add_submenu_page( 'epfl-ws', 'Infoscience',  ' • Infoscience (publications)',           'manage_options', 'epfl-infoscience',  array( $this, 'infoscience_home'));
+			add_submenu_page( 'epfl-ws', 'Organigramme', ' • Organizational charts (organigramme)', 'manage_options', 'epfl-organigramme', array( $this, 'organigramme_home'));
+			add_submenu_page( 'epfl-ws', 'People',       ' • People (trombinoscope)',               'manage_options', 'epfl-people',       array( $this, 'people_home'));
 		}
 	}
 
@@ -61,6 +62,7 @@ class EPFLWSmain {
 		echo '      <li><a href="'.admin_url( "admin.php?page=epfl-infoscience" ).'">Infoscience (publications)</a></li>';
 		echo '      <li><a href="'.admin_url( "admin.php?page=epfl-memento" ).'">Memento (events)</a></li>';
 		echo '      <li><a href="'.admin_url( "admin.php?page=epfl-people" ).'">People (trombinoscope)</a></li>';
+		echo '      <li><a href="'.admin_url( "admin.php?page=epfl-organigramme" ).'">Organizational charts (organigramme)</a></li>';
 		echo '    </ul>';
 		echo '  </p>';
 		echo '  <p><u>Help, resources and contributing</u>:';
@@ -120,6 +122,18 @@ class EPFLWSmain {
 		echo '</div>';
 	}
 
+	function organigramme_home() {
+		if ( !current_user_can( 'manage_options' ) )  {
+			wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+		}
+		echo '<div class="wrap">';
+		echo '  <h1>EPFL People</h1>';
+		echo '  <p>&lt; <a href="'.admin_url( "admin.php?page=epfl-ws" ).'">Back to EPFL WS</a></p>';
+		echo '  <h2>Short code</h2>';
+		echo '  <p>The <code>[organigramme unit=STI lang=en responsive=1]</code> shortcode allows you to integrate EPFL Organizational charts in any Wordpress pages or posts. It uses <a href="https://jahia.epfl.ch/contenu-externe/organigramme">https://organigramme.epfl.ch</a> HTML export as input.</p>';
+		echo '</div>';
+	}
+
 }
 
 // Initialize the plugin.
@@ -131,6 +145,7 @@ require_once(dirname(__FILE__) . "/Actu_shortcode.php");
 require_once(dirname(__FILE__) . "/Actu.php");
 require_once(dirname(__FILE__) . "/Infoscience_shortcode.php");
 require_once(dirname(__FILE__) . "/Memento_shortcode.php");
+require_once(dirname(__FILE__) . "/Organigramme_shortcode.php");
 require_once(dirname(__FILE__) . "/People_shortcode.php");
 
 
