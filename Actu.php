@@ -23,6 +23,8 @@ if (! defined('ABSPATH')) {
 }
 
 require_once(dirname(__FILE__) . "/inc/i18n.php");
+require_once(dirname(__FILE__) . "/inc/image-size.php");
+use function EPFL\WS\get_image_size;
 
 /**
  * Object model for Actu streams
@@ -196,7 +198,9 @@ class Actu
         }
     }
 
-    const THUMBNAIL_META = "epfl_actu_external_thumbnail";
+    const THUMBNAIL_META  = "epfl_actu_external_thumbnail";
+    const MAX_HEIGHT_META = "epfl_actu_external_img_max_height";
+    const MAX_WIDTH_META  = "epfl_actu_external_img_max_width";
 
     /**
      * Update this news post with $details, overwriting most of the
@@ -207,7 +211,7 @@ class Actu
      */
     function update ($details)
     {
-        $meta = array();
+        $this->_post_meta = $meta = array();
         foreach (["news_id", "translation_id", "news_thumbnail_absolute_url",
                   "absolute_slug", "video"]
                  as $keep_this_as_meta)
@@ -231,7 +235,11 @@ class Actu
                 "https://img.youtube.com/vi/%s/default.jpg",
                 $meta["youtube_id"]);
         } elseif ($meta["news_thumbnail_absolute_url"]) {
-            $meta[self::THUMBNAIL_META] = $meta["news_thumbnail_absolute_url"];
+            $news_thumbnail_url = $meta["news_thumbnail_absolute_url"];
+            $meta[self::THUMBNAIL_META]  = $news_thumbnail_url;
+            $max_size = get_image_size($this->get_image_url("8000x6000"));
+            $meta[self::MAX_HEIGHT_META] = $max_size["height"];
+            $meta[self::MAX_WIDTH_META]  = $max_size["width"];
         }
 
         // Support for WP Subtitle plugin
@@ -256,14 +264,34 @@ class Actu
         );
     }
 
-    function get_external_thumbnail_url ()
+    function _get_post_meta ()
     {
-        return get_post_meta($this->ID, self::THUMBNAIL_META, true);
+        if (! $this->_post_meta) {
+            $this->_post_meta = array();
+            foreach (get_post_meta($this->ID) as $key => $array) {
+                // All meta keys are single-valued
+                $this->_post_meta[$key] = $array[0];
+            }
+        }
+        return $this->_post_meta;
     }
 
     function get_permalink ()
     {
-        return get_post_meta($this->ID, "absolute_slug", true);
+        $meta = $this->_get_post_meta();
+        return $meta["absolute_slug"];
+    }
+
+    function get_max_size ()
+    {
+        $meta = $this->_get_post_meta();
+        if ($meta[self::MAX_HEIGHT_META] &&
+            $meta[self::MAX_WIDTH_META]) {
+            return array("height" => $meta[self::MAX_HEIGHT_META],
+                         "width"  => $meta[self::MAX_WIDTH_META]);
+        } else {
+            return null;
+        }
     }
 
     function wp_post ()
@@ -275,6 +303,26 @@ class Actu
     }
 
     /**
+     * @return the URL for a server-side resized image of $size
+     *
+     * @param $size e.g. "1024x768". If omitted, utilize the thumbnail
+     *        size as returned by the API.
+     */
+    function get_image_url ($size = null)
+    {
+        $meta = $this->_get_post_meta();
+        $url = $meta[self::THUMBNAIL_META];
+        if (! $url) return null;
+        if (! $size) return $url;
+        $matched = array();
+        if (preg_match("/^(.*)\/(\d+x\d+)\.([a-zA-z]{1,6})$/", $url, $matched)) {
+            return sprintf("%s/%s.%s", $matched[1], $size, $matched[3]);
+        } else {
+            return $url;
+        }
+    }
+
+    /**
      * Extract a subtitle from the API's excerpt.
      *
      * The field named "subtitle" is generally unfit for use as a
@@ -282,7 +330,7 @@ class Actu
      * However, some subtitles on actu.epfl.ch do start with a short
      * sentence followed with a <br />. If that is the case, return it.
      */
-    function extract_subtitle ($details) {
+    private function extract_subtitle ($details) {
         $matched = array();
         $max_subtitle_length = 80;
         if (preg_match("/^(.{1,$max_subtitle_length})<br/", $details["subtitle"], $matched)) {
@@ -489,7 +537,6 @@ class ActuConfig
      */
     static function register_caps ()
     {
-        error_log("register_caps");
         foreach (self::ROLES_THAT_MAY_VIEW_ACTUS as $role_name) {
             $role = get_role($role_name);
             foreach (self::CAPS_FOR_VIEWERS as $cap) {
@@ -511,7 +558,6 @@ class ActuConfig
      */
     static function deregister_caps ()
     {
-        error_log("deregister_caps");
         foreach (self::ALL_ROLES as $role_name) {
             $role = get_role($role_name);
             foreach (self::ALL_CAPS as $cap) {
@@ -534,8 +580,16 @@ class ActuConfig
 
     static function render_thumbnail_column ($column, $post_id)
     {
-        if ($column === 'thumbnail') {
-            echo get_the_post_thumbnail($post_id);
+        if ($column !== 'thumbnail') return;
+        $thumbnail = get_the_post_thumbnail($post_id);
+        if (! $thumbnail) return;
+        echo $thumbnail;
+
+        $actu = Actu::get($post_id);
+        if (! $actu) return;
+        $orig_size = $actu->get_max_size();
+        if ($orig_size) {
+            printf("<p>%dx%d</p>", $orig_size["width"], $orig_size["height"]);
         }
     }
 
@@ -565,7 +619,7 @@ class ActuConfig
      *
      * This is set as a filter for WordPress' @link post_thumbnail_html hook. Note that
      * it isn't as easy to hijack the return value of @link get_the_post_thumbnail_url
-     * in this way (but you can always call the @link get_external_thumbnail_url instance
+     * in this way (but you can always call the @link get_image_url instance
      * method on an Actu object).
      */
     static function filter_post_thumbnail_html ($orig_html, $post_id, $unused_thumbnail_id,
@@ -574,16 +628,15 @@ class ActuConfig
         $actu = Actu::get($post_id);
         if (! $actu) return $orig_html;
 
-        $src = $actu->get_external_thumbnail_url();
+        // Actu images are resizable server-side
+        // TODO: we could actually interpret $size in a much finer way
+        if (($size === "full" || $size === "large")) {
+            $src = $actu->get_image_url("2048x1152");
+        } else {
+            $src = $actu->get_image_url();
+        }
         if (! $src) return $orig_html;
 
-        $matched = array();
-        if (($size === "full" || $size === "large") &&
-            preg_match("/^(.*)\/(\d+x\d+)\.([a-zA-z]{1,6})$/", $src, $matched)) {
-                // Actu images are resizable server-side
-                // TODO: we could actually interpret $size in a much finer way
-                $src = sprintf("%s/2048x1152.%s", $matched[1], $matched[3]);
-        }
         $html = sprintf("<img src=\"%s\"", $src);
         if ($attr) {
             foreach ( $attr as $name => $value ) {
@@ -619,7 +672,7 @@ class ActuConfig
     <h1><?php echo $wp_post->post_title; ?></h1>
     <?php if ($subtitle) : ?><h2><?php echo $subtitle; ?></h2><?php endif; ?>
 	<div id="edit-slug-box" class="hide-if-no-js">
-    <img class="actu-thumbnail" src="<?php echo $actu->get_external_thumbnail_url() ?>"/>
+    <img class="actu-thumbnail" src="<?php echo $actu->get_image_url() ?>"/>
     <p><b>Permalink:</b> <a href="<?php echo $permalink; ?>"><?php echo $permalink; ?></a></p>
     <?php echo $wp_post->post_content; ?>
 	</div>
