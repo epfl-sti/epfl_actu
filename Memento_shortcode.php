@@ -1,28 +1,11 @@
 <?php
-/*
- * Plugin Name: EPFL Memento (shortcodes)
- * Plugin URI:  https://github.com/epfl-sti/wordpress.plugin.ws
- * Description: Insert EPFL events on your WordPress site from <a href="https://memento.epfl.ch/">Memento</a>.
- * Version:     0.1
- * Author:      STI-IT Web
- * Author URI:  mailto:stiitweb@groupes.epfl.ch
- * License:     MIT License / Copyright (c) 2017-2018 EPFL ⋅ STI ⋅ IT
+/**
+ * EPFL Memento shortcodes, by stiitweb@groupes.epfl.ch
  *
  * Usage:
  *   - [memento]
  *   - [memento tmpl=full channel=10 lang=en limit=3]
  *   - [memento tmpl=short channel=10 lang=en limit=20 category=1 title=EPFL subtitle=EPFL text=EPFL faculties=6 themes=1 publics=6]
- *
- * Note:
- *   - Add `add_filter('memento','do_shortcode');` in theme to enable shortcodes in text widgets
- *   - Doc
- *       + https://wiki.epfl.ch/api-rest-actu-memento/memento
- *       + https://help-memento.epfl.ch/help
- *       + https://memento.epfl.ch/api/v1/
- *
- * Logs:
- *   - v0.1   Loïc's XML version rewritted to use the REST API, based on actu plugin.
- *
  */
 
 namespace EPFL\WS\Memento;

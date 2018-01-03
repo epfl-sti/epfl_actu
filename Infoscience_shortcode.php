@@ -1,14 +1,9 @@
 <?php
 
-/*
-Plugin Name: EPFL Infoscience shortcode
-Plugin URI: https://github.com/jaepetto/EPFL-SC-Infoscience
-Description: provides a shortcode to dispay results from Infoscience
-Version: 1.0
-Author: Emmanuel JAEP
-Author URI: https://people.epfl.ch/emmanuel.jaep?lang=en
-License: Copyright (c) 2017 Ecole Polytechnique Federale de Lausanne, Switzerland
-*/
+/**
+ * EPFL Infoscience shortcode, by Emmanuel JAEP
+ * @see https://github.com/jaepetto/EPFL-SC-Infoscience
+ */
 
 namespace EPFL\WS\Infoscience;
 use WP_Error;

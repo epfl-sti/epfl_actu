@@ -2,7 +2,8 @@
 /*
  * Plugin Name: EPFL Web Services and shortcodes
  * Plugin URI:  https://github.com/epfl-sti/wordpress.plugin.ws
- * Description: Integrate EPFL Web Services on your WordPress site.
+ * Description: Integrate EPFL Web Services on your WordPress site. Integrates with <a href="https://wordpress.org/plugins/wp-subtitle/">WP subtitle</a> if installed.
+
  * Version:     0.5
  * Author:      STI-IT Web
  * Author URI:  mailto:stiitweb@groupes.epfl.ch
