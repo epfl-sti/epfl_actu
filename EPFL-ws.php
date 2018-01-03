@@ -47,6 +47,7 @@ class EPFLWSmain {
 			add_submenu_page( 'epfl-ws', 'Infoscience',  ' • Infoscience (publications)',           'manage_options', 'epfl-infoscience',  array( $this, 'infoscience_home'));
 			add_submenu_page( 'epfl-ws', 'Organigramme', ' • Organizational charts (organigramme)', 'manage_options', 'epfl-organigramme', array( $this, 'organigramme_home'));
 			add_submenu_page( 'epfl-ws', 'People',       ' • People (trombinoscope)',               'manage_options', 'epfl-people',       array( $this, 'people_home'));
+			add_submenu_page( 'epfl-ws', 'IS-Academia',  ' • IS-Academia (course list)',            'manage_options', 'epfl-isacademia',   array( $this, 'isacademia_home'));
 		}
 	}
 
@@ -63,6 +64,7 @@ class EPFLWSmain {
 		echo '      <li><a href="'.admin_url( "admin.php?page=epfl-memento" ).'">Memento (events)</a></li>';
 		echo '      <li><a href="'.admin_url( "admin.php?page=epfl-people" ).'">People (trombinoscope)</a></li>';
 		echo '      <li><a href="'.admin_url( "admin.php?page=epfl-organigramme" ).'">Organizational charts (organigramme)</a></li>';
+		echo '      <li><a href="'.admin_url( "admin.php?page=epfl-isacademia" ).'">IS-Academia (Automatic course list)</a></li>';
 		echo '    </ul>';
 		echo '  </p>';
 		echo '  <p><u>Help, resources and contributing</u>:';
@@ -134,6 +136,21 @@ class EPFLWSmain {
 		echo '</div>';
 	}
 
+	function isacademia_home() {
+		if ( !current_user_can( 'manage_options' ) )  {
+			wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+		}
+		echo '<div class="wrap">';
+		echo '  <h1>EPFL IS-Academia</h1>';
+		echo '  <p>&lt; <a href="'.admin_url( "admin.php?page=epfl-ws" ).'">Back to EPFL WS</a></p>';
+		echo '  <h2>Short code</h2>';
+		echo '  <p>The <code>[isacademia unit=STI lang=en]</code> shortcode allows you to integrate EPFL automatic course list in any Wordpress pages or posts. It uses the IS-Academia database through a <a href="http://people.epfl.ch/cgi-bin/getCours?unit=XXXX">webservice</a>.</p>';
+		echo '  <p>The <code>[isacademia unit=sgm-ens sem=hiver cursus=ba display=byprof detail=L lang=en]</code> shortcode lists the courses of the Mecanical Engineering section, winter semester, bachelor, sorted by teached and full detail..</p>';
+		echo '  <p></p>';
+		echo '  <p>It\'s also (sort of for now), possible to include a course table <code>[isacademia url=https://isa.epfl.ch/pe/plan_etude_bama_cyclemaster_el_en.html]</code>. Get you URL from <a href="https://is-academia.epfl.ch/planfiche-html">here</a>.</p>';
+		echo '</div>';
+	}
+
 }
 
 // Initialize the plugin.
@@ -146,6 +163,7 @@ require_once(dirname(__FILE__) . "/Actu.php");
 require_once(dirname(__FILE__) . "/Infoscience_shortcode.php");
 require_once(dirname(__FILE__) . "/Memento_shortcode.php");
 require_once(dirname(__FILE__) . "/Organigramme_shortcode.php");
+require_once(dirname(__FILE__) . "/ISAcademia_shortcode.php");
 require_once(dirname(__FILE__) . "/People_shortcode.php");
 
 
