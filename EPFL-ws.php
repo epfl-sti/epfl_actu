@@ -87,8 +87,8 @@ class EPFLWSmain {
 		echo '  <h1>EPFL Infoscience</h1>';
 		echo '  <p>&lt; <a href="'.admin_url( "admin.php?page=epfl-ws" ).'">Back to EPFL WS</a></p>';
 		echo '  <h2>Short code</h2>';
-		echo '  <p>The <code>[infoscience url=https://infoscience.epfl.ch/curator/export/123456]</code> shortcode allows you to integrate EPFL Publication (infoscience) in any Wordpress pages or posts. It uses <a href="https://help-infoscience.epfl.ch/page-59729-en.html">https://infoscience.epfl.ch</a> HTML export as input.</p>';
-		echo '  <p>Details on how to find the correct URL to fetch the publications list to integrate with the shortcode can be found <a href="https://help-infoscience.epfl.ch/page-59729-en.html">here</a></p>';
+		echo '  <p>The <code>[infoscience url=https://infoscience.epfl.ch/curator/export/123456]</code> shortcode allows you to integrate EPFL Publications (infoscience) in any Wordpress pages or posts. It uses <a href="https://help-infoscience.epfl.ch/page-59729-en.html">https://infoscience.epfl.ch</a> HTML export as input.</p>';
+		echo '  <p>Details on how to find the correct URL to fetch the publications list to integrate with the shortcode can be found <a href="https://help-infoscience.epfl.ch/page-59729-en.html">here</a>.</p>';
 		echo '</div>';
 	}
 
@@ -101,7 +101,7 @@ class EPFLWSmain {
 		echo '  <p>&lt; <a href="'.admin_url( "admin.php?page=epfl-ws" ).'">Back to EPFL WS</a></p>';
 		echo '  <h2>Short code</h2>';
 		echo '  <p>The <code>[memento]</code> shortcode allows you to integrate EPFL Events (memento) in any Wordpress pages or posts. It uses <a href="https://memento.epfl.ch/api-docs/">https://memento.epfl.ch/api-docs/ TODO</a> as an application programming interface (API).</p>';
-		echo '  <p>This documentation is kept short as it will change as soon as the memento API integrates news features.</p>';
+		echo '  <p><b>Please be aware</b> that this short code still relate on the old <a href="https://memento.epfl.ch/api/jahia/mementos/">API</a> and will switch to the <a href="https://memento.epfl.ch/api/v1/events/">new one</a> whenever it\'s ready.</p>';
 		echo '</div>';
 	}
 

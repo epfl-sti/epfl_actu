@@ -62,6 +62,9 @@ class ActuShortCode {
     $factulties = esc_attr($actu_atts['factulties']);
     $offset     = esc_attr($actu_atts['offset']);
 
+    // https://actu.epfl.ch/search/sti/?keywords=&date_filter=all&themes=4&faculties=6&categories=3&search=Search
+    // 'https://actu.epfl.ch/api/v1/channels/10/news/?format=json&lang='.$lang.'&category=3&faculty=3&themes=4';
+
     // make the correct URL call
     // OLD API $url = 'https://actu.epfl.ch/api/jahia/channels/'.$channel.'/news/'.$lang.'/?format=json';
     // channel and lang are the 2 needed attributes, fallback to STI/EN
@@ -88,7 +91,6 @@ class ActuShortCode {
       $url .= '&offset=' . $offset;
 
     // Debug: print $url;
-
     // fetch actus items
     require_once(dirname(__FILE__) . "/inc/epfl-ws.php");
     $ws = new \EPFL\WS\epflws();
@@ -131,7 +133,7 @@ class ActuShortCode {
                         'Note that more detailed information can be found on the plugin page in the administration section of your site or on GitHub.\n\n' +
                         'Actu Shortcode allows you to integrate EPFL News (actus) in any Wordpress pages or posts. ' +
                         'To do so, just use the [actu] short code where ever you want to display the news. ' +
-                        'In addition, you can be very picky on which news you want, by passing some arguments to the short code\n' +
+                        'In addition, you can be very picky on which news you want, by passing some arguments to the short code.\n' +
                         'Here are some example:\n' +
                         '\t- [actu]\n' +
                         '\t- [actu tmpl=full channel=10 lang=en limit=3]\n' +

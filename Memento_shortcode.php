@@ -133,25 +133,17 @@ class MementoShortCode {
               callback
             );
             var mementoDoc = '<!--\n' +
-                          '= Actu short code Information =\n' +
+                          '= Memento short code Information =\n' +
                           'Note that more detailed information can be found on the plugin page in the administration section of your site or on GitHub.\n\n' +
-                          'Actu Shortcode allows you to integrate EPFL News (actus) in any Wordpress pages or posts. ' +
-                          'To do so, just use the [actu] short code where ever you want to display the news. ' +
-                          'In addition, you can be very picky on which news you want, by passing some arguments to the short code\n' +
+                          'Memento Shortcode allows you to integrate EPFL Events (memento) in any Wordpress pages or posts. ' +
+                          'To do so, just use the [memento] short code where ever you want to display the news. ' +
+                          'In addition, you can be very picky on which news you want, by passing some arguments to the short code.\n' +
                           'Here are some example:\n' +
-                          '\t- [actu]\n' +
-                          '\t- [actu tmpl=full channel=10 lang=en limit=3]\n' +
-                          '\t- [actu tmpl=short channel=10 lang=en limit=20 category=1 title=EPFL subtitle=EPFL text=EPFL faculties=6 themes=1 publics=6]\n' +
+                          '\t- [memento]\n' +
+                          '\t- [memento tmpl=full channel=STI lang=en limit=3]\n' +
+                          '\t- [memento tmpl=short channel=STI lang=en limit=20]\n' +
                           '\n' +
-                          'Generally, you want to pick up your channel. You can search your channel\'s ID here: https://actu.epfl.ch/api/v1/channels/?name=sti\n' +
-                          '\n' +
-                          '\t* The "category" is in [1: EPFL, 2: EDUCATION, 3: RESEARCH, 4: INNOVATION, 5: CAMPUS LIFE]\n' +
-                          '\t* The "publics" is in [1: Prospective Students, 2: Students, 3: Collaborators, 4: Industries/partners, 5: Public, 6: Média]\n' +
-                          '\t* The "themes" is in [1: Basic Sciences, 2: Health, 3: Computer Science, 4: Engineering, 5: Environment, 6: Buildings, 7: Culture, 8: Economy, 9: Energy]\n' +
-                          '\t* The "faculties" is in [1: CDH, 2: CDM, 3: ENAC, 4: IC, 5: SB, 6: STI, 7: SV]\n' +
-                          'Note that you don\'t have to specify any of these if you don\ want to filter.\n' +
-                          '\n' +
-                          '"search", "title", "subtitle", "text" are search arguments you can use to get news across the school on, in example, keywords.\n' +
+                          '!!! Please be aware that this short code still relate on the old <https://memento.epfl.ch/api/jahia/mementos/>API and will switch to the <https://memento.epfl.ch/api/v1/events/>new one whenever it\'s ready. !!!' +
                           '\n' +
                           '\n' +
                           'Finally, the source and documentation of this plugin are part of EPFL-WS, you can find help and participate here: <https://github.com/epfl-sti/wordpress.plugin.ws>\n' +
