@@ -7,6 +7,11 @@
  * are interested in, there is a local copy as a post inside the
  * WordPress database. This allows e.g. putting actus news into the
  * newsletter or using the full-text search on them.
+ *
+ * The "Actu" custom post type integrates with WP Subtitles, if
+ * installed (https://wordpress.org/plugins/wp-subtitle/). Note that
+ * only Actu items fetched *after* WP Subtitles is installed, can get
+ * a subtitle.
  */
 
 namespace EPFL\WS\Actu;
@@ -229,6 +234,16 @@ class Actu
             $meta[self::THUMBNAIL_META] = $meta["news_thumbnail_absolute_url"];
         }
 
+        // Support for WP Subtitle plugin
+        if (class_exists("WPSubtitle")) {
+            $subtitle = $this->extract_subtitle($details);
+            if ($subtitle && $subtitle !== $details["title"]) {
+                // Like private function get_post_meta_key() in subtitle.php
+                $subtitle_meta_key = apply_filters( 'wps_subtitle_key', 'wps_subtitle', $this->ID);
+                $meta[$subtitle_meta_key] = $subtitle;
+            }
+        }
+
         wp_update_post(
             array(
                 "ID"            => $this->ID,
@@ -257,6 +272,26 @@ class Actu
             $this->_wp_post = get_post($this->ID);
         }
         return $this->_wp_post;
+    }
+
+    /**
+     * Extract a subtitle from the API's excerpt.
+     *
+     * The field named "subtitle" is generally unfit for use as a
+     * subtitle in the WordPress sense — It is more like post_excerpt.
+     * However, some subtitles on actu.epfl.ch do start with a short
+     * sentence followed with a <br />. If that is the case, return it.
+     */
+    function extract_subtitle ($details) {
+        $matched = array();
+        $max_subtitle_length = 80;
+        if (preg_match("/^(.{1,$max_subtitle_length})<br/", $details["subtitle"], $matched)) {
+            return trim($matched[1]);
+        } elseif (preg_match("/^<p>(.{1,$max_subtitle_length})<\/p>/", $details["subtitle"], $matched)) {
+            return trim($matched[1]);
+        } else {
+            return null;
+        }
     }
 }
 
@@ -364,12 +399,12 @@ class ActuConfig
                    array(get_called_class(), "filter_post_link"), 10, 4);
 
         // Behavior of Actu posts in the wp-admin area
+        add_action('admin_init', array(get_called_class(), 'make_subtitles_readonly_in_admin'), 0);
         add_action( sprintf('manage_%s_posts_columns', Actu::get_post_type()) , array(get_called_class(), "alter_columns"));
         add_action( sprintf('manage_%s_posts_custom_column', Actu::get_post_type()),
                     array(get_called_class(), "render_thumbnail_column"), 10, 2);
         add_action("edit_form_after_title", array(get_called_class(), "render_in_edit_form"));
         add_action("admin_enqueue_scripts", array(get_called_class(), "editor_css"));
-
     }
 
     /**
@@ -426,7 +461,7 @@ class ActuConfig
                 'taxonomies'         => array(ActuStream::get_taxonomy_slug(), 'category'),
                 'menu_position'      => null,
                 'menu_icon'          => 'dashicons-megaphone',
-                'supports'           => false
+                'supports'           => array('wps_subtitle')
             ));
     }
 
@@ -505,6 +540,27 @@ class ActuConfig
     }
 
     /**
+     * Make Actu subtitles read-only by preventing WP Subtitles from
+     * initializing in the case of epfl-actu posts.
+     */
+    static function make_subtitles_readonly_in_admin ()
+    {
+		$post_type = '';
+
+		if ( isset( $_REQUEST['post_type'] ) ) {
+			$post_type = sanitize_text_field( $_REQUEST['post_type'] );
+		} elseif ( isset( $_GET['post'] ) ) {
+			$post_type = get_post_type( absint( $_GET['post'] ) );
+        }
+        if ($post_type !== Actu::get_post_type()) return;
+
+        remove_action('admin_init', array( 'WPSubtitle_Admin', '_admin_init' ) );
+        // Add back the subtitle column:
+        add_filter( 'manage_edit-' . $post_type . '_columns', array( 'WPSubtitle_Admin', 'manage_subtitle_columns' ) );
+        add_action( 'manage_' . $post_type . '_posts_custom_column', array( 'WPSubtitle_Admin', 'manage_subtitle_columns_content' ), 10, 2 );
+    }
+
+    /**
      * Arrange for get_the_post_thumbnail() to return the external thumbnail for Actus.
      *
      * This is set as a filter for WordPress' @link post_thumbnail_html hook. Note that
@@ -557,8 +613,11 @@ class ActuConfig
         if (! $actu) return;
 
         $permalink = get_permalink($wp_post);
+        global $post;
+        $subtitle = function_exists("get_the_subtitle") ? get_the_subtitle($post, "", "", false) : null;
         ?>
     <h1><?php echo $wp_post->post_title; ?></h1>
+    <?php if ($subtitle) : ?><h2><?php echo $subtitle; ?></h2><?php endif; ?>
 	<div id="edit-slug-box" class="hide-if-no-js">
     <img class="actu-thumbnail" src="<?php echo $actu->get_external_thumbnail_url() ?>"/>
     <p><b>Permalink:</b> <a href="<?php echo $permalink; ?>"><?php echo $permalink; ?></a></p>
