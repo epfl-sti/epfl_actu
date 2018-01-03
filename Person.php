@@ -14,12 +14,12 @@ if (! defined('ABSPATH')) {
 
 function ___($text)
 {
-    return __($text, "epfl-people");
+    return __($text, "epfl-person");
 }
 
 function __x($text, $context)
 {
-    return _x($text, $context, "epfl-people");
+    return _x($text, $context, "epfl-person");
 }
 
 class Person
@@ -85,7 +85,7 @@ class Person
             __x('People', 'admin menu page title'),
             __x('People', 'admin menu title'),
             'read',
-            'epfl-people',
+            'epfl-person',
             null,                                      // Render callback
             'dashicons-calendar',                      // Icon type
             70                                         // Position
