@@ -508,12 +508,12 @@ class ActuConfig
      * Arrange for get_the_post_thumbnail() to return the external thumbnail for Actus.
      *
      * This is set as a filter for WordPress' @link post_thumbnail_html hook. Note that
-     * it is impossible to hijack the return value of @link get_the_post_thumbnail_url
+     * it isn't as easy to hijack the return value of @link get_the_post_thumbnail_url
      * in this way (but you can always call the @link get_external_thumbnail_url instance
      * method on an Actu object).
      */
     static function filter_post_thumbnail_html ($orig_html, $post_id, $unused_thumbnail_id,
-                                                $unused_size, $attr)
+                                                $size, $attr)
     {
         $actu = Actu::get($post_id);
         if (! $actu) return $orig_html;
@@ -521,6 +521,13 @@ class ActuConfig
         $src = $actu->get_external_thumbnail_url();
         if (! $src) return $orig_html;
 
+        $matched = array();
+        if (($size === "full" || $size === "large") &&
+            preg_match("/^(.*)\/(\d+x\d+)\.([a-zA-z]{1,6})$/", $src, $matched)) {
+                // Actu images are resizable server-side
+                // TODO: we could actually interpret $size in a much finer way
+                $src = sprintf("%s/2048x1152.%s", $matched[1], $matched[3]);
+        }
         $html = sprintf("<img src=\"%s\"", $src);
         if ($attr) {
             foreach ( $attr as $name => $value ) {
