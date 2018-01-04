@@ -425,7 +425,17 @@ class ActuStreamConfig
 
     static function update_channel_widget ($term, $taxonomy)
     {
-        self::render_channel_widget(array("value" => (new ActuStream($term))->get_url()));
+        ?><tr class="form-field actu-channel-url-wrap">
+            <th scope="row">
+                <label for="<?php echo self::CHANNEL_WIDGET_URL_SLUG ?>">
+                    <?php echo ___('Actu Channel API URL'); ?>
+                </label>
+            </th>
+            <td>
+                <input id="<?php echo self::CHANNEL_WIDGET_URL_SLUG; ?>" name="<?php echo self::CHANNEL_WIDGET_URL_SLUG; ?>" type="text" size="40" value="<?php echo (new ActuStream($term))->get_url(); ?>" />
+                <p class="description"><?php echo ___("Source URL of the JSON data. Use <a href=\"https://wiki.epfl.ch/api-rest-actu-memento/actu\" target=\"_blank\">actu-doc</a> for details."); ?></p>
+            </td>
+        </tr><?php
     }
 
     const CHANNEL_WIDGET_URL_SLUG = 'epfl_actu_channel_url';
