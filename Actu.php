@@ -418,7 +418,12 @@ class ActuStreamConfig
                 'show_ui'           => true,
                 'show_admin_column' => true,
                 'query_var'         => true,
-                // TODO: capabilities here.
+                'capabilities'      => array(
+                    'manage_terms' => '__NEVER_PERMITTED__',
+                    'edit_terms' => '__NEVER_PERMITTED__',
+                    'delete_terms' => '__NEVER_PERMITTED__',
+                    'assign_terms' => '__NEVER_PERMITTED__'
+                ),
                 'rewrite'           => array( 'slug' => $taxonomy_slug ),
             ));
         add_action("${taxonomy_slug}_add_form_fields", array(get_called_class(), "create_channel_widget"));
