@@ -735,7 +735,7 @@ class ActuCategory
     {
         return get_term_meta($this->tag_id, self::ID_META, true);
     }
-    
+
     static function get_by_actu_id ($actu_id, $discrim_func = null)
     {
         $klass = get_called_class();
@@ -772,16 +772,39 @@ class ActuCategoryConfig
         add_filter ( "manage_category_custom_column", array(get_called_class(), 'render_custom_column_category_id'), 10, 3);
     }
 
+    // https://actus.epfl.ch/api/v1/categories/
+    const ACTU_CATEGORY_LIST = array(
+        "1" => "EPFL",
+        "2" => "Education",
+        "3" => "Research",
+        "4" => "Innovation",
+        "5" => "Campus Life",
+        );
+
     static function get_actu_category_id ($tag_id) {
-        return get_term_meta($tag_id, ActuCategory::ID_META, true);
+        return self::ACTU_CATEGORY_LIST[get_term_meta($tag_id, ActuCategory::ID_META, true)];
     }
-    
+
     static function render_actu_category_id ()
     {
         $actu_category_id = (new ActuCategory($_REQUEST['tag_ID']))->get_actu_id();
         ?>
-
-         <label for="actu_category_id"><?php echo ___("Actu category ID:"); ?>&nbsp;</label><input type="text" name="actu_category_id" id="actu_category_id" value="<?php echo $actu_category_id ?>"><br />
+        <tr class="form-field actu-description-wrap">
+            <th scope="row">
+                <label for="actu_category_id">
+                    <?php echo ___("Actu's category ID"); ?>
+                </label>
+            </th>
+            <td>
+                <select name="actu_category_id" id="actu_category_id" class="postform">
+                    <option value="-1">None</option>
+                <?php foreach (self::ACTU_CATEGORY_LIST as $catid => $cattitle) { ?>
+                    <option class="level-0" value="<?php echo $catid; ?>"<?php echo ($actu_category_id==$catid) ? 'selected="true"':'';  ?>><?php echo ___($cattitle); ?></option>
+                <?php } ?>
+                </select>
+                <p><?php echo ___("This allows to link any news.epfl.ch's category with this plugins categories."); ?></p>
+            </td>
+        </tr>
         <?php
     }
 
