@@ -252,6 +252,12 @@ class Actu
             }
         }
 
+        $in_categories = array();
+        $actu_cat = ActuCategory::get_by_actu_id($details["news_category_id"]);
+        if ($actu_cat) {
+            array_push($in_categories, $actu_cat->ID());
+        }
+
         wp_update_post(
             array(
                 "ID"            => $this->ID,
@@ -259,6 +265,7 @@ class Actu
                 "post_title"    => $details["title"],
                 "post_excerpt"  => $details["subtitle"],
                 "post_content"  => $details["text"],
+                "post_category" => $in_categories,
                 "meta_input"    => $meta
             )
         );
@@ -691,13 +698,48 @@ class ActuConfig
 }
 
 /**
+ * A standard WordPress category that is auto-assigned to Actu elements.
+ */
+class ActuCategory
+{
+    const ID_META = "epfl_actu_category_id";
+
+    function __construct ($tag_id)
+    {
+        $this->tag_id = $tag_id;
+    }
+
+    function ID ()
+    {
+        return $this->tag_id;
+    }
+
+    function get_actu_id ()
+    {
+        return get_term_meta($this->tag_id, self::ID_META, true);
+    }
+    
+    static function get_by_actu_id ($actu_id)
+    {
+        $klass = get_called_class();
+        $terms = get_terms(array(
+            'taxonomy'   => 'category',
+            'meta_key'   => self::ID_META,
+            'meta_value' => $actu_id,
+            'hide_empty' => false
+        ));
+        if (! count($terms)) return;
+        return new $klass($terms[0]->term_id);
+    }
+}
+
+/**
  * WP configuration and callbacks for categories of Actus
  *
  * This is a "pure static" class; no instances are ever constructed.
  */
 class ActuCategoryConfig
 {
-    const ACTU_CATEGORY_ID_META = "epfl_actu_category_id";
 
     static function hook ()
     {
@@ -711,12 +753,12 @@ class ActuCategoryConfig
     }
 
     static function get_actu_category_id ($tag_id) {
-        return get_term_meta($tag_id, self::ACTU_CATEGORY_ID_META, true);
+        return get_term_meta($tag_id, ActuCategory::ID_META, true);
     }
     
     static function render_actu_category_id ()
     {
-        $actu_category_id = self::get_actu_category_id($_REQUEST['tag_ID']);
+        $actu_category_id = (new ActuCategory($_REQUEST['tag_ID']))->get_actu_id();
         ?>
 
          <label for="actu_category_id"><?php echo ___("Actu category ID:"); ?>&nbsp;</label><input type="text" name="actu_category_id" id="actu_category_id" value="<?php echo $actu_category_id ?>"><br />
@@ -725,19 +767,19 @@ class ActuCategoryConfig
 
     static function save_actu_category_id ($term_id, $unused_taxonomy) {
         if ( isset( $_REQUEST['actu_category_id'] ) ) {
-            add_term_meta($term_id, self::ACTU_CATEGORY_ID_META, $_REQUEST['actu_category_id']);
+            add_term_meta($term_id, ActuCategory::ID_META, $_REQUEST['actu_category_id']);
         }
     }
 
     static function add_column_category_id ($columns)
     {
-        $columns[self::ACTU_CATEGORY_ID_META] = ___("Actu category");
+        $columns[ActuCategory::ID_META] = ___("Actu category");
         return $columns;
     }
 
     static function render_custom_column_category_id ($content, $column_name, $term_id)
     {
-        if ($column_name === self::ACTU_CATEGORY_ID_META) {
+        if ($column_name === ActuCategory::ID_META) {
             return self::get_actu_category_id($term_id);
         }
     }
