@@ -133,17 +133,17 @@ class MementoShortCode {
               callback
             );
             var mementoDoc = '<!--\n' +
-                          '= Memento short code Information =\n' +
+                          '= Memento shortcode Information =\n' +
                           'Note that more detailed information can be found on the plugin page in the administration section of your site or on GitHub.\n\n' +
                           'Memento Shortcode allows you to integrate EPFL Events (memento) in any Wordpress pages or posts. ' +
-                          'To do so, just use the [memento] short code where ever you want to display the news. ' +
-                          'In addition, you can be very picky on which news you want, by passing some arguments to the short code.\n' +
+                          'To do so, just use the [memento] shortcode where ever you want to display the events. ' +
+                          '\n' +
                           'Here are some example:\n' +
                           '\t- [memento]\n' +
                           '\t- [memento tmpl=full channel=STI lang=en limit=3]\n' +
                           '\t- [memento tmpl=short channel=STI lang=en limit=20]\n' +
                           '\n' +
-                          '!!! Please be aware that this short code still relate on the old <https://memento.epfl.ch/api/jahia/mementos/>API and will switch to the <https://memento.epfl.ch/api/v1/events/>new one whenever it\'s ready. !!!' +
+                          '!!! Please be aware that this shortcode still relate on the old <https://memento.epfl.ch/api/jahia/mementos/>API and will switch to the <https://memento.epfl.ch/api/v1/events/>new one whenever it\'s ready. !!!' +
                           '\n' +
                           '\n' +
                           'Finally, the source and documentation of this plugin are part of EPFL-WS, you can find help and participate here: <https://github.com/epfl-sti/wordpress.plugin.ws>\n' +

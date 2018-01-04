@@ -92,11 +92,11 @@ class PeopleShortCode {
             callback
           );
           var peopleDoc = '<!--\n' +
-                        '= People short code Information =\n' +
+                        '= People shortcode Information =\n' +
                         'Note that more detailed information can be found on the plugin page in the administration section of your site or on GitHub.\n\n' +
                         'People Shortcode allows you to integrate EPFL People (trombinoscope) in any Wordpress pages or posts. ' +
-                        'To do so, just use the [people unit=sti-it lang=fr ] short code where ever you want to display the news. ' +
-                        'In addition, you can be very picky on which news you want, by passing some arguments to the short code.\n' +
+                        'To do so, just use the [people unit=sti-it lang=fr] shortcode where ever you want to display the news. ' +
+                        'In addition, you can be very picky on which news you want, by passing some arguments to the shortcode.\n' +
                         'Here are some example:\n' +
                         '\t- [people tmpl=default_aZ_pic_side lang=en unit=STI-IT]\n' +
                         '\t- [people tmpl=default_aZ_pic_side lang=en unit=STI subtree=1 struct=1 function=prof nophone=0 nooffice=0 responsive=0]\n' +
