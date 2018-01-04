@@ -253,7 +253,24 @@ class Actu
         }
 
         $in_categories = array();
-        $actu_cat = ActuCategory::get_by_actu_id($details["news_category_id"]);
+        $actu_cat = ActuCategory::get_by_actu_id(
+            $details["news_category_id"],
+            function ($terms) use ($details) {
+                // Perhaps the returned categories are translations of each other?
+                $filtered_terms = array();
+                if (function_exists("pll_get_term")) {  // Polylang
+                    foreach ($terms as $term) {
+                        if (pll_get_term($term->term_id, $details["language"]) === $term->term_id) {
+                            array_push($filtered_terms, $term);
+                        }
+                    }
+                    return $filtered_terms;
+                } else {
+                    // Ah well, just go with the first one
+                    return $terms;
+                }
+            }
+        );
         if ($actu_cat) {
             array_push($in_categories, $actu_cat->ID());
         }
@@ -719,7 +736,7 @@ class ActuCategory
         return get_term_meta($this->tag_id, self::ID_META, true);
     }
     
-    static function get_by_actu_id ($actu_id)
+    static function get_by_actu_id ($actu_id, $discrim_func = null)
     {
         $klass = get_called_class();
         $terms = get_terms(array(
@@ -729,6 +746,9 @@ class ActuCategory
             'hide_empty' => false
         ));
         if (! count($terms)) return;
+        if (count($terms) > 1) {
+            $terms = call_user_func($discrim_func, $terms);
+        }
         return new $klass($terms[0]->term_id);
     }
 }
