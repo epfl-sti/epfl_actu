@@ -631,7 +631,7 @@ class ActuConfig
         if (! $actu) return;
 
         if ($actu->get_youtube_id()) {
-            echo '<object style="width:160px;height:89px;float: none; clear: both; margin: 2px auto;" data="http://www.youtube.com/embed/'.$actu->get_youtube_id().'"></object>';
+            echo '<object style="width:160px;height:89px;float: none; clear: both; margin: 2px auto;" data="https://www.youtube.com/embed/'.$actu->get_youtube_id().'"></object>';
             printf("<p><a href=\"https://youtu.be/%s\">YouTube link</a></p>", $actu->get_youtube_id());
         } elseif ($orig_size = $actu->get_max_size()) {
             echo $thumbnail;
