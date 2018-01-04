@@ -65,10 +65,10 @@ class OrganigrammeShortCode {
             callback
           );
           var organigrammeDoc = '<!--\n' +
-                        '= Organigramme short code Information =\n' +
+                        '= Organigramme shor code Information =\n' +
                         'Note that more detailed information can be found on the plugin page in the administration section of your site or on GitHub.\n\n' +
                         'Organigramme Shortcode allows you to integrate EPFL Organigramme (Organizational charts) in any Wordpress pages or posts. ' +
-                        'To do so, just use the [organigramme unit=STI lang=en] short code where ever you want to display the organizational charts. ' +
+                        'To do so, just use the [organigramme unit=STI lang=en] shortcode where ever you want to display the organizational charts. ' +
                         '\n' +
                         '\n' +
                         'Finally, the source and documentation of this plugin are part of EPFL-WS, you can find help and participate here: <https://github.com/epfl-sti/wordpress.plugin.ws>\n' +

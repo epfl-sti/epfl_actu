@@ -95,11 +95,11 @@ class ISAcademiaShortCode {
             callback
           );
           var isacademiaDoc = '<!--\n' +
-                        '= IS-Academia short code Information =\n' +
+                        '= IS-Academia shortcode Information =\n' +
                         'Note that more detailed information can be found on the plugin page in the administration section of your site or on GitHub.\n\n' +
                         'IS-Academia Shortcode allows you to integrate EPFL automatic course list (IS-Academia) in any Wordpress pages or posts. ' +
-                        'To do so, just use the [isacademia unit=sgm-ens lang=en] short code where ever you want to display the news. ' +
-                        'In addition, you can pass some arguments to the short code.\n' +
+                        'To do so, just use the [isacademia unit=sgm-ens lang=en] shortcode where ever you want to display the news. ' +
+                        'In addition, you can pass some arguments to the shortcode.\n' +
                         'Here are some example:\n' +
                         '\t- per laboratory: unit=XXX,XXX >the acronym of the laboratory(s)\n' +
                         '\t- per section: unit=XXX-ens\n' +

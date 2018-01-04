@@ -133,11 +133,11 @@ class ActuShortCode {
             callback
           );
           var actuDoc = '<!--\n' +
-                        '= Actu short code Information =\n' +
+                        '= Actu shortcode Information =\n' +
                         'Note that more detailed information can be found on the plugin page in the administration section of your site or on GitHub.\n\n' +
                         'Actu Shortcode allows you to integrate EPFL News (actus) in any Wordpress pages or posts. ' +
-                        'To do so, just use the [actu] short code where ever you want to display the news. ' +
-                        'In addition, you can be very picky on which news you want, by passing some arguments to the short code.\n' +
+                        'To do so, just use the [actu] shortcode where ever you want to display the news. ' +
+                        'In addition, you can be very picky on which news you want, by passing some arguments to the shortcode.\n' +
                         'Here are some example:\n' +
                         '\t- [actu]\n' +
                         '\t- [actu tmpl=full channel=10 lang=en limit=3]\n' +

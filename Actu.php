@@ -213,7 +213,7 @@ class Actu
     {
         $this->_post_meta = $meta = array();
         foreach (["news_id", "translation_id", "news_thumbnail_absolute_url",
-                  "absolute_slug", "video"]
+                  "absolute_slug", "video", "news_has_video", "visual_and_thumbnail_description"]
                  as $keep_this_as_meta)
         {
             if ($details[$keep_this_as_meta]) {
@@ -285,7 +285,7 @@ class Actu
         if ($actu_cat) {
             array_push($add_in_categories, $actu_cat->ID());
         }
-        
+
         if (count($add_in_categories)) {
             wp_set_post_categories($this->ID, $add_in_categories,
                                    /* $append = */ true);
@@ -626,15 +626,20 @@ class ActuConfig
         if ($column !== 'thumbnail') return;
         $thumbnail = get_the_post_thumbnail($post_id);
         if (! $thumbnail) return;
-        echo $thumbnail;
 
         $actu = Actu::get($post_id);
         if (! $actu) return;
+
         if ($actu->get_youtube_id()) {
-            printf("<p><a href=\"https://youtu.be/%s\">YouTube</a></p>", $actu->get_youtube_id());
+            echo '<object style="width:160px;height:89px;float: none; clear: both; margin: 2px auto;" data="http://www.youtube.com/embed/'.$actu->get_youtube_id().'"></object>';
+            printf("<p><a href=\"https://youtu.be/%s\">YouTube link</a></p>", $actu->get_youtube_id());
         } elseif ($orig_size = $actu->get_max_size()) {
-            printf("<p>%dx%d</p>", $orig_size["width"], $orig_size["height"]);
+            echo $thumbnail;
+            printf("<p>Size: %dx%d</p>", $orig_size["width"], $orig_size["height"]);
+        } else {
+            echo $thumbnail;
         }
+
     }
 
     /**

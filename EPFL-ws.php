@@ -79,7 +79,7 @@ class EPFLWSmain {
 		echo '<div class="wrap">';
 		echo '  <h1>EPFL Actu</h1>';
 		echo '  <p>&lt; <a href="'.admin_url( "admin.php?page=epfl-ws" ).'">Back to EPFL WS</a></p>';
-		echo '  <h2>Short code</h2>';
+		echo '  <h2>Shortcode</h2>';
 		echo '  <p>The <code>[actu]</code> shortcode allows you to integrate EPFL News (actus) in any Wordpress pages or posts. It uses <a href="https://actu.epfl.ch/api-docs/">https://actu.epfl.ch/api-docs/</a> as an application programming interface (API).</p>';
 		echo '  <p>This documentation is kept short as it will change as soon as the actu API integrates news features.</p>';
 		echo '</div>';
@@ -92,7 +92,7 @@ class EPFLWSmain {
 		echo '<div class="wrap">';
 		echo '  <h1>EPFL Infoscience</h1>';
 		echo '  <p>&lt; <a href="'.admin_url( "admin.php?page=epfl-ws" ).'">Back to EPFL WS</a></p>';
-		echo '  <h2>Short code</h2>';
+		echo '  <h2>Shortcode</h2>';
 		echo '  <p>The <code>[infoscience url=https://infoscience.epfl.ch/curator/export/123456]</code> shortcode allows you to integrate EPFL Publications (infoscience) in any Wordpress pages or posts. It uses <a href="https://help-infoscience.epfl.ch/page-59729-en.html">https://infoscience.epfl.ch</a> HTML export as input.</p>';
 		echo '  <p>Details on how to find the correct URL to fetch the publications list to integrate with the shortcode can be found <a href="https://help-infoscience.epfl.ch/page-59729-en.html">here</a>.</p>';
 		echo '</div>';
@@ -105,9 +105,9 @@ class EPFLWSmain {
 		echo '<div class="wrap">';
 		echo '  <h1>EPFL Memento</h1>';
 		echo '  <p>&lt; <a href="'.admin_url( "admin.php?page=epfl-ws" ).'">Back to EPFL WS</a></p>';
-		echo '  <h2>Short code</h2>';
+		echo '  <h2>Shortcode</h2>';
 		echo '  <p>The <code>[memento]</code> shortcode allows you to integrate EPFL Events (memento) in any Wordpress pages or posts. It uses <a href="https://memento.epfl.ch/api-docs/">https://memento.epfl.ch/api-docs/ TODO</a> as an application programming interface (API).</p>';
-		echo '  <p><b>Please be aware</b> that this short code still relate on the old <a href="https://memento.epfl.ch/api/jahia/mementos/">API</a> and will switch to the <a href="https://memento.epfl.ch/api/v1/events/">new one</a> whenever it\'s ready.</p>';
+		echo '  <p><b>Please be aware</b> that this shortcode still relate on the old <a href="https://memento.epfl.ch/api/jahia/mementos/">API</a> and will switch to the <a href="https://memento.epfl.ch/api/v1/events/">new one</a> whenever it\'s ready.</p>';
 		echo '</div>';
 	}
 
@@ -118,7 +118,7 @@ class EPFLWSmain {
 		echo '<div class="wrap">';
 		echo '  <h1>EPFL People</h1>';
 		echo '  <p>&lt; <a href="'.admin_url( "admin.php?page=epfl-ws" ).'">Back to EPFL WS</a></p>';
-		echo '  <h2>Short code</h2>';
+		echo '  <h2>Shortcode</h2>';
 		echo '  <p>The <code>[people tmpl=default_aZ_pic_side lang=en unit=STI-IT]</code> shortcode allows you to integrate EPFL People in any Wordpress pages or posts. It uses <a href="https://jahia.epfl.ch/external-content/list-of-people">https://people.epfl.ch</a> HTML export as input.</p>';
 		echo '  <p>It\'s also possible to use <code>[people url=https://people.epfl.ch/cgi-bin/getProfiles?lang=en&unit=STI&subtree=1&nophone=1&function=professeur+ordinaire]</code>. Details on how to find the correct URL to fetch with the shortcode can be found <a href="https://jahia.epfl.ch/cms/site/jahia6/lang/fr/contenu-externe/liste-de-personnes/composer">here</a>.</p>';
 		echo '</div>';
@@ -131,7 +131,7 @@ class EPFLWSmain {
 		echo '<div class="wrap">';
 		echo '  <h1>EPFL People</h1>';
 		echo '  <p>&lt; <a href="'.admin_url( "admin.php?page=epfl-ws" ).'">Back to EPFL WS</a></p>';
-		echo '  <h2>Short code</h2>';
+		echo '  <h2>Shortcode</h2>';
 		echo '  <p>The <code>[organigramme unit=STI lang=en responsive=1]</code> shortcode allows you to integrate EPFL Organizational charts in any Wordpress pages or posts. It uses <a href="https://jahia.epfl.ch/contenu-externe/organigramme">https://organigramme.epfl.ch</a> HTML export as input.</p>';
 		echo '</div>';
 	}
@@ -143,7 +143,7 @@ class EPFLWSmain {
 		echo '<div class="wrap">';
 		echo '  <h1>EPFL IS-Academia</h1>';
 		echo '  <p>&lt; <a href="'.admin_url( "admin.php?page=epfl-ws" ).'">Back to EPFL WS</a></p>';
-		echo '  <h2>Short code</h2>';
+		echo '  <h2>Shortcode</h2>';
 		echo '  <p>The <code>[isacademia unit=STI lang=en]</code> shortcode allows you to integrate EPFL automatic course list in any Wordpress pages or posts. It uses the IS-Academia database through a <a href="http://people.epfl.ch/cgi-bin/getCours?unit=XXXX">webservice</a>.</p>';
 		echo '  <p>The <code>[isacademia unit=sgm-ens sem=hiver cursus=ba display=byprof detail=L lang=en]</code> shortcode lists the courses of the Mecanical Engineering section, winter semester, bachelor, sorted by teached and full detail..</p>';
 		echo '  <p></p>';
