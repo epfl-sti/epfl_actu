@@ -665,6 +665,23 @@ class ActuConfig
      * it isn't as easy to hijack the return value of @link get_the_post_thumbnail_url
      * in this way (but you can always call the @link get_image_url instance
      * method on an Actu object).
+     *
+     * @return An <img /> tag with suitable attributes
+     *
+     * @param $orig_html The HTML that WordPress intended to return as
+     *                   the picture (unused, as it will typically be
+     *                   empty — Actu objects lack attachments)
+     *
+     * @param $post_id   The post ID to compute the <img /> for
+     *
+     * @param $size      The requested size, in WordPress notation (either the
+     *                   name of a well-known or declared size, or a [$height,
+     *                   $width] array)
+     *
+     * @param $attr      Associative array of HTML attributes. If "class" is
+     *                   not specified, the default "wp-post-image" is used
+     *                   to match the WordPress behavior for local (attached)
+     *                   images.
      */
     static function filter_post_thumbnail_html ($orig_html, $post_id, $unused_thumbnail_id,
                                                 $size, $attr)
@@ -681,14 +698,15 @@ class ActuConfig
         }
         if (! $src) return $orig_html;
 
-        $html = sprintf("<img src=\"%s\"", $src);
-        if ($attr) {
-            foreach ( $attr as $name => $value ) {
-                $html .= " $name=" . '"' . $value . '"';
-            }
+        if (! $attr) $attr = array();
+        if (! $attr["class"]) {
+            $attr["class"] = "wp-post-image";
         }
-        $html .= " />";
-        return $html;
+        $attrs = "";
+        foreach ( $attr as $name => $value ) {
+            $attrs .= sprintf(" %s=\"%s\"", $name, esc_attr($value));
+        }
+        return sprintf("<img src=\"%s\" %s/>", $src, $attrs);
     }
 
     /**
