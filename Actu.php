@@ -318,6 +318,11 @@ class Actu
         }
     }
 
+    function get_youtube_id ()
+    {
+        return $this->_get_post_meta()["youtube_id"];
+    }
+
     function wp_post ()
     {
         if (! $this->_wp_post) {
@@ -611,8 +616,9 @@ class ActuConfig
 
         $actu = Actu::get($post_id);
         if (! $actu) return;
-        $orig_size = $actu->get_max_size();
-        if ($orig_size) {
+        if ($actu->get_youtube_id()) {
+            printf("<p><a href=\"https://youtu.be/%s\">YouTube</a></p>", $actu->get_youtube_id());
+        } elseif ($orig_size = $actu->get_max_size()) {
             printf("<p>%dx%d</p>", $orig_size["width"], $orig_size["height"]);
         }
     }
