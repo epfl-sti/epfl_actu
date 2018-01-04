@@ -420,7 +420,7 @@ class ActuStreamConfig
 
     static function create_channel_widget ($taxonomy)
     {
-        self::render_channel_widget(array("placeholder" => "http://example.com/"));
+        self::render_channel_widget(array("placeholder" => "https://actu.epfl.ch/api/jahia/channels/sti/news/en/?format=json", "size" => 40, "type" => "text"));
     }
 
     static function update_channel_widget ($term, $taxonomy)
@@ -432,11 +432,11 @@ class ActuStreamConfig
 
     static function render_channel_widget ($input_attributes)
     {
-      ?><div class="form-field term-group">
+      ?><div class="form-field term-wrap">
         <label for="<?php echo self::CHANNEL_WIDGET_URL_SLUG ?>"><?php echo ___('Actu Channel API URL'); ?></label>
         <input id="<?php echo self::CHANNEL_WIDGET_URL_SLUG ?>" name="<?php echo self::CHANNEL_WIDGET_URL_SLUG ?>" <?php
            foreach ($input_attributes as $k => $v) {
-               echo "$k=" . htmlspecialchars($v);
+               echo "$k=" . htmlspecialchars($v) . " ";
            }?> />
        </div><?php
     }
