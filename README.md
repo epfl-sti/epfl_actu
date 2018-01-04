@@ -16,6 +16,12 @@ This Wordpress plugin aim to unify all EPFL web services in one place.
 
 <!-- tocstop -->
 
+
+# About
+
+![EPFL WS menu for shortcodes](./EPFL-WS-Shortcode.png)
+
+
 # EPFL Actu (news)
 
 The Actu part of this plugin is separeted in two parts, one is the shortcode and
