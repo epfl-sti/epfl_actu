@@ -213,7 +213,7 @@ class Actu
     {
         $this->_post_meta = $meta = array();
         foreach (["news_id", "translation_id", "news_thumbnail_absolute_url",
-                  "absolute_slug", "video"]
+                  "absolute_slug", "video", "news_has_video", "visual_and_thumbnail_description"]
                  as $keep_this_as_meta)
         {
             if ($details[$keep_this_as_meta]) {
