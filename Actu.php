@@ -252,7 +252,18 @@ class Actu
             }
         }
 
-        $in_categories = array();
+        wp_update_post(
+            array(
+                "ID"            => $this->ID,
+                "post_type"     => Actu::get_post_type(),
+                "post_title"    => $details["title"],
+                "post_excerpt"  => $details["subtitle"],
+                "post_content"  => $details["text"],
+                "meta_input"    => $meta
+            )
+        );
+
+        $add_in_categories = array();
         $actu_cat = ActuCategory::get_by_actu_id(
             $details["news_category_id"],
             function ($terms) use ($details) {
@@ -272,20 +283,13 @@ class Actu
             }
         );
         if ($actu_cat) {
-            array_push($in_categories, $actu_cat->ID());
+            array_push($add_in_categories, $actu_cat->ID());
         }
-
-        wp_update_post(
-            array(
-                "ID"            => $this->ID,
-                "post_type"     => Actu::get_post_type(),
-                "post_title"    => $details["title"],
-                "post_excerpt"  => $details["subtitle"],
-                "post_content"  => $details["text"],
-                "post_category" => $in_categories,
-                "meta_input"    => $meta
-            )
-        );
+        
+        if (count($add_in_categories)) {
+            wp_set_post_categories($this->ID, $add_in_categories,
+                                   /* $append = */ true);
+        }
     }
 
     function _get_post_meta ()
