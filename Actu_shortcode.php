@@ -23,6 +23,9 @@ class ActuShortCode {
   function __construct() {
     add_shortcode('actu', array($this, 'wp_shortcode'));
     add_action("admin_print_footer_scripts", array($this, 'actu_shortcode_button_script'));
+    // include function from /inc/epfl-ws.php
+    require_once(dirname(__FILE__) . "/inc/epfl-ws.php");
+    $this->ws = new \EPFL\WS\epflws();
   }
 
   /*
@@ -90,15 +93,13 @@ class ActuShortCode {
     if ($offset)
       $url .= '&offset=' . $offset;
 
-    // Debug: print $url;
+    //$this->ws->debug($url);
     // fetch actus items
-    require_once(dirname(__FILE__) . "/inc/epfl-ws.php");
-    $ws = new \EPFL\WS\epflws();
-    if ( $actuurl = $ws->validate_url( $url, "actu.epfl.ch" ) ) {
-      $actus = $ws->get_items( $actuurl );
+    if ( $actuurl = $this->ws->validate_url( $url, "actu.epfl.ch" ) ) {
+      $actus = $this->ws->get_items( $actuurl );
     } else {
       $error = new WP_Error( 'epfl-ws-actu-shortcode', 'URL not validated', 'URL: ' . $url . ' returned an error' );
-      $ws->log( $error );
+      $this->ws->log( $error );
     }
 
     switch ($tmpl) {
@@ -111,6 +112,9 @@ class ActuShortCode {
         break;
       case 'widget':
         $display_html = $this->display_widget($actus->results);
+        break;
+      case 'list':
+        $display_html = $this->display_list($actus->results);
         break;
     }
     return $display_html;
@@ -167,19 +171,20 @@ class ActuShortCode {
    */
   function display_full($actus)
   {
-    require_once(dirname(__FILE__) . "/inc/epfl-ws.php");
-    $ws = new \EPFL\WS\epflws();
-    //$ws->debug($actus);
+    //$this->ws->debug($actus);
+    $actu .= '<div class="actu_template_full">';
     foreach ($actus as $item) {
-      $actu .= '<div class="actu_item" id="' . $item->id . '">';
-      $actu .= '<h2>' . $item->title . '</h2>';
-      $actu .= '<p><img src="' . $item->visual_url . '" title=""></p>'; // Image description + copyright not available
-      $actu .= '<p>Created: ' . $item->publish_date . '</p>';
-      $actu .= '<p>' . $item->subtitle . '</p>';
-      $actu .= '<p>' . $item->text . '</p>';
-      // $actu .= '<p><a href="">Read more</a></p>'; // absolute_slug not available for now
-      $actu .= '</div>';
+      $actu .= '  <a name="' . $this->ws->get_anchor($item->title) . '"></a>';
+      $actu .= '  <div class="actu_item" id="' . $item->id . '">';
+      $actu .= '    <h2>' . $item->title . '</h2>';
+      $actu .= '    <p><img src="' . $item->visual_url . '" title=""></p>'; // Image description + copyright not available
+      $actu .= '    <p>Created: ' . $item->publish_date . '</p>';
+      $actu .= '    <p>' . $item->subtitle . '</p>';
+      $actu .= '    <p>' . $item->text . '</p>';
+      $actu .= '    <p><a href="https://actu.epfl.ch/news/' . $this->ws->get_anchor($item->title) . '">Read more</a></p>';
+      $actu .= '  </div>';
     }
+    $actu .= '</div>';
     return $actu;
   }
 
@@ -188,14 +193,18 @@ class ActuShortCode {
    */
   function display_short($actus)
   {
+    //$this->ws->debug($actus);
+    $actu .= '<div class="actu_template_short">';
     foreach ($actus as $item) {
-      $actu .= '<div class="actu_item" id="' . $item->id . '">';
-      $actu .= '<h2>' . $item->title . '</h2>';
-      $actu .= '<p>' . $item->subtitle . '</p>';
-      $actu .= '<img src="' . $item->visual_url . '" title="">'; // Image description + copyright not available
-      // $actu .= '<a href="' . $item->absolute_slug . '">Read more</a>'; // absolute_slug not available for now
-      $actu .= '</div>';
+      $actu .= '  <a name="' . $this->ws->get_anchor($item->title) . '"></a>';
+      $actu .= '  <div class="actu_item" id="' . $item->id . '">';
+      $actu .= '    <h2>' . $item->title . '</h2>';
+      $actu .= '    <p>' . $item->subtitle . '</p>';
+      $actu .= '    <img src="' . $item->visual_url . '" title="">'; // Image description + copyright not available
+      $actu .= '    <p><a href="https://actu.epfl.ch/news/' . $this->ws->get_anchor($item->title) . '">Read more</a></p>';
+      $actu .= '  </div>';
     }
+    $actu .= '</div>';
     return $actu;
   }
 
@@ -204,12 +213,45 @@ class ActuShortCode {
    */
   function display_widget($actus)
   {
+    //$this->ws->debug($actus);
+    $actu .= '<div class="actu_template_widget">';
     foreach ($actus as $item) {
-      $actu .= '<div class="actu_item" id="' . $item->id . '">';
-      $actu .= '<h2>' . $item->title . '</h2>';
-      $actu .= '<a href="' . $item->visual_url . '"><img src="' . $item->visual_url . '" title=""></a>';
-      $actu .= '</div>';
+      $actu .= '  <a name="' . $this->ws->get_anchor($item->title) . '"></a>';
+      $actu .= '  <div class="actu_item" id="' . $item->id . '">';
+      $actu .= '    <h2>' . $item->title . '</h2>';
+      $actu .= '    <a href="https://actu.epfl.ch/news/' . $this->ws->get_anchor($item->title) . '"><img src="' . $item->visual_url . '" title=""></a>';
+      $actu .= '  </div>';
     }
+    $actu .= '</div>';
+    return $actu;
+  }
+
+  /*
+   * List template
+   */
+  function display_list($actus)
+  {
+    //$this->ws->debug($actus);
+    $actu .= '<div class="actu_template_list">';
+    foreach ($actus as $item) {
+      $actu .= '<a name="' . $this->ws->get_anchor($item->title) . '"></a>';
+      $actu .= '<div class="actu_item" id="' . $item->id . '"  style="display: flex;">';
+      $actu .= '  <div class="actu_item_visual" style="margin-right: 10px;">';
+      $actu .= '    <a href="https://actu.epfl.ch/news/' . $this->ws->get_anchor($item->title) . '/"><img src="' . $item->visual_url . '" width="153px" /></a><br />';
+      $actu .= '    <span class="actu_item_date" style="font-size: 0.8em; text-align: center;">' . $item->publish_date . '</span>';
+      $actu .= '  </div>';
+      $actu .= '  <div class="actu_item_text_content">';
+      $actu .= '    <span class="actu_item_label" style="font-size: 0.8em;">' . strtoupper($item->category->en_label) . '</span><br />';
+      $actu .= '    <span class="actu_item_title" style="font-size: 1.1em;">';
+      $actu .= '      <a href="https://actu.epfl.ch/news/' . $this->ws->get_anchor($item->title) . '/">' . $item->title . ' 🔗</a>';
+      $actu .= '    </span><br />';
+      $actu .= '    <span class="actu_item_subtitle" style="font-size: 0.9em;">' . $item->subtitle . '</span>';
+      $actu .= '  </div>';
+      $actu .= '</div>';
+      $actu .= '<span style="clear: both;"></span>';
+      $actu .= '<hr style="height:1px; border:none; width:300px; color:#000; background-color:#000;" />';
+    }
+    $actu .= '</div>';
     return $actu;
   }
 

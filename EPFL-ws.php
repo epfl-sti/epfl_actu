@@ -42,9 +42,12 @@ class EPFLWSmain {
 	function ws_menu() {
 		if ( is_admin() ) {
 			add_menu_page( 'EPFL Web Services Options', 'EPFL WS', 'manage_options', 'epfl-ws', array( $this, 'ws_home'), 'dashicons-carrot', 80 );
-			add_submenu_page( 'epfl-ws', 'Actu', ' • Actu (news)', 'manage_options', 'epfl-actu', array( $this, 'actu_home'));
-			add_submenu_page( 'epfl-ws', 'Memento', ' • Memento (events)', 'manage_options', 'epfl-memento', array( $this, 'memento_home'));
-			add_submenu_page( 'epfl-ws', 'Infoscience', ' • Infoscience (publications)', 'manage_options', 'epfl-infoscience', array( $this, 'infoscience_home'));
+			add_submenu_page( 'epfl-ws', 'Actu',         ' • Actu (news)',                          'manage_options', 'epfl-actu',         array( $this, 'actu_home'));
+			add_submenu_page( 'epfl-ws', 'Memento',      ' • Memento (events)',                     'manage_options', 'epfl-memento',      array( $this, 'memento_home'));
+			add_submenu_page( 'epfl-ws', 'Infoscience',  ' • Infoscience (publications)',           'manage_options', 'epfl-infoscience',  array( $this, 'infoscience_home'));
+			add_submenu_page( 'epfl-ws', 'Organigramme', ' • Organizational charts (organigramme)', 'manage_options', 'epfl-organigramme', array( $this, 'organigramme_home'));
+			add_submenu_page( 'epfl-ws', 'People',       ' • People (trombinoscope)',               'manage_options', 'epfl-people',       array( $this, 'people_home'));
+			add_submenu_page( 'epfl-ws', 'IS-Academia',  ' • IS-Academia (course list)',            'manage_options', 'epfl-isacademia',   array( $this, 'isacademia_home'));
 		}
 	}
 
@@ -59,6 +62,9 @@ class EPFLWSmain {
 		echo '      <li><a href="'.admin_url( "admin.php?page=epfl-actu" ).'">Actu (news)</a></li>';
 		echo '      <li><a href="'.admin_url( "admin.php?page=epfl-infoscience" ).'">Infoscience (publications)</a></li>';
 		echo '      <li><a href="'.admin_url( "admin.php?page=epfl-memento" ).'">Memento (events)</a></li>';
+		echo '      <li><a href="'.admin_url( "admin.php?page=epfl-people" ).'">People (trombinoscope)</a></li>';
+		echo '      <li><a href="'.admin_url( "admin.php?page=epfl-organigramme" ).'">Organizational charts (organigramme)</a></li>';
+		echo '      <li><a href="'.admin_url( "admin.php?page=epfl-isacademia" ).'">IS-Academia (Automatic course list)</a></li>';
 		echo '    </ul>';
 		echo '  </p>';
 		echo '  <p><u>Help, resources and contributing</u>:';
@@ -105,6 +111,46 @@ class EPFLWSmain {
 		echo '</div>';
 	}
 
+	function people_home() {
+		if ( !current_user_can( 'manage_options' ) )  {
+			wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+		}
+		echo '<div class="wrap">';
+		echo '  <h1>EPFL People</h1>';
+		echo '  <p>&lt; <a href="'.admin_url( "admin.php?page=epfl-ws" ).'">Back to EPFL WS</a></p>';
+		echo '  <h2>Short code</h2>';
+		echo '  <p>The <code>[people tmpl=default_aZ_pic_side lang=en unit=STI-IT]</code> shortcode allows you to integrate EPFL People in any Wordpress pages or posts. It uses <a href="https://jahia.epfl.ch/external-content/list-of-people">https://people.epfl.ch</a> HTML export as input.</p>';
+		echo '  <p>It\'s also possible to use <code>[people url=https://people.epfl.ch/cgi-bin/getProfiles?lang=en&unit=STI&subtree=1&nophone=1&function=professeur+ordinaire]</code>. Details on how to find the correct URL to fetch with the shortcode can be found <a href="https://jahia.epfl.ch/cms/site/jahia6/lang/fr/contenu-externe/liste-de-personnes/composer">here</a>.</p>';
+		echo '</div>';
+	}
+
+	function organigramme_home() {
+		if ( !current_user_can( 'manage_options' ) )  {
+			wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+		}
+		echo '<div class="wrap">';
+		echo '  <h1>EPFL People</h1>';
+		echo '  <p>&lt; <a href="'.admin_url( "admin.php?page=epfl-ws" ).'">Back to EPFL WS</a></p>';
+		echo '  <h2>Short code</h2>';
+		echo '  <p>The <code>[organigramme unit=STI lang=en responsive=1]</code> shortcode allows you to integrate EPFL Organizational charts in any Wordpress pages or posts. It uses <a href="https://jahia.epfl.ch/contenu-externe/organigramme">https://organigramme.epfl.ch</a> HTML export as input.</p>';
+		echo '</div>';
+	}
+
+	function isacademia_home() {
+		if ( !current_user_can( 'manage_options' ) )  {
+			wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+		}
+		echo '<div class="wrap">';
+		echo '  <h1>EPFL IS-Academia</h1>';
+		echo '  <p>&lt; <a href="'.admin_url( "admin.php?page=epfl-ws" ).'">Back to EPFL WS</a></p>';
+		echo '  <h2>Short code</h2>';
+		echo '  <p>The <code>[isacademia unit=STI lang=en]</code> shortcode allows you to integrate EPFL automatic course list in any Wordpress pages or posts. It uses the IS-Academia database through a <a href="http://people.epfl.ch/cgi-bin/getCours?unit=XXXX">webservice</a>.</p>';
+		echo '  <p>The <code>[isacademia unit=sgm-ens sem=hiver cursus=ba display=byprof detail=L lang=en]</code> shortcode lists the courses of the Mecanical Engineering section, winter semester, bachelor, sorted by teached and full detail..</p>';
+		echo '  <p></p>';
+		echo '  <p>It\'s also (sort of for now), possible to include a course table <code>[isacademia url=https://isa.epfl.ch/pe/plan_etude_bama_cyclemaster_el_en.html]</code>. Get you URL from <a href="https://is-academia.epfl.ch/planfiche-html">here</a>.</p>';
+		echo '</div>';
+	}
+
 }
 
 // Initialize the plugin.
@@ -116,6 +162,9 @@ require_once(dirname(__FILE__) . "/Actu_shortcode.php");
 require_once(dirname(__FILE__) . "/Actu.php");
 require_once(dirname(__FILE__) . "/Infoscience_shortcode.php");
 require_once(dirname(__FILE__) . "/Memento_shortcode.php");
+require_once(dirname(__FILE__) . "/Organigramme_shortcode.php");
+require_once(dirname(__FILE__) . "/ISAcademia_shortcode.php");
+require_once(dirname(__FILE__) . "/People_shortcode.php");
 
 
 ?>
