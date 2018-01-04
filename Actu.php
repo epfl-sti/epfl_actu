@@ -690,6 +690,59 @@ class ActuConfig
     }
 }
 
+/**
+ * WP configuration and callbacks for categories of Actus
+ *
+ * This is a "pure static" class; no instances are ever constructed.
+ */
+class ActuCategoryConfig
+{
+    const ACTU_CATEGORY_ID_META = "epfl_actu_category_id";
+
+    static function hook ()
+    {
+        add_action ( 'category_add_form_fields', array(get_called_class(), 'render_actu_category_id'));
+        add_action ( 'category_edit_form_fields', array(get_called_class(), 'render_actu_category_id'));
+        add_action ( 'created_category', array(get_called_class(), 'save_actu_category_id'), 10, 2);
+        add_action ( 'edited_category', array(get_called_class(), 'save_actu_category_id'), 10, 2);
+
+        add_filter ( "manage_edit-category_columns", array(get_called_class(), 'add_column_category_id'));
+        add_filter ( "manage_category_custom_column", array(get_called_class(), 'render_custom_column_category_id'), 10, 3);
+    }
+
+    static function get_actu_category_id ($tag_id) {
+        return get_term_meta($tag_id, self::ACTU_CATEGORY_ID_META, true);
+    }
+    
+    static function render_actu_category_id ()
+    {
+        $actu_category_id = self::get_actu_category_id($_REQUEST['tag_ID']);
+        ?>
+
+         <label for="actu_category_id"><?php echo ___("Actu category ID:"); ?>&nbsp;</label><input type="text" name="actu_category_id" id="actu_category_id" value="<?php echo $actu_category_id ?>"><br />
+        <?php
+    }
+
+    static function save_actu_category_id ($term_id, $unused_taxonomy) {
+        if ( isset( $_REQUEST['actu_category_id'] ) ) {
+            add_term_meta($term_id, self::ACTU_CATEGORY_ID_META, $_REQUEST['actu_category_id']);
+        }
+    }
+
+    static function add_column_category_id ($columns)
+    {
+        $columns[self::ACTU_CATEGORY_ID_META] = ___("Actu category");
+        return $columns;
+    }
+
+    static function render_custom_column_category_id ($content, $column_name, $term_id)
+    {
+        if ($column_name === self::ACTU_CATEGORY_ID_META) {
+            return self::get_actu_category_id($term_id);
+        }
+    }
+}
 
 ActuStreamConfig::hook();
 ActuConfig::hook();
+ActuCategoryConfig::hook();
