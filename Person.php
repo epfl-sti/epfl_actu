@@ -27,10 +27,7 @@ class Person
     static function hook ()
     {
         $THIS_CLASS = '\EPFL\Persons\Person';
-        add_action('admin_init', array($THIS_CLASS, 'admin_init'));
         add_action('init', array($THIS_CLASS, 'register_post_type'));
-        add_filter('enter_title_here', array($THIS_CLASS, 'enter_title_here'),
-                   10, 2);
     }
 
     /**
@@ -47,7 +44,7 @@ class Person
                 'labels'             => array(
                     'name'               => __x( 'People', 'post type general name' ),
                     'singular_name'      => __x( 'Person', 'post type singular name' ),
-                    'menu_name'          => __x( 'People', 'admin menu' ),
+                    'menu_name'          => __x( 'EPFL People', 'admin menu' ),
                     'name_admin_bar'     => __x( 'Person', 'add new on admin bar' ),
                     'add_new'            => __x( 'Add New', 'book' ),
                     'add_new_item'       => ___( 'Add New Person' ),
@@ -70,25 +67,11 @@ class Person
                 'capability_type'    => 'post',
                 'has_archive'        => true,
                 'hierarchical'       => false,
-                'menu_position'      => null,
+                'menu_position'      => 26,
                 'menu_icon'          => 'dashicons-welcome-learn-more',
                 'supports'           => array( 'title', 'editor', 'thumbnail' )
             ));
     }
-
-    static function admin_init ()
-    {
-        // TODO: not sure if useful
-        add_menu_page(
-            __x('People', 'admin menu page title'),
-            __x('People', 'admin menu title'),
-            'read',
-            'epfl-person',
-            null,                                      // Render callback
-            'dashicons-calendar',                      // Icon type
-            70                                         // Position
-        );
-   }
 
     static function enter_title_here ($text, $post)
     {
