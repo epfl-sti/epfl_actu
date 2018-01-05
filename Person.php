@@ -33,12 +33,14 @@ function ends_with($haystack, $needle)
 /**
  * True iff we are on the "/post-new.php" page.
  */
-function is_form_new () {
+function is_form_new ()
+{
     return ends_with(parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH),
                      "/post-new.php");
 }
 
-class Person {
+class Person
+{
     const SLUG = "epfl-person";
 }
 
@@ -47,7 +49,9 @@ class PersonConfig
     static function hook ()
     {
         add_action('init', array(get_called_class(), 'register_post_type'));
-        add_action('edit_form_top', array(get_called_class(), 'edit_form_top'));
+
+        /* Customize the edit form */
+        add_action('edit_form_after_title', array(get_called_class(), 'meta_boxes_above_editor'));
     }
 
     /**
@@ -89,18 +93,74 @@ class PersonConfig
                 'hierarchical'       => false,
                 'menu_position'      => 26,
                 'menu_icon'          => 'dashicons-welcome-learn-more',  // Mortar hat
-                'supports'           => array( 'editor', 'thumbnail' )
+                'supports'           => array( 'editor', 'thumbnail' ),
+                'register_meta_box_cb' => array(get_called_class(), 'add_meta_boxes')
             ));
     }
 
-    static function edit_form_top ($post)
+    /**
+     * Add custom fields and behavior to the new person / edit person form
+     * using "meta boxes".
+     *
+     * @see https://code.tutsplus.com/tutorials/how-to-create-custom-wordpress-writemeta-boxes--wp-20336
+     */
+    static function add_meta_boxes ()
+    {
+        if (is_form_new()) {
+            self::add_meta_box('find_by_sciper', ___('Find person'));
+        } else {
+            self::add_meta_box('show_person_details', ___('Person details'));
+        }
+    }
+
+    /**
+     * Simpler version of the WordPress add_meta_box function
+     *
+     * @param $slug Unique name for this meta box. The render function
+     * is the method called "render_meta_box_$slug"
+     *
+     * @param $title The human-readable title for the meta box
+     *
+     * @param $position The position to render the meta box at;
+     *        defaults to "above-editor" (see @link meta_boxes_above_editor).
+     *        Can be set to any legal value for the $priority argument
+     *        to the WordPress add_meta_box function, in particular "default"
+     *        to render the meta box after the editor.
+     */
+    static function add_meta_box ($slug, $title, $position = null)
+    {
+        if (! $position) $position = 'above-editor';
+        $klass = get_called_class();
+        $meta_box_name = self::_get_meta_box_name($slug);
+        add_meta_box($meta_box_name, $title,
+                     function () use ($meta_box_name, $klass, $slug) {
+                         wp_nonce_field($meta_box_name);
+                         call_user_func(array($klass, "render_meta_box_$slug"));
+                     },
+                     null, $position);
+    }
+
+    private static function _get_meta_box_name ($slug) {
+        return sprintf("%s-meta_box_%s", Person::SLUG, $slug);
+    }
+
+    static function render_meta_box_find_by_sciper ()
+    {
+        ?><input type="text" id="sciper" name="sciper" placeholder="<?php echo ___("SCIPER"); ?>"><?php
+    }
+
+    static function render_meta_box_show_person_details ()
+    {
+        ?><h1>PERSON DETAILS</h1><?php
+    }
+
+    /**
+     * Render all meta boxes configured to show up above the editor.
+     */
+    static function meta_boxes_above_editor ($post)
     {
         if ($post->post_type !== Person::SLUG) return;
-        if (is_form_new()) {
-            ?><h1>NEW PERSON</h1><?php
-        } else {
-            ?><h1>EXISTING PERSON</h1><?php
-        }
+        do_meta_boxes(get_current_screen(), 'above-editor', $post);
     }
 }
 
