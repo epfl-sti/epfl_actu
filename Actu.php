@@ -554,7 +554,7 @@ class ActuConfig
                 'has_archive'        => true,
                 'hierarchical'       => false,
                 'taxonomies'         => array(ActuStream::get_taxonomy_slug(), 'category'),
-                'menu_position'      => null,
+                'menu_position'      => 24,
                 'menu_icon'          => 'dashicons-megaphone',
                 'supports'           => array('wps_subtitle')
             ));
