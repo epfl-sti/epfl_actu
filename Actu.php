@@ -419,10 +419,9 @@ class ActuStreamConfig
                 'show_admin_column' => true,
                 'query_var'         => true,
                 'capabilities'      => array(
-                    'manage_terms' => '__NEVER_PERMITTED__',
-                    'edit_terms' => '__NEVER_PERMITTED__',
-                    'delete_terms' => '__NEVER_PERMITTED__',
-                    'assign_terms' => '__NEVER_PERMITTED__'
+                    // Cannot change terms from Actu edit screen:
+                    'assign_terms' => '__NEVER_PERMITTED__',
+                    // Default permissions apply for the other operations
                 ),
                 'rewrite'           => array( 'slug' => $taxonomy_slug ),
             ));
