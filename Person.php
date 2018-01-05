@@ -22,10 +22,12 @@ function __x($text, $context)
     return _x($text, $context, "epfl-person");
 }
 
-class Person
-{
+class Person {
     const SLUG = "epfl-person";
+}
 
+class PersonConfig
+{
     static function hook ()
     {
         add_action('init', array(get_called_class(), 'register_post_type'));
@@ -69,10 +71,10 @@ class Person
                 'has_archive'        => true,
                 'hierarchical'       => false,
                 'menu_position'      => 26,
-                'menu_icon'          => 'dashicons-welcome-learn-more',
+                'menu_icon'          => 'dashicons-welcome-learn-more',  // Mortar hat
                 'supports'           => array( 'editor', 'thumbnail' )
             ));
     }
 }
 
-Person::hook();
+PersonConfig::hook();
