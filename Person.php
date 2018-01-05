@@ -28,8 +28,7 @@ class Person
 
     static function hook ()
     {
-        $THIS_CLASS = '\EPFL\Persons\Person';
-        add_action('init', array($THIS_CLASS, 'register_post_type'));
+        add_action('init', array(get_called_class(), 'register_post_type'));
     }
 
     /**
