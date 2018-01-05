@@ -70,17 +70,8 @@ class Person
                 'hierarchical'       => false,
                 'menu_position'      => 26,
                 'menu_icon'          => 'dashicons-welcome-learn-more',
-                'supports'           => array( 'title', 'editor', 'thumbnail' )
+                'supports'           => array( 'editor', 'thumbnail' )
             ));
-    }
-
-    /**
-     * Replace the "Enter title here" prompt for Person-typed posts
-     */
-    static function enter_title_here ($text, $post)
-    {
-        if ($post->post_type != Person::SLUG) return $text;
-        return __x("Dr Firstname Lastname", "enter_title_here");
     }
 }
 
