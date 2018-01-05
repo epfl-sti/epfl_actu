@@ -22,6 +22,22 @@ function __x($text, $context)
     return _x($text, $context, "epfl-person");
 }
 
+function ends_with($haystack, $needle)
+{
+    $length = strlen($needle);
+
+    return $length === 0 ||
+    (substr($haystack, -$length) === $needle);
+}
+
+/**
+ * True iff we are on the "/post-new.php" page.
+ */
+function is_form_new () {
+    return ends_with(parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH),
+                     "/post-new.php");
+}
+
 class Person {
     const SLUG = "epfl-person";
 }
@@ -31,6 +47,7 @@ class PersonConfig
     static function hook ()
     {
         add_action('init', array(get_called_class(), 'register_post_type'));
+        add_action('edit_form_top', array(get_called_class(), 'edit_form_top'));
     }
 
     /**
@@ -74,6 +91,16 @@ class PersonConfig
                 'menu_icon'          => 'dashicons-welcome-learn-more',  // Mortar hat
                 'supports'           => array( 'editor', 'thumbnail' )
             ));
+    }
+
+    static function edit_form_top ($post)
+    {
+        if ($post->post_type !== Person::SLUG) return;
+        if (is_form_new()) {
+            ?><h1>NEW PERSON</h1><?php
+        } else {
+            ?><h1>EXISTING PERSON</h1><?php
+        }
     }
 }
 
