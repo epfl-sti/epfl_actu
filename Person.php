@@ -230,7 +230,6 @@ class PersonConfig
                     'view_item'          => ___( 'View Person' ),
                     'all_items'          => ___( 'All People' ),
                     'search_items'       => ___( 'Search People' ),
-                    'parent_item_colon'  => ___( 'Parent People:' ),
                     'not_found'          => ___( 'No persons found.' ),
                     'not_found_in_trash' => ___( 'No persons found in Trash.' )
                 ),
