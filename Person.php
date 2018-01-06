@@ -136,6 +136,7 @@ class Person
         } else {
             $update = array(
                 'ID'         => $this->ID,
+                'post_name'  => $sciper,
                 'meta_input' => array(
                     'sciper' => $sciper
                 )
