@@ -1,7 +1,7 @@
 <?php
 /*
  * Plugin Name: EPFL Personal Pages (shortcode)
- * Description: Manage personal pages for EPFL (and external) staff
+ * Description: Manage personal pages for EPFL staff
  * Version:     0.1
  * Author:      STI Web Task Force
  * Author URI:  mailto:stiitweb@groupes.epfl.ch
