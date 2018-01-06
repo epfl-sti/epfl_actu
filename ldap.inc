@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * LDAP client for the EPFL directory
+ */
+
 namespace EPFL\Persons;
 
 /* Only included from Person.php, so assume function_exists("___") */
@@ -10,10 +14,6 @@ class LDAPUnsupportedException extends \Exception {
         return ___("This PHP doesn't support LDAP");
     }
 }
-
-/**
- * LDAP client for the EPFL directory
- */
 
 class LDAPClient 
 {

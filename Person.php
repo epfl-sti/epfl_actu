@@ -115,6 +115,16 @@ class Person
         return $this->_wp_post;
     }
 
+    public function get_title ()
+    {
+        return $this->wp_post()->post_title;
+    }
+
+    public function get_sciper ()
+    {
+        return get_post_meta($this->ID, 'sciper', true);  // Cached by WP
+    }
+
     public function set_sciper($sciper)
     {
         $search_query = new \WP_Query(array(
@@ -158,16 +168,6 @@ class Person
         return $this;  // Chainable
     }
 
-    public function get_title ()
-    {
-        return $this->wp_post()->post_title;
-    }
-
-    public function get_sciper ()
-    {
-        return get_post_meta($this->ID, 'sciper', true);  // Cached by WP
-    }
-
     private function update_from_ldap ()
     {
         $entries = LDAPClient::query_by_sciper($this->get_sciper());
@@ -193,7 +193,11 @@ class Person
     }
 }
 
-class PersonConfig
+/**
+ * Instance-less class for the controller code (the C of MVC) that manages
+ * persons, both on the main site and in wp-admin/
+ */
+class PersonController
 {
     static function hook ()
     {
@@ -210,7 +214,7 @@ class PersonConfig
         /* Make permalinks work - See doc for flush_rewrite_rules() */
         register_deactivation_hook(__FILE__, 'flush_rewrite_rules' );
         register_activation_hook(__FILE__, function () {
-            PersonConfig::register_post_type();
+            PersonController::register_post_type();
             flush_rewrite_rules();
         });
     }
@@ -305,7 +309,8 @@ class PersonConfig
     static function save_meta_box_show_person_details ($post_id, $post, $is_update)
     {
         // Strictly speaking, this meta box has no state to change (for now).
-        // Still, this sort of makes sense to fetch data from LDAP again here.
+        // Still, it sort of makes sense that here be the place where
+        // we sync data from LDAP again.
         Person::get($post_id)->update();
     }
 
@@ -385,7 +390,8 @@ class PersonConfig
      * posting information.
      *
      * Any and all nonces present in $_REQUEST, for which a corresponding
-     * class method exists, are checked; then the class method is called.
+     * class method exists, are checked; then the class method is called,
+     * unless already done in this request cycle.
      */
     static function save_meta_boxes ($post_id, $post, $is_update)
     {
@@ -430,4 +436,4 @@ class PersonConfig
     }
 }
 
-PersonConfig::hook();
+PersonController::hook();
