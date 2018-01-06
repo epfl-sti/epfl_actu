@@ -247,7 +247,6 @@ class PersonConfig
                 'show_ui'            => true,
                 'show_in_menu'       => true,
                 'query_var'          => true,
-                'rewrite'            => array( 'slug' => Person::get_post_type() ),
                 'capability_type'    => 'post',
                 'has_archive'        => true,
                 'hierarchical'       => false,
