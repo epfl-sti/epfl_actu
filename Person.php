@@ -13,6 +13,7 @@ if (! defined('ABSPATH')) {
 }
 
 require_once(dirname(__FILE__) . "/ldap.inc");
+require_once(dirname(__FILE__) . "/scrape.inc");
 
 function ___($text)
 {
@@ -191,6 +192,24 @@ class Person
         );
         wp_update_post($update);
     }
+
+    const THUMBNAIL_META  = "epfl_person_external_thumbnail";
+    public function get_image_url ($size = null)
+    {
+        return get_post_meta($this->ID, self::THUMBNAIL_META, true);
+    }
+
+    public function import_image_from_people ()
+    {
+        $dom = scrape(sprintf("https://people.epfl.ch/%d",
+                              $this->get_sciper()));
+        $xpath = new \DOMXpath($dom);
+        $src_attr = $xpath->query("//div[@class=\"portrait\"]/img/@src")->item(0);
+        if (! $src_attr) return null;
+        $src = $src_attr->value;
+        update_post_meta($this->ID, self::THUMBNAIL_META, $src);
+        return $src;
+    }
 }
 
 /**
@@ -202,6 +221,10 @@ class PersonController
     static function hook ()
     {
         add_action('init', array(get_called_class(), 'register_post_type'));
+
+        /* Behavior of Persons on the main site */
+        add_filter("post_thumbnail_html",
+                   array(get_called_class(), "filter_post_thumbnail_html"), 10, 5);
 
         /* Customize the edit form */
         add_action('edit_form_after_title',
@@ -262,6 +285,47 @@ class PersonController
     }
 
     /**
+     * Arrange for get_the_post_thumbnail() to return the external thumbnail for Persons.
+     *
+     * This is set as a filter for WordPress' @link post_thumbnail_html hook. Note that
+     * it isn't as easy to hijack the return value of @link get_the_post_thumbnail_url
+     * in this way (but you can always call the @link get_image_url instance
+     * method on a Person object).
+     *
+     * @return An <img /> tag with suitable attributes
+     *
+     * @param $orig_html The HTML that WordPress intended to return as
+     *                   the picture (unused, as it will typically be
+     *                   empty — Person objects lack attachments)
+     *
+     * @param $post_id   The post ID to compute the <img /> for
+     *
+     * @param $attr      Associative array of HTML attributes. If "class" is
+     *                   not specified, the default "wp-post-image" is used
+     *                   to match the WordPress behavior for local (attached)
+     *                   images.
+     */
+    static function filter_post_thumbnail_html ($orig_html, $post_id, $unused_thumbnail_id,
+                                                $unused_size, $attr)
+    {
+        $person = Person::get($post_id);
+        if (! $person) return $orig_html;
+
+        $src = $person->get_image_url();
+        if (! $src) return $orig_html;
+
+        if (! $attr) $attr = array();
+        if (! $attr["class"]) {
+            $attr["class"] = "wp-post-image";
+        }
+        $attrs = "";
+        foreach ( $attr as $name => $value ) {
+            $attrs .= sprintf(" %s=\"%s\"", $name, esc_attr($value));
+        }
+        return sprintf("<img src=\"%s\" %s/>", $src, $attrs);
+    }
+
+    /**
      * Add custom fields and behavior to the new person / edit person form
      * using "meta boxes".
      *
@@ -286,7 +350,10 @@ class PersonController
     static function save_meta_box_find_by_sciper ($post_id, $post, $is_update)
     {
         try {
-            Person::get($post_id)->set_sciper(intval($_REQUEST['sciper']))->update();
+            Person::get($post_id)
+                ->set_sciper(intval($_REQUEST['sciper']))
+                ->update()
+                ->import_image_from_people();
         } catch (LDAPException $e) {
             // Not fatal, we'll try again later
             error_log(sprintf("LDAPException: %s", $e->getMessage()));
@@ -300,10 +367,15 @@ class PersonController
         }
     }
 
-    static function render_meta_box_show_person_details ($post)
+    static function render_meta_box_show_person_details ($the_post)
     {
-        $sciper = get_post_meta($post->ID, 'sciper', true);
-        ?><h1><?php echo $post->post_title; ?></h1><?php
+        global $post; $post = $the_post; setup_postdata($post);
+        $person = Person::get($post->ID);
+        $sciper = $person->get_sciper();
+        ?><h1><?php the_title(); ?></h1>
+          <h2><a href="https://people.epfl.ch/<?php echo $sciper; ?>">SCIPER <?php echo $sciper; ?></a></h2>
+        <?php the_post_thumbnail(); ?>
+       <?php
     }
 
     static function save_meta_box_show_person_details ($post_id, $post, $is_update)
