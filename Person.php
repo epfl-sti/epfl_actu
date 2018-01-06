@@ -206,6 +206,13 @@ class PersonConfig
                    array(get_called_class(), 'save_meta_boxes'), 10, 3);
         add_action("admin_notices",
                    array(get_called_class(), 'maybe_show_admin_error'));
+
+        /* Make permalinks work - See doc for flush_rewrite_rules() */
+        register_deactivation_hook(__FILE__, 'flush_rewrite_rules' );
+        register_activation_hook(__FILE__, function () {
+            PersonConfig::register_post_type();
+            flush_rewrite_rules();
+        });
     }
 
     /**
