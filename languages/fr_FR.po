@@ -8,172 +8,172 @@ msgid ""
 msgstr ""
 "Project-Id-Version: epfl-persons\n"
 "Report-Msgid-Bugs-To: stiitweb@groupes.epfl.ch\n"
-"POT-Creation-Date: 2018-01-06 18:28+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"POT-Creation-Date: 2018-01-06 18:16+0100\n"
+"PO-Revision-Date: 2018-01-06 18:26+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 #: ../ldap.inc:14
 msgid "This PHP doesn't support LDAP"
-msgstr ""
+msgstr "Cette installation de PHP ne permet pas l'utilisation de LDAP"
 
 #: ../ldap.inc:29
 #, php-format
 msgid "Unable to bind to LDAP server %s (error: %s)"
-msgstr ""
+msgstr "Impossible de se lier (\"bind\") au serveur LDAP %s (erreur : %s)"
 
 #: ../ldap.inc:38
 #, php-format
 msgid "ldap_search error: %s"
-msgstr ""
+msgstr "Erreur dans ldap_search : %s"
 
 #: ../ldap.inc:43
 #, php-format
 msgid "ldap_get_entries error: %s"
-msgstr ""
+msgstr "Erreur dans ldap_get_entries : %s"
 
 #: ../Person.php:53 ../Person.php:178
 #, php-format
 msgid "Person with SCIPER %d not found"
-msgstr ""
+msgstr "Personne n'a été trouvé pour l'identiant SCIPER %d"
 
 #: ../Person.php:63
 #, php-format
 msgid "A person with SCIPER %d already exists"
-msgstr ""
+msgstr "Une personne ayant l'identifiant SCIPER %d existe déjà"
 
 #: ../Person.php:73
 #, php-format
 msgid "Multiple persons found with SCIPER %d"
-msgstr ""
+msgstr "Plusieurs personnes trouvées pour l'identifiant SCIPER %d"
 
-#: ../Person.php:263
+#: ../Person.php:260
 msgid "People"
-msgstr ""
+msgstr "Personnes"
 
-#: ../Person.php:264 ../Person.php:266
+#: ../Person.php:261 ../Person.php:263
 msgid "Person"
-msgstr ""
+msgstr "Personne"
+
+#: ../Person.php:262
+msgid "EPFL People"
+msgstr "Personnes de l'EPFL"
+
+#: ../Person.php:264
+msgid "Add New"
+msgstr "Ajouter"
 
 #: ../Person.php:265
-msgid "EPFL People"
-msgstr ""
+msgid "Add New Person"
+msgstr "Ajouter une nouvelle personne"
+
+#: ../Person.php:266
+msgid "New Person"
+msgstr "Nouvelle personne"
 
 #: ../Person.php:267
-msgid "Add New"
-msgstr ""
+msgid "Edit Person"
+msgstr "Modifier cette personne"
 
 #: ../Person.php:268
-msgid "Add New Person"
-msgstr ""
+msgid "View Person"
+msgstr "Voir cette personne"
 
 #: ../Person.php:269
-msgid "New Person"
-msgstr ""
+msgid "All People"
+msgstr "Toutes les personnes"
 
 #: ../Person.php:270
-msgid "Edit Person"
-msgstr ""
+msgid "Search People"
+msgstr "Rechercher une personne"
 
 #: ../Person.php:271
-msgid "View Person"
-msgstr ""
+msgid "No persons found."
+msgstr "Personne n'a été trouvé."
 
 #: ../Person.php:272
-msgid "All People"
-msgstr ""
-
-#: ../Person.php:273
-msgid "Search People"
-msgstr ""
+msgid "No persons found in Trash."
+msgstr "Personne n'a été trouvé dans la corbeille."
 
 #: ../Person.php:274
-msgid "No persons found."
-msgstr ""
-
-#: ../Person.php:275
-msgid "No persons found in Trash."
-msgstr ""
-
-#: ../Person.php:277
 msgid "Noteworthy people"
-msgstr ""
+msgstr "Personnes remarquables"
 
-#: ../Person.php:345
+#: ../Person.php:342
 msgid "Find person"
-msgstr ""
+msgstr "Trouver une personne"
 
-#: ../Person.php:347
+#: ../Person.php:344
 msgid "Person details"
-msgstr ""
+msgstr "Détails de la personne"
 
-#: ../Person.php:353
+#: ../Person.php:350
 msgid "SCIPER"
-msgstr ""
+msgstr "SCIPER"
 
-#: ../Person.php:487
+#: ../Person.php:484
 msgid "Nonce check failed"
-msgstr ""
+msgstr "Code de sécurité (\"nonce\") incorrect"
 
-#: ../Person.php:489
+#: ../Person.php:486
 msgid "Permission denied: edit person"
-msgstr ""
+msgstr "Permission refusée pour modifier la personne"
 
 #: ../scrape.inc:21
 #, php-format
 msgid "Unable to parse DOM retreived from %s"
-msgstr ""
+msgstr "Impossible d'interpréter le DOM reçu de %s"
 
 #: ../scrape.inc:40
 #, php-format
 msgid "CURL exception while downloading %s: %s"
-msgstr ""
+msgstr "Exception CURL lors du téléchargement de %s : %s"
 
 #: ../scrape.inc:45
 #, php-format
 msgid "HTTP Error code %d received while downloading %s"
-msgstr ""
+msgstr "Code d'erreur HTTP %d reçu pendant le téléchargement de %s"
 
 #: ../title.inc:34
 msgid "Full Professor"
-msgstr ""
+msgstr "Professeur ordinaire"
 
 #: ../title.inc:35
 msgid "Assistant Professor"
-msgstr ""
+msgstr "Professeur assistant"
 
 #: ../title.inc:36
 msgid "Tenure Track Assistant Professor"
-msgstr ""
+msgstr "Professeur assistant tenure track"
 
 #: ../title.inc:37
-msgid "SNSF-funded Professor"
-msgstr ""
+msgid "SNSF-funded  Professor"
+msgstr "Professeur boursier"
 
 #: ../title.inc:38
 msgid "Adjunct Professor"
-msgstr ""
+msgstr "Professeur titulaire"
 
 #: ../title.inc:39
 msgid "Senior Scientist"
-msgstr ""
+msgstr "Maître d'enseignement et de recherche"
 
 #: ../title.inc:40
 msgid "Lecturer"
-msgstr ""
+msgstr "Chargé de cours"
 
 #: ../title.inc:41
 msgid "Scientist"
-msgstr ""
+msgstr "Post-doctorant"
 
 #: ../title.inc:92
 msgid "Professor"
-msgstr ""
+msgstr "Professeur"
 
 #: ../title.inc:94
 msgid "Doctor"
-msgstr ""
+msgstr "Docteur"

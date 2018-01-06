@@ -14,6 +14,7 @@ if (! defined('ABSPATH')) {
 
 require_once(dirname(__FILE__) . "/ldap.inc");
 require_once(dirname(__FILE__) . "/scrape.inc");
+require_once(dirname(__FILE__) . "/title.inc");
 
 function ___($text)
 {
@@ -116,11 +117,6 @@ class Person
         return $this->_wp_post;
     }
 
-    public function get_title ()
-    {
-        return $this->wp_post()->post_title;
-    }
-
     public function get_sciper ()
     {
         return get_post_meta($this->ID, 'sciper', true);  // Cached by WP
@@ -152,7 +148,7 @@ class Person
                     'sciper' => $sciper
                 )
             );
-            $title = $this->get_title();
+            $title = $this->$this->wp_post()->post_title;
             if (! $title ||
                 // Ackpttht
                 in_array($title, ["Auto Draft", "Brouillon auto"])) {
@@ -161,6 +157,12 @@ class Person
             wp_update_post($update);
             return $this;  // Chainable
         }
+    }
+
+    function get_title ()
+    {
+        $title_code = get_post_meta($this->ID, "title_code", true);
+        return $title_code ? new Title($title_code) : null;
     }
 
     public function update ()
@@ -178,17 +180,18 @@ class Person
                         $this->get_sciper()));
         }
 
-        $greeting = $entries[0]['personaltitle'][0];
-        $job      = $entries[0]['title'][0];
-        $name     = $entries[0]['cn'][0];
+        $meta = array();
+        $title = Title::from_ldap($entries);
+        if ($title) {
+            $meta["title_code"] = $title->code;
+        }
         
         $update = array(
             'ID'         => $this->ID,
-            'post_title' => "$greeting $name",
-            'meta_input' => array(
-                'greeting'  => $greeting,
-                'job_title' => $job
-            )
+            // We want a language-neutral post_title so we can't
+            // work in the greeting - Filters will be used for that instead.
+            'post_title' => $entries[0]['cn'][0],
+            'meta_input' => $meta
         );
         wp_update_post($update);
     }
@@ -240,6 +243,9 @@ class PersonController
             PersonController::register_post_type();
             flush_rewrite_rules();
         });
+
+        /* i18n */
+		load_theme_textdomain('epfl-persons', dirname(__FILE__) . '/languages' );
     }
 
     /**
@@ -372,8 +378,11 @@ class PersonController
         global $post; $post = $the_post; setup_postdata($post);
         $person = Person::get($post->ID);
         $sciper = $person->get_sciper();
-        ?><h1><?php the_title(); ?></h1>
-          <h2><a href="https://people.epfl.ch/<?php echo $sciper; ?>">SCIPER <?php echo $sciper; ?></a></h2>
+        $title = $person->get_title();
+        $greeting = $title ? sprintf("%s ", $title->as_greeting()) : "";
+        $title_str = $title ? sprintf("%s, ", $title->localize()) : "";
+        ?><h1><?php echo $greeting; the_title(); ?></h1>
+          <h2><?php echo $title_str; ?><a href="https://people.epfl.ch/<?php echo $sciper; ?>">SCIPER <?php echo $sciper; ?></a></h2>
         <?php the_post_thumbnail(); ?>
        <?php
     }
