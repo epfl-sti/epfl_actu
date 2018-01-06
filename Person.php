@@ -18,12 +18,12 @@ require_once(dirname(__FILE__) . "/title.inc");
 
 function ___($text)
 {
-    return __($text, "epfl-person");
+    return __($text, "epfl-persons");
 }
 
 function __x($text, $context)
 {
-    return _x($text, $context, "epfl-person");
+    return _x($text, $context, "epfl-persons");
 }
 
 function ends_with($haystack, $needle)
@@ -148,7 +148,7 @@ class Person
                     'sciper' => $sciper
                 )
             );
-            $title = $this->$this->wp_post()->post_title;
+            $title = $this->wp_post()->post_title;
             if (! $title ||
                 // Ackpttht
                 in_array($title, ["Auto Draft", "Brouillon auto"])) {
@@ -245,7 +245,11 @@ class PersonController
         });
 
         /* i18n */
-		load_theme_textdomain('epfl-persons', dirname(__FILE__) . '/languages' );
+        add_action('plugins_loaded', function () {
+            load_plugin_textdomain(
+                'epfl-persons', false,
+                basename(dirname(__FILE__)) . '/languages');
+        });
     }
 
     /**
