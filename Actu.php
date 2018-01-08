@@ -505,6 +505,9 @@ class ActuConfig
                     array(get_called_class(), "render_thumbnail_column"), 10, 2);
         add_action("edit_form_after_title", array(get_called_class(), "render_in_edit_form"));
         add_action("admin_enqueue_scripts", array(get_called_class(), "editor_css"));
+
+        // Behavior of Actu posts in search results
+        add_filter('pre_get_posts', array(get_called_class(), "pre_get_posts"));
     }
 
     /**
@@ -763,6 +766,24 @@ class ActuConfig
             'ws-editor',
             plugins_url( 'ws-editor.css', __FILE__ ) );
         wp_enqueue_style('ws-editor');
+    }
+
+    function pre_get_posts ($query) {
+		$qv = &$query->query_vars;
+
+        if (! is_admin() && $query->is_main_query()) {
+            // Loosely based on https://wordpress.stackexchange.com/q/181803/132235
+            $post_types = $query->get('post_type');
+            if ($post_types === 'post') {
+                $post_types = ['post'];
+            }
+            if (is_array($post_types) &&
+                (false === array_search(Actu::get_post_type(), $post_types))) {
+                array_push($post_types, Actu::get_post_type());
+                $query->set('post_type', $post_types);
+            }
+        }
+        return $query;
     }
 }
 
