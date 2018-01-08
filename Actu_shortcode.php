@@ -37,7 +37,7 @@ class ActuShortCode {
 
     // override default attributes with user attributes
     $actu_atts = shortcode_atts([ 'tmpl'      => 'full', // full, short, widget
-                                  'channel'   => '10',   // http://actu.epfl.ch/api/v1/channels/ [10 = STI, search https://actu.epfl.ch/api/v1/channels/?name=sti]
+                                  'channel'   => '',   // http://actu.epfl.ch/api/v1/channels/ [10 = STI, search https://actu.epfl.ch/api/v1/channels/?name=sti]
                                   'category'  => '',     // https://actu.epfl.ch/api/v1/categories/ [1: EPFL, 2: EDUCATION, 3: RESEARCH, 4: INNOVATION, 5: CAMPUS LIFE]
                                   'lang'      => 'en',   // en, fr
                                   'search'    => '',     // ??? search somewhere ???
@@ -71,7 +71,11 @@ class ActuShortCode {
     // make the correct URL call
     // OLD API $url = 'https://actu.epfl.ch/api/jahia/channels/'.$channel.'/news/'.$lang.'/?format=json';
     // channel and lang are the 2 needed attributes, fallback to STI/EN
-    $url = 'https://actu.epfl.ch/api/v1/channels/'.$channel.'/news/?format=json&lang='.$lang;
+    if ($channel) {
+      $url = 'https://actu.epfl.ch/api/v1/channels/'.$channel.'/news/?format=json&lang='.$lang;
+    } else {
+      $url = 'https://actu.epfl.ch/api/v1/news/?format=json&lang='.$lang;
+    }
     if ($category)
       $url .= '&category=' . $category;
     if ($search)
@@ -117,6 +121,9 @@ class ActuShortCode {
         $display_html = $this->display_list($actus->results);
         break;
     }
+
+    // This print out the queryed url, useful for now
+    echo "<!-- epfl-actu url: " . $url . " -->";
     return $display_html;
   }
 
