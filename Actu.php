@@ -252,6 +252,11 @@ class Actu
             }
         }
 
+        // Polylang
+        if (function_exists("pll_set_post_language")) {
+            pll_set_post_language($this->ID, $details["language"]);
+        }
+
         wp_update_post(
             array(
                 "ID"            => $this->ID,
