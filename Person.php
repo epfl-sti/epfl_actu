@@ -165,6 +165,21 @@ class Person
         return $title_code ? new Title($title_code) : null;
     }
 
+    public function get_dn ()
+    {
+        return get_post_meta($this->ID, 'dn', true);
+    }
+
+    public function get_postaladdress ()
+    {
+        return get_post_meta($this->ID, 'postaladdress', true);
+    }
+
+    public function get_unit ()
+    {
+        return get_post_meta($this->ID, 'unit', true);
+    }
+
     public function update ()
     {
         $this->update_from_ldap();
@@ -185,7 +200,20 @@ class Person
         if ($title) {
             $meta["title_code"] = $title->code;
         }
-        
+
+        $postaladdress = $entries[0]["postaladdress"][0];
+        if ($postaladdress) {
+            $meta["postaladdress"] = $postaladdress;
+        }
+
+        $dn = $entries[0]["dn"];
+        if ($dn) {
+            $meta["dn"] = $dn;
+            $bricks = explode(',', $dn);
+            // construct a unit string, e.g. EPFL / STI / STI-SG / STI-IT
+            $meta["unit"] = strtoupper(explode('=', $bricks[4])[1]) . " / " . strtoupper(explode('=', $bricks[3])[1]) . " / " . strtoupper(explode('=', $bricks[2])[1]) . " / " . strtoupper(explode('=', $bricks[1])[1]);
+        }
+
         $update = array(
             'ID'         => $this->ID,
             // We want a language-neutral post_title so we can't
@@ -236,6 +264,13 @@ class PersonController
                    array(get_called_class(), 'save_meta_boxes'), 10, 3);
         add_action("admin_notices",
                    array(get_called_class(), 'maybe_show_admin_error'));
+
+        /* Customize the list in the admin aera */
+        add_action( sprintf('manage_%s_posts_columns', Person::get_post_type()) , array(get_called_class(), "alter_columns"));
+        add_action( sprintf('manage_%s_posts_custom_column', Person::get_post_type()),
+                    array(get_called_class(), "render_people_thumbnail_column"), 10, 2);
+        add_action( sprintf('manage_%s_posts_custom_column', Person::get_post_type()),
+                    array(get_called_class(), "render_people_unit_column"), 10, 2);
 
         /* Make permalinks work - See doc for flush_rewrite_rules() */
         register_deactivation_hook(__FILE__, 'flush_rewrite_rules' );
@@ -399,6 +434,44 @@ class PersonController
         Person::get($post_id)->update();
     }
 
+    /**
+     * Alter the columns shown in the Actu list admin page
+     * (Add the thumbnail column between the checkbox and the title)
+     */
+    static function alter_columns ($columns)
+    {
+        // https://stackoverflow.com/a/3354804/435004
+        return array_merge(
+            array_slice($columns, 0, 1, true),
+            array('thumbnail' => __( 'Thumbnail' )),
+            array_slice($columns, 1, 1, true),
+            array('unit' => __( 'Unit' )),
+            array_slice($columns, 2, count($columns) - 1, true));
+    }
+
+    static function render_people_thumbnail_column ($column, $post_id)
+    {
+        if ($column !== 'thumbnail') return;
+        $person = Person::get($post_id);
+        if (! $person) return;
+
+        $src = $person->get_image_url();
+        if (! $src) return;
+
+        $attrs = 'width="100px" ';
+        echo sprintf("<img src=\"%s\" %s/>", $src, $attrs);
+    }
+
+    static function render_people_unit_column  ($column, $post_id) {
+        if ($column !== 'unit') return;
+        $person = Person::get($post_id);
+        if (! $person) return;
+
+        $unit = $person->get_unit();
+        if (! $unit) return;
+
+        echo $unit;
+    }
 
     /**
      * Arrange for a nonfatal error to be shown in a so-called "admin notice."
@@ -407,7 +480,7 @@ class PersonController
     {
         // Use "Saving It in a Transient" technique from
         // https://www.sitepoint.com/displaying-errors-from-the-save_post-hook-in-wordpress/
-        
+
         set_transient(
             self::get_error_transient_key($post_id),
             $text,
