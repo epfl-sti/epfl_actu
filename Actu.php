@@ -22,6 +22,8 @@ if (! defined('ABSPATH')) {
     die('Access denied.');
 }
 
+require_once(dirname(__FILE__) . "/inc/base-classes.php");
+
 require_once(dirname(__FILE__) . "/inc/i18n.php");
 require_once(dirname(__FILE__) . "/inc/image-size.php");
 use function EPFL\WS\get_image_size;
@@ -33,53 +35,21 @@ use function EPFL\WS\get_image_size;
  * 'epfl-actu-channel' WordPress taxonomy. Each stream has an API URL
  * from which news are continuously fetched.
  */
-class ActuStream
+class ActuStream extends \EPFL\WS\Base\StreamedTaxonomy
 {
     static function get_taxonomy_slug ()
     {
         return 'epfl-actu-channel';
     }
 
-    function __construct($term_or_term_id)
+    static function get_channel_api_url_slug ()
     {
-        if (is_object($term_or_term_id)) {
-            $this->ID = $term_or_term_id->term_id;
-        } else {
-            $this->ID = $term_or_term_id;
-        }
+        return "epfl_actu_channel_api_url";
     }
 
-    const CHANNEL_API_URL_SLUG = "epfl_actu_channel_api_url";
-
-    function get_url ()
+    static function get_post_class ()
     {
-        if (! $this->url) {
-            $this->url = get_term_meta( $this->ID, self::CHANNEL_API_URL_SLUG, true );
-        }
-        return $this->url;
-    }
-
-    function set_url ($url)
-    {
-        $this->url = $url;
-        delete_term_meta($this->ID, self::CHANNEL_API_URL_SLUG);
-        add_term_meta($this->ID, self::CHANNEL_API_URL_SLUG, $url);
-    }
-
-    function as_category ()
-    {
-        return $this->ID;
-    }
-
-    function sync ()
-    {
-        require_once (dirname(__FILE__) . "/ActuAPI.php");
-        $client = new ActuAPIClient($this);
-        foreach ($client->fetch() as $APIelement) {
-            $actuItem = Actu::get_or_create($APIelement["news_id"], $APIelement["translation_id"]);
-            $actuItem->update($APIelement);
-            $actuItem->add_found_in_stream($this);
-        }
+        return Actu::class;
     }
 }
 
@@ -186,11 +156,11 @@ class Actu
     function add_found_in_stream($stream_object)
     {
         $terms = wp_get_post_terms(
-            $this->ID, ActuStream::get_taxonomy_slug(),
+            $this->ID, $stream_object->get_taxonomy_slug(),
             array('fields' => 'ids'));
         if (! in_array($stream_object->ID, $terms)) {
             wp_set_post_terms($this->ID, array($stream_object->ID),
-                              ActuStream::get_taxonomy_slug(),
+                              $stream_object->get_taxonomy_slug(),
                               true);  // Append
         }
     }
@@ -383,7 +353,7 @@ class Actu
  *
  * This is a "pure static" class; no instances are ever constructed.
  */
-class ActuStreamConfig
+class ActuStreamController
 {
     static function hook ()
     {
@@ -479,7 +449,7 @@ class ActuStreamConfig
  *
  * This is a "pure static" class; no instances are ever constructed.
  */
-class ActuConfig
+class ActuController
 {
     static function hook ()
     {
@@ -828,8 +798,12 @@ class ActuCategory
  *
  * This is a "pure static" class; no instances are ever constructed.
  */
-class ActuCategoryConfig
+class ActuCategoryController
 {
+    static function get_model_class ()
+    {
+        return Actu::class;
+    }
 
     static function hook ()
     {
@@ -898,6 +872,6 @@ class ActuCategoryConfig
     }
 }
 
-ActuStreamConfig::hook();
-ActuConfig::hook();
-ActuCategoryConfig::hook();
+ActuStreamController::hook();
+ActuController::hook();
+ActuCategoryController::hook();
