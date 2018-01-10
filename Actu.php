@@ -40,15 +40,12 @@ class ActuStream
         return 'epfl-actu-channel';
     }
 
-    function __construct($term_or_term_id, $url = null)
+    function __construct($term_or_term_id)
     {
         if (is_object($term_or_term_id)) {
             $this->ID = $term_or_term_id->term_id;
         } else {
             $this->ID = $term_or_term_id;
-        }
-        if ($url !== null) {
-            $this->url = $url;
         }
     }
 
