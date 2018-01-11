@@ -64,6 +64,14 @@ class Actu extends \EPFL\WS\Base\APIChannelPost
         return 'epfl-actu';
     }
 
+    static function get_auto_category_class () {
+        return ActuCategory::class;
+    }
+
+    static function get_auto_category_id_key () {
+        return "news_category_id";
+    }
+
     static function get_api_id_key ()
     {
         return "news_id";
@@ -113,32 +121,6 @@ class Actu extends \EPFL\WS\Base\APIChannelPost
                 $this->_post_meta[$subtitle_meta_key] = $subtitle;
             }
         }
-    }
-
-    protected function _get_auto_categories($api_result) {
-        $categories = array();
-        $actu_cat = ActuCategory::get_by_actu_id(
-            $api_result["news_category_id"],
-            function ($terms) use ($api_result) {
-                // Perhaps the returned categories are translations of each other?
-                $filtered_terms = array();
-                if (function_exists("pll_get_term")) {  // Polylang
-                    foreach ($terms as $term) {
-                        if (pll_get_term($term->term_id, $api_result["language"]) === $term->term_id) {
-                            array_push($filtered_terms, $term);
-                        }
-                    }
-                    return $filtered_terms;
-                } else {
-                    // Ah well, just go with the first one
-                    return $terms;
-                }
-            }
-        );
-        if ($actu_cat) {
-            array_push($categories, $actu_cat->ID());
-        }
-        return $categories;
     }
 
     function get_youtube_id ()
@@ -287,39 +269,22 @@ class ActuController extends \EPFL\WS\Base\APIChannelPostController
 /**
  * A standard WordPress category that is auto-assigned to Actu elements.
  */
-class ActuCategory
+class ActuCategory extends \EPFL\WS\Base\APIAutoCategory
 {
-    const ID_META = "epfl_actu_category_id";
-
-    function __construct ($tag_id)
+    static function get_term_meta_slug ()
     {
-        $this->tag_id = $tag_id;
+        return "epfl_actu_category_id";
     }
 
-    function ID ()
-    {
-        return $this->tag_id;
-    }
-
-    function get_actu_id ()
-    {
-        return get_term_meta($this->tag_id, self::ID_META, true);
-    }
-
-    static function get_by_actu_id ($actu_id, $discrim_func = null)
-    {
-        $klass = get_called_class();
-        $terms = get_terms(array(
-            'taxonomy'   => 'category',
-            'meta_key'   => self::ID_META,
-            'meta_value' => $actu_id,
-            'hide_empty' => false
-        ));
-        if (! count($terms)) return;
-        if (count($terms) > 1) {
-            $terms = call_user_func($discrim_func, $terms);
-        }
-        return new $klass($terms[0]->term_id);
+    static function get_api_category_names () {
+        // https://actus.epfl.ch/api/v1/categories/
+        return array(
+            "1" => __x("EPFL",        "API category"),
+            "2" => __x("Education",   "API category"),
+            "3" => __x("Research",    "API category"),
+            "4" => __x("Innovation",  "API category"),
+            "5" => __x("Campus Life", "API category")
+        );
     }
 }
 
@@ -328,78 +293,25 @@ class ActuCategory
  *
  * This is a "pure static" class; no instances are ever constructed.
  */
-class ActuCategoryController
+class ActuCategoryController extends \EPFL\WS\Base\APIAutoCategoryController
 {
     static function get_model_class ()
     {
-        return Actu::class;
+        return ActuCategory::class;
     }
 
-    static function hook ()
+    static function get_human_labels ()
     {
-        add_action ( 'category_add_form_fields', array(get_called_class(), 'render_actu_category_id'));
-        add_action ( 'category_edit_form_fields', array(get_called_class(), 'render_actu_category_id'));
-        add_action ( 'created_category', array(get_called_class(), 'save_actu_category_id'), 10, 2);
-        add_action ( 'edited_category', array(get_called_class(), 'save_actu_category_id'), 10, 2);
-
-        add_filter ( "manage_edit-category_columns", array(get_called_class(), 'add_column_category_id'));
-        add_filter ( "manage_category_custom_column", array(get_called_class(), 'render_custom_column_category_id'), 10, 3);
-    }
-
-    // https://actus.epfl.ch/api/v1/categories/
-    const ACTU_CATEGORY_LIST = array(
-        "1" => "EPFL",
-        "2" => "Education",
-        "3" => "Research",
-        "4" => "Innovation",
-        "5" => "Campus Life",
+        return array(
+            "category_name_label" => ___("Actu's category name"),
+            "purpose_explanation" => ___("Setting this will cause matching posts from news.epfl.ch to automatically get classified into this category."),
+            "column_title"        => ___("Actu category")
         );
-
-    static function get_actu_category_id ($tag_id)
-    {
-        return self::ACTU_CATEGORY_LIST[get_term_meta($tag_id, ActuCategory::ID_META, true)];
     }
 
-    static function render_actu_category_id ()
+    static function get_wp_admin_css_class ()
     {
-        $actu_category_id = (new ActuCategory($_REQUEST['tag_ID']))->get_actu_id();
-        ?>
-        <tr class="form-field actu-description-wrap">
-            <th scope="row">
-                <label for="actu_category_id">
-                    <?php echo ___("Actu's category ID"); ?>
-                </label>
-            </th>
-            <td>
-                <select name="actu_category_id" id="actu_category_id" class="postform">
-                    <option value="-1">None</option>
-                <?php foreach (self::ACTU_CATEGORY_LIST as $catid => $cattitle) { ?>
-                    <option class="level-0" value="<?php echo $catid; ?>"<?php echo ($actu_category_id==$catid) ? 'selected="true"':'';  ?>><?php echo ___($cattitle); ?></option>
-                <?php } ?>
-                </select>
-                <p><?php echo ___("This allows to link any news.epfl.ch's category with this plugins categories."); ?></p>
-            </td>
-        </tr>
-        <?php
-    }
-
-    static function save_actu_category_id ($term_id, $unused_taxonomy) {
-        if ( isset( $_REQUEST['actu_category_id'] ) ) {
-            add_term_meta($term_id, ActuCategory::ID_META, $_REQUEST['actu_category_id']);
-        }
-    }
-
-    static function add_column_category_id ($columns)
-    {
-        $columns[ActuCategory::ID_META] = ___("Actu category");
-        return $columns;
-    }
-
-    static function render_custom_column_category_id ($content, $column_name, $term_id)
-    {
-        if ($column_name === ActuCategory::ID_META) {
-            return self::get_actu_category_id($term_id);
-        }
+        return "actu-description-wrap";
     }
 }
 

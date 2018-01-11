@@ -52,7 +52,7 @@ abstract class APIChannelTaxonomy
 
     /**
      * @return A slug (unique keyword) used to associate metadata
-     *         (e.g. the API URL) to objects of this class in the
+     *         (here, the API URL) to objects of this class in the
      *         WordPress database
      */
     static abstract function get_term_meta_slug ();
@@ -278,6 +278,19 @@ abstract class APIChannelPost
      */
     static abstract function get_image_url_key ();
 
+    /**
+     * @return The @link APIAutoCategory class that instances of
+     *         this class get auto-attached to.
+     */
+    static abstract function get_auto_category_class ();
+
+    /**
+     * @return The key in the JSON returned in the API, whose value
+     *         is an integer ID pointing to the correct instance
+     *         of @link get_auto_category_class
+     */
+    static abstract function get_auto_category_id_key ();
+
     var $ID;
     var $api_id;
     var $translation_id;
@@ -416,11 +429,14 @@ abstract class APIChannelPost
 
         wp_update_post($update_post_args);
 
-        $add_in_categories = $that->_get_auto_categories($api_result);
-        if (count($add_in_categories)) {
-            wp_set_post_categories($that->ID, $add_in_categories,
-                                   /* $append = */ true);
-        }
+        $auto_categories = $this->get_auto_category_class()::find(
+            $api_result[$this->get_auto_category_id_key()],
+            /* $lang_hint = */ $api_result["language"]);
+        wp_set_post_categories(
+            $that->ID,
+            array_map(function($cat) { return $cat->ID(); }, $auto_categories),
+            /* $append = */ true);
+
         return $that;
     }
 
@@ -576,7 +592,7 @@ abstract class APIChannelPost
 }
 
 /**
- * Configuration UI and WP callbacks for a APIChannelPost class.
+ * Configuration UI and WP callbacks for an APIChannelPost class.
  *
  * This is a "pure static" class; no instances are ever constructed.
  */
@@ -788,10 +804,10 @@ abstract class APIChannelPostController
      * The base class appends size informations below $img. Subclasses
      * may override this to render the thumbnail differently.
      *
-     * @arg $epfl_post An instance of the class returned by @link
+     * @param $epfl_post An instance of the class returned by @link
      * get_model_class
      *
-     * @arg $img HTML code for the thumbnail (as returned by
+     * @param $img HTML code for the thumbnail (as returned by
      * Wordpress' @link get_the_post_thumbnail)
      */
     static function render_thumbnail_column ($epfl_post, $img)
@@ -950,5 +966,185 @@ abstract class APIChannelPostController
     {
         $taxonomy_class = static::get_taxonomy_class();
         return $taxonomy_class::get_post_class();
+    }
+}
+
+/**
+ * A category into which APIChannelPost instances can be auto-assigned
+ */
+abstract class APIAutoCategory
+{
+    /**
+     * @return A slug (unique keyword) used to associate metadata
+     *         (here, the API-side category code) to objects of this
+     *         class in the WordPress database
+     */
+    static abstract function get_term_meta_slug ();
+
+    /**
+     * @return An associative array where keys are API-side integer IDs,
+     *         and values are i18n'd human-readable names for same.
+     */
+    static abstract function get_api_category_names();
+
+    function __construct ($tag_id)
+    {
+        $this->tag_id = $tag_id;
+    }
+
+    function ID ()
+    {
+        return $this->tag_id;
+    }
+
+    function get_api_id ()
+    {
+        return get_term_meta($this->tag_id, $this->get_term_meta_slug(), true);
+    }
+
+    /**
+     * @return A list of categories to auto-include an instance
+     * of @link APIChannelPost into.
+     *
+     * @param $api_id One of the numeric IDs listed by
+     *        https://actus.epfl.ch/api/v1/categories/ or equivalent,
+     *        as received in the JSON response
+     *
+     * @param $language_hint A two-letter language code. In case there
+     *        are several matching categories *and* the Polylang plug-in is
+     *        active, only retain the one(s) that have the same language.
+     */
+    static function find ($api_id, $language_hint = null)
+    {
+        $theclass = get_called_class();
+        $terms = get_terms(array(
+            'taxonomy'   => 'category',
+            'meta_key'   => static::get_term_meta_slug(),
+            'meta_value' => $api_id,
+            'hide_empty' => false
+        ));
+        if (! count($terms)) return [];
+        if (count($terms) > 1 && null !== $language_hint &&
+            function_exists("pll_get_term")) {  // Polylang
+            // Perhaps the multiple $terms are translations of each other?
+            $terms = array_filter(
+                $terms,
+                function($term) use ($language_hint) {
+                    return ($term->term_id ===
+                            pll_get_term($term->term_id, $language_hint));
+                });
+        }
+        // No Polylang? No matter: just keep the first one (a notch
+        // better than inserting into all of them, which we *could* do
+        // too from here)
+        if (count($terms)) {
+            return [new $theclass($terms[0]->term_id)];
+        } else {
+            return [];
+        }
+    }
+}
+
+/**
+ * Configuration UI and WP callbacks for an APIAutoCategory class.
+ *
+ * This is a "pure static" class; no instances are ever constructed.
+ */
+abstract class APIAutoCategoryController
+{
+    /**
+     * @return The model class for this controller
+     */
+    abstract static function get_model_class ();
+
+    /**
+     * Get the labels to display in various places in the UI.
+     *
+     * @return An associative array whose keys are i18n-neutral
+     *         keywords and whose values are translation strings. The
+     *         keys are as shown below:
+     *
+     * - category_name_label: A short explanation of what the values of
+     *                        ::get_model_class()::get_api_category_names()
+     *                        are useful for, e.g. "Actu's category name"
+     *
+     * - purpose_explanation: A longer explanation of same, intended
+     *                        for a pop-up tip or help message
+     *
+     * - column_title:        Same as category_name_label, but for the purpose
+     *                        of a column title in a tabular display
+     */
+    abstract static function get_human_labels ();
+
+    static function hook ()
+    {
+        add_action ( 'category_add_form_fields', array(get_called_class(), 'render_category_id'));
+        add_action ( 'category_edit_form_fields', array(get_called_class(), 'render_category_id'));
+        add_action ( 'created_category', array(get_called_class(), 'save_category_id'), 10, 2);
+        add_action ( 'edited_category', array(get_called_class(), 'save_category_id'), 10, 2);
+
+        add_filter ( "manage_edit-category_columns", array(get_called_class(), 'add_column_category_id'));
+        add_filter ( "manage_category_custom_column", array(get_called_class(), 'get_custom_column_value'), 10, 3);
+    }
+
+    static function get_term_meta_slug()
+    {
+        return static::get_model_class()::get_term_meta_slug();
+    }
+
+    static function get_category_id ($tag_id)
+    {
+        return get_term_meta($tag_id, static::get_term_meta_slug(), true);
+    }
+
+    static function get_category_name ($tag_id)
+    {
+        return static::get_model_class()::get_api_category_names()[
+            static::get_category_id($tag_id)];
+    }
+
+    static function get_custom_column_value ($content, $column_name, $term_id)
+    {
+        if ($column_name === static::get_term_meta_slug()) {
+            return self::get_category_name($term_id);
+        }
+    }
+
+    static function render_category_id ()
+    {
+        $model_class = static::get_model_class();
+        $api_id = (new $model_class($_REQUEST['tag_ID']))->get_api_id();
+        ?>
+        <tr class="form-field <?php echo static::get_wp_admin_css_class() ?>">
+            <th scope="row">
+                <label for="epfl_api_category_id">
+                    <?php echo static::get_human_labels()["category_name_label"]; ?>
+                </label>
+            </th>
+            <td>
+                <select name="epfl_api_category_id" id="epfl_api_category_id" class="postform">
+                    <option value="-1">None</option>
+                <?php foreach (static::get_model_class()::get_api_category_names() as $catid => $cattitle) { ?>
+                    <option class="level-0" value="<?php echo $catid; ?>"<?php selected($api_id, $catid)  ?>><?php echo $cattitle; ?></option>
+                <?php } ?>
+                </select>
+                <p><?php echo static::get_human_labels()["purpose_explanation"]; ?></p>
+            </td>
+        </tr>
+        <?php
+    }
+
+    static function save_category_id ($term_id, $unused_taxonomy) {
+        $newval = $_REQUEST['epfl_api_category_id'];
+        if ( null !== $newval ) {
+            delete_term_meta($term_id, static::get_term_meta_slug());
+            add_term_meta($term_id, static::get_term_meta_slug(), $newval);
+        }
+    }
+
+    static function add_column_category_id ($columns)
+    {
+        $columns[static::get_term_meta_slug()] = static::get_human_labels()["column_title"];
+        return $columns;
     }
 }
