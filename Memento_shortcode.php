@@ -93,7 +93,7 @@ class MementoShortCode {
     // Debug: print $url;
 
     // fetch actus items
-    require_once(dirname(__FILE__) . "/inc/epfl-ws.php");
+    require_once(dirname(__FILE__) . "/inc/epfl-ws.inc");
     $ws = new \EPFL\WS\epflws();
     if ( $memento_url = $ws->validate_url( $url, "memento.epfl.ch" ) ) {
       $events = $ws->get_items( $memento_url );
@@ -164,7 +164,7 @@ class MementoShortCode {
    */
   function display_full($events)
   {
-    require_once(dirname(__FILE__) . "/inc/epfl-ws.php");
+    require_once(dirname(__FILE__) . "/inc/epfl-ws.inc");
     $ws = new \EPFL\WS\epflws();
     //$ws->debug($events);
     foreach ($events as $item) {

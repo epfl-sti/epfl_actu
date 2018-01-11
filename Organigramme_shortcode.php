@@ -13,8 +13,8 @@ class OrganigrammeShortCode {
   function __construct() {
     add_shortcode('organigramme', array($this, 'wp_shortcode'));
     add_action("admin_print_footer_scripts", array($this, 'organigramme_shortcode_button_script'));
-    // include function from /inc/epfl-ws.php
-    require_once(dirname(__FILE__) . "/inc/epfl-ws.php");
+    // include function from /inc/epfl-ws.inc
+    require_once(dirname(__FILE__) . "/inc/epfl-ws.inc");
     $this->ws = new \EPFL\WS\epflws();
   }
 

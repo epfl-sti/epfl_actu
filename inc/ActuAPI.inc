@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Client code for the EPFL Actu API
+ * Client code for the EPFL Actu and Memento APIs
  *
  * @see https://wiki.epfl.ch/api-rest-actu-memento
  */

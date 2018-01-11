@@ -1,6 +1,6 @@
 <?php
 /*
- * File name:   epfl-ws/inc/epfl-ws.php
+ * File name:   epfl-ws/inc/epfl-ws.inc
  * Description: This file regroups common function for EPFL WS
  * Version:     0.1
  * Author:      STI-IT Web

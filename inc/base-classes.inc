@@ -10,7 +10,7 @@ if (! defined('ABSPATH')) {
     die('Access denied.');
 }
 
-require_once(dirname(__FILE__) . "/i18n.php");
+require_once(dirname(__FILE__) . "/i18n.inc");
 
 /**
  * Abstract base classes for taxonomies whose terms correspond to an API URL.
@@ -77,7 +77,7 @@ abstract class APIChannelTaxonomy
 
     function sync ()
     {
-        require_once (dirname(dirname(__FILE__)) . "/ActuAPI.php");
+        require_once (dirname(__FILE__) . "/ActuAPI.inc");
         $client = new \EPFL\WS\Actu\ActuAPIClient($this);
         foreach ($client->fetch() as $APIelement) {
             $post_class = $this->get_post_class();

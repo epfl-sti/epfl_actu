@@ -22,10 +22,10 @@ if (! defined('ABSPATH')) {
     die('Access denied.');
 }
 
-require_once(dirname(__FILE__) . "/inc/base-classes.php");
+require_once(dirname(__FILE__) . "/inc/base-classes.inc");
 
-require_once(dirname(__FILE__) . "/inc/i18n.php");
-require_once(dirname(__FILE__) . "/inc/image-size.php");
+require_once(dirname(__FILE__) . "/inc/i18n.inc");
+require_once(dirname(__FILE__) . "/inc/image-size.inc");
 use function EPFL\WS\get_image_size;
 
 /**
