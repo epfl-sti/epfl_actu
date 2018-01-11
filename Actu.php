@@ -35,7 +35,7 @@ use function EPFL\WS\get_image_size;
  * 'epfl-actu-channel' WordPress taxonomy. Each stream has an API URL
  * from which news are continuously fetched.
  */
-class ActuStream extends \EPFL\WS\Base\StreamedTaxonomy
+class ActuStream extends \EPFL\WS\Base\APIChannelTaxonomy
 {
     static function get_taxonomy_slug ()
     {
@@ -154,7 +154,7 @@ class Actu
      * mutable state of it.
      *
      * Only taxonomy terms (categories, as well as @link
-     * StreamedTaxonomy#set_ownership) are left unchanged.
+     * APIChannelTaxonomy#set_ownership) are left unchanged.
      */
     function update ($details)
     {
@@ -333,94 +333,35 @@ class Actu
  *
  * This is a "pure static" class; no instances are ever constructed.
  */
-class ActuStreamController
+class ActuStreamController extends \EPFL\WS\Base\APIChannelTaxonomyController
 {
-    static function hook ()
-    {
-        add_action('init', array(get_called_class(), 'register_taxonomy'));
+    static function get_taxonomy_class () {
+        return ActuStream::class;
     }
 
-    /**
-     * Create Actu channels as a taxonomy.
-     *
-     * A "taxonomy" is a complicated word for a category of Actu
-     * entries. Actu entries are grouped by "channels", i.e. the feed
-     * they come from. Channels have names and host suitable metadata,
-     * i.e. an API URL to fetch from.
-     */
-    static function register_taxonomy ()
+    static function get_human_labels ()
     {
-        $taxonomy_slug = ActuStream::get_taxonomy_slug();
-        register_taxonomy(
-            $taxonomy_slug,
-            array( Actu::get_post_type() ),
-            array(
-                'hierarchical'      => false,
-                'labels'            => array(
-                'name'              => __x( 'News Channels', 'taxonomy general name'),
-                'singular_name'     => __x( 'News Channel', 'taxonomy singular name'),
-                'search_items'      => ___( 'Search News Channels'),
-                'all_items'         => ___( 'All News Channels'),
-                'edit_item'         => ___( 'Edit News Channel'),
-                'update_item'       => ___( 'Update News Channel'),
-                'add_new_item'      => ___( 'Add News Channel'),
-                'new_item_name'     => ___( 'New Channel Name'),
-                'menu_name'         => ___( 'News Channels'),
-                ),
-                'show_ui'           => true,
-                'show_admin_column' => true,
-                'query_var'         => true,
-                'capabilities'      => array(
-                    // Cannot change terms from Actu edit screen:
-                    'assign_terms' => '__NEVER_PERMITTED__',
-                    // Default permissions apply for the other operations
-                ),
-                'rewrite'           => array( 'slug' => $taxonomy_slug ),
-            ));
-        add_action("${taxonomy_slug}_add_form_fields", array(get_called_class(), "create_channel_widget"));
-        add_action( "${taxonomy_slug}_edit_form_fields", array(get_called_class(), "update_channel_widget"), 10, 2);
-        add_action( "created_${taxonomy_slug}", array(get_called_class(), 'edited_channel'), 10, 2 );
-        add_action( "edited_${taxonomy_slug}", array(get_called_class(), 'edited_channel'), 10, 2 );
+        return array(
+            // These are for regster_taxonomy
+            'name'              => __x( 'News Channels', 'taxonomy general name'),
+            'singular_name'     => __x( 'News Channel', 'taxonomy singular name'),
+            'search_items'      => ___( 'Search News Channels'),
+            'all_items'         => ___( 'All News Channels'),
+            'edit_item'         => ___( 'Edit News Channel'),
+            'update_item'       => ___( 'Update News Channel'),
+            'add_new_item'      => ___( 'Add News Channel'),
+            'new_item_name'     => ___( 'New Channel Name'),
+            'menu_name'         => ___( 'News Channels'),
+
+            // These are internal to APIChannelTaxonomyController
+            'url_legend'        => ___('Actu Channel API URL'),
+            'url_legend_long'   => ___("Source URL of the JSON data. Use <a href=\"https://wiki.epfl.ch/api-rest-actu-memento/actu\" target=\"_blank\">actu-doc</a> for details.")
+        );
     }
 
-    static function create_channel_widget ($taxonomy)
+    static function get_placeholder_api_url ()
     {
-        self::render_channel_widget(array("placeholder" => "https://actu.epfl.ch/api/jahia/channels/sti/news/en/?format=json", "size" => 40, "type" => "text"));
-    }
-
-    static function update_channel_widget ($term, $taxonomy)
-    {
-        ?><tr class="form-field actu-channel-url-wrap">
-            <th scope="row">
-                <label for="<?php echo self::CHANNEL_WIDGET_URL_SLUG ?>">
-                    <?php echo ___('Actu Channel API URL'); ?>
-                </label>
-            </th>
-            <td>
-                <input id="<?php echo self::CHANNEL_WIDGET_URL_SLUG; ?>" name="<?php echo self::CHANNEL_WIDGET_URL_SLUG; ?>" type="text" size="40" value="<?php echo (new ActuStream($term))->get_url(); ?>" />
-                <p class="description"><?php echo ___("Source URL of the JSON data. Use <a href=\"https://wiki.epfl.ch/api-rest-actu-memento/actu\" target=\"_blank\">actu-doc</a> for details."); ?></p>
-            </td>
-        </tr><?php
-    }
-
-    const CHANNEL_WIDGET_URL_SLUG = 'epfl_actu_channel_url';
-
-    static function render_channel_widget ($input_attributes)
-    {
-      ?><div class="form-field term-wrap">
-        <label for="<?php echo self::CHANNEL_WIDGET_URL_SLUG ?>"><?php echo ___('Actu Channel API URL'); ?></label>
-        <input id="<?php echo self::CHANNEL_WIDGET_URL_SLUG ?>" name="<?php echo self::CHANNEL_WIDGET_URL_SLUG ?>" <?php
-           foreach ($input_attributes as $k => $v) {
-               echo "$k=" . htmlspecialchars($v) . " ";
-           }?> />
-       </div><?php
-    }
-
-    static function edited_channel ($term_id, $tt_id)
-    {
-        $stream = new ActuStream($term_id);
-        $stream->set_url($_POST[self::CHANNEL_WIDGET_URL_SLUG]);
-        $stream->sync();
+        return "https://actu.epfl.ch/api/jahia/channels/sti/news/en/?format=json";
     }
 }
 
