@@ -42,7 +42,7 @@ class ActuStream extends \EPFL\WS\Base\StreamedTaxonomy
         return 'epfl-actu-channel';
     }
 
-    static function get_channel_api_url_slug ()
+    static function get_term_meta_slug ()
     {
         return "epfl_actu_channel_api_url";
     }
@@ -145,26 +145,6 @@ class Actu
         return $that;
     }
 
-    /**
-     * Mark in the database that this piece of news was found by
-     * fetching from $stream_object.
-     *
-     * This is materialized by a relationship in the
-     * wp_term_relationships SQL table, using the @link
-     * wp_set_post_terms API.
-     */
-    function add_found_in_stream($stream_object)
-    {
-        $terms = wp_get_post_terms(
-            $this->ID, $stream_object->get_taxonomy_slug(),
-            array('fields' => 'ids'));
-        if (! in_array($stream_object->ID, $terms)) {
-            wp_set_post_terms($this->ID, array($stream_object->ID),
-                              $stream_object->get_taxonomy_slug(),
-                              true);  // Append
-        }
-    }
-
     const THUMBNAIL_META  = "epfl_actu_external_thumbnail";
     const MAX_HEIGHT_META = "epfl_actu_external_img_max_height";
     const MAX_WIDTH_META  = "epfl_actu_external_img_max_width";
@@ -173,8 +153,8 @@ class Actu
      * Update this news post with $details, overwriting most of the
      * mutable state of it.
      *
-     * Only taxonomy terms (managed by @link add_found_in_stream) are
-     * left unchanged.
+     * Only taxonomy terms (categories, as well as @link
+     * StreamedTaxonomy#set_ownership) are left unchanged.
      */
     function update ($details)
     {
