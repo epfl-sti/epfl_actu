@@ -13,6 +13,7 @@ if (! defined('ABSPATH')) {
 use WP_Query;
 
 require_once(dirname(__FILE__) . "/i18n.inc");
+use function \EPFL\WS\Actu\___;
 
 /**
  * Abstract base classes for taxonomies whose terms correspond to an API URL.
@@ -129,11 +130,6 @@ abstract class APIChannelTaxonomyController
      */
     abstract static function get_placeholder_api_url ();
 
-    static function hook ()
-    {
-        add_action('init', array(get_called_class(), '_do_register_taxonomy'));
-    }
-
     /**
      * Get the labels to display in various places in the UI.
      *
@@ -152,6 +148,11 @@ abstract class APIChannelTaxonomyController
      *
      */
     abstract static function get_human_labels ();
+
+    static function hook ()
+    {
+        add_action('init', array(get_called_class(), '_do_register_taxonomy'));
+    }
 
     /**
      * Make the taxonomy of @link get_taxonomy_class exist.
@@ -539,5 +540,368 @@ abstract class APIChannelPost
         $meta = $this->_get_post_meta();
         return $meta["absolute_slug"];
     }
+}
 
+/**
+ * Configuration UI and WP callbacks for a APIChannelPost class.
+ *
+ * This is a "pure static" class; no instances are ever constructed.
+ */
+abstract class APIChannelPostController
+{
+    /**
+     * Get the labels to display in various places in the UI.
+     *
+     * @return An associative array whose keys are i18n-neutral
+     *         keywords and whose values are translation strings. This
+     *         array gets passed as-is as the 'labels' value to
+     *         WordPress' @link register_post_type, and therefore ought
+     *         to contain like-named keys. Additionally the following
+     *         keys are used by APIChannelTaxonomyController directly:
+     *
+     * - description: The post type description for wp_admin (passed
+     *                as the `"description"` field to `register_post_type`)
+     *
+     */
+    abstract static function get_human_labels ();
+
+    /**
+     * @return The @link APIChannelTaxonomy subclass this controller serves.
+     */
+    abstract static function get_taxonomy_class ();
+
+    /**
+     * @return The name of the
+     * [dashicons](https://developer.wordpress.org/resource/dashicons/)
+     * icon to use in the header for this controller in the WP admin
+     * area
+     */
+    abstract static function get_wpadmin_icon ();
+
+    static function hook ()
+    {
+        add_action('init', array(get_called_class(), 'register_post_type'));
+
+        $main_plugin_file = dirname(dirname(__FILE__)) . "/EPFL-ws.php";
+        register_activation_hook($main_plugin_file, array(get_called_class(), "register_caps"));
+        register_deactivation_hook($main_plugin_file, array(get_called_class(), "deregister_caps"));
+
+        // Behavior of epfl-ws posts on the main site
+        add_filter("post_thumbnail_html",
+                   array(get_called_class(), "filter_post_thumbnail_html"), 10, 5);
+        add_filter("post_type_link",
+                   array(get_called_class(), "filter_post_link"), 10, 4);
+
+        // Behavior of epfl-ws posts in the wp-admin area
+        add_action('admin_init', array(get_called_class(), 'make_subtitles_readonly_in_admin'), 0);
+        static::add_thumbnail_column();
+        static::configure_rendering_in_edit_form();
+        add_action("admin_enqueue_scripts", array(get_called_class(), "editor_css"));
+
+        // Behavior of Actu posts in search results
+        add_filter('pre_get_posts', array(get_called_class(), "pre_get_posts"));
+    }
+
+    /**
+     * Make it so that posts of this class exist.
+     *
+     * Under WordPress, almost everything publishable is a post.
+     * register_post_type() is invoked to create a particular flavor
+     * of posts that describe news.
+     */
+    static function register_post_type ()
+    {
+        $taxonomy_class = static::get_taxonomy_class();
+        $taxonomy_slug = $taxonomy_class::get_taxonomy_slug();
+        $menu_icon = static::get_wpadmin_icon();
+        $post_class = $taxonomy_class::get_post_class();
+        $post_type = $post_class::get_post_type();
+        $labels = static::get_human_labels();
+        register_post_type(
+            $post_type,
+            array(
+                'labels'             => $labels,
+                'description'        => $labels['description'],
+                'public'             => true,
+                'publicly_queryable' => true,
+                'show_ui'            => true,
+                'show_in_menu'       => true,
+                'query_var'          => true,
+                // ad hoc access control, see (de|)register_caps() below:
+                'capabilities'       => array(
+                    'read'                 => 'read_epfl_ws_posts',
+                    // Name notwithstanding, edit_posts is actually
+                    // the permission to see the list of posts.
+                    'edit_posts'           => 'read_epfl_ws_posts',
+                    'create_posts'         => '__NEVER_PERMITTED__',
+
+                    'edit_post'            => 'edit_epfl_ws_posts',
+                    'edit_private_posts'   => 'edit_epfl_ws_posts',
+                    'edit_published_posts' => 'edit_epfl_ws_posts',
+                    'assign_categories'    => 'edit_epfl_ws_posts',
+                    'assign_post_tags'     => 'edit_epfl_ws_posts',
+                    // One is not actually supposed to delete posts manually —
+                    // This is just an escape hatch in case an ActuStream was
+                    // deleted and referential integrity was breached.
+                    'delete_post'          => 'edit_epfl_ws_posts',
+                    'delete_posts'         => 'edit_epfl_ws_posts',
+                    'delete_private_posts' => 'edit_epfl_ws_posts',
+                    'delete_others_posts'  => 'edit_epfl_ws_posts',
+                ),
+                'has_archive'        => true,
+                'hierarchical'       => false,
+                'taxonomies'         => array($taxonomy_slug, 'category'),
+                'menu_position'      => 24,
+                'menu_icon'          => $menu_icon,
+                'supports'           => array('wps_subtitle')
+            ));
+    }
+
+    const ROLES_THAT_MAY_VIEW_ACTUS = array('administrator', 'editor', 'author', 'contributor');
+    const ROLES_THAT_MAY_MANAGE_ACTUS = array('administrator', 'editor');
+    const ALL_ROLES = array('administrator', 'editor', 'author', 'contributor', 'subscriber');
+    const CAPS_FOR_VIEWERS = array(
+        'read_epfl_ws_posts'
+    );
+    const ALL_CAPS = array(
+        'read_epfl_ws_posts',
+        'edit_epfl_ws_posts'
+    );
+    // We have used these in the past, and need to clean them up.
+    const OBSOLETE_CAPS = array(
+        'read_epfl_actus',
+        'edit_epfl_actus',
+        'read_epfl_actu',
+        'delete_epfl_actu'
+    );
+
+    /**
+     * Register permissions ("capabilities") on Actu posts.
+     *
+     * Called at plugin activation time.
+     *
+     * The permission map is made so that administrators and editors can view and
+     * delete Actus, but not edit them.
+     */
+    static function register_caps ()
+    {
+        foreach (self::ROLES_THAT_MAY_VIEW_ACTUS as $role_name) {
+            $role = get_role($role_name);
+            foreach (self::CAPS_FOR_VIEWERS as $cap) {
+                $role->add_cap($cap);
+            }
+        }
+        foreach (self::ROLES_THAT_MAY_MANAGE_ACTUS as $role_name) {
+            $role = get_role($role_name);
+            foreach (self::ALL_CAPS as $cap) {
+                $role->add_cap($cap);
+            }
+        }
+    }
+
+    /**
+     * De-register permissions ("capabilities") on Actu posts.
+     *
+     * Called at plugin deactivation time.
+     */
+    static function deregister_caps ()
+    {
+        foreach (self::ALL_ROLES as $role_name) {
+            $role = get_role($role_name);
+            foreach (self::ALL_CAPS as $cap) {
+                $role->remove_cap($cap);
+            }
+            foreach (self::OBSOLETE_CAPS as $cap) {
+                $role->remove_cap($cap);
+            }
+        }
+    }
+
+    /**
+     * Make room for a column that shows the thumbnails and some
+     * details
+     */
+    static function add_thumbnail_column ()
+    {
+        $this_class = get_called_class();
+        $model_class = $this_class::get_model_class();
+        $post_type = $model_class::get_post_type();
+        add_action( sprintf('manage_%s_posts_columns', $post_type),
+                    function ($columns) {
+                        // https://stackoverflow.com/a/3354804/435004
+                        return array_merge(
+                            array_slice($columns, 0, 1, true),
+                            array('thumbnail' => ___( 'Thumbnail' )),
+                            array_slice($columns, 1, count($columns) - 1, true));
+                    });
+        add_action(
+            sprintf('manage_%s_posts_custom_column', $post_type),
+            function () use ($this_class, $model_class) {
+                if ($column !== 'thumbnail') return;
+                $img = get_the_post_thumbnail($post_id);
+                if (! $img) return;
+
+                $epfl_post = $model_class::get($post_id);
+                if (! $epfl_post) return;
+
+                $this_class::render_thumbnail_column($epfl_post, $img);
+            }, 10, 2);
+    }
+
+    static function render_thumbnail_column ($epfl_post, $img)
+    {
+        if ($orig_size = $epfl_post->get_max_size()) {
+            echo $img;
+            printf("<p>Size: %dx%d</p>", $orig_size["width"], $orig_size["height"]);
+        } else {
+            echo $img;
+        }
+    }
+
+    /**
+     * Make subtitles read-only by preventing WP Subtitles from
+     * initializing in the case of epfl-actu posts.
+     */
+    static function make_subtitles_readonly_in_admin ()
+    {
+		$post_type = '';
+
+		if ( isset( $_REQUEST['post_type'] ) ) {
+			$post_type = sanitize_text_field( $_REQUEST['post_type'] );
+		} elseif ( isset( $_GET['post'] ) ) {
+			$post_type = get_post_type( absint( $_GET['post'] ) );
+        }
+        if ($post_type !== static::get_model_class()::get_post_type()) return;
+
+        remove_action('admin_init', array( 'WPSubtitle_Admin', '_admin_init' ) );
+        // Add back the subtitle column:
+        add_filter( 'manage_edit-' . $post_type . '_columns', array( 'WPSubtitle_Admin', 'manage_subtitle_columns' ) );
+        add_action( 'manage_' . $post_type . '_posts_custom_column', array( 'WPSubtitle_Admin', 'manage_subtitle_columns_content' ), 10, 2 );
+    }
+
+    /**
+     * Arrange for get_the_post_thumbnail() to return the external thumbnail for epfl-ws posts.
+     *
+     * This is set as a filter for WordPress' @link post_thumbnail_html hook. Note that
+     * it isn't as easy to hijack the return value of @link get_the_post_thumbnail_url
+     * in this way (but you can always call the @link get_image_url instance
+     * method on an Actu object).
+     *
+     * @return An <img /> tag with suitable attributes
+     *
+     * @param $orig_html The HTML that WordPress intended to return as
+     *                   the picture (unused, as it will typically be
+     *                   empty — epfl-ws objects lack attachments)
+     *
+     * @param $post_id   The post ID to compute the <img /> for
+     *
+     * @param $size      The requested size, in WordPress notation (either the
+     *                   name of a well-known or declared size, or a [$height,
+     *                   $width] array)
+     *
+     * @param $attr      Associative array of HTML attributes. If "class" is
+     *                   not specified, the default "wp-post-image" is used
+     *                   to match the WordPress behavior for local (attached)
+     *                   images.
+     */
+    static function filter_post_thumbnail_html ($orig_html, $post_id, $unused_thumbnail_id,
+                                                $size, $attr)
+    {
+        $actu = static::get_model_class()::get($post_id);
+        if (! $actu) return $orig_html;
+
+        // Actu images are resizable server-side
+        // TODO: we could actually interpret $size in a much finer way
+        if (($size === "full" || $size === "large")) {
+            $src = $actu->get_image_url("2048x1152");
+        } else {
+            $src = $actu->get_image_url();
+        }
+        if (! $src) return $orig_html;
+
+        if (! $attr) $attr = array();
+        if (! $attr["class"]) {
+            $attr["class"] = "wp-post-image";
+        }
+        $attrs = "";
+        foreach ( $attr as $name => $value ) {
+            $attrs .= sprintf(" %s=\"%s\"", $name, esc_attr($value));
+        }
+        return sprintf("<img src=\"%s\" %s/>", $src, $attrs);
+    }
+
+    /**
+     * Serve the permalink from actu.epfl.ch / memento.epfl.ch instead of our own.
+     *
+     * Mostly, we keep the full text of the article in-database just for the search engine.
+     */
+    static function filter_post_link ($orig_link, $post, $unused_leavename, $unused_is_sample)
+    {
+        $epfl_post = static::get_model_class()::get($post);
+        if (! $epfl_post) return $orig_link;
+        $true_permalink = $epfl_post->get_permalink();
+        return $true_permalink ? $true_permalink : $orig_link;
+    }
+
+    static function configure_rendering_in_edit_form ()
+    {
+        $this_class = get_called_class();
+        add_action("edit_form_after_title", function ($wp_post) use ($this_class) {
+                $epfl_post = $this_class::get_model_class()::get($wp_post);
+                if (! $epfl_post) return;
+               $this_class::render_readonly_in_edit_form($epfl_post); 
+            });
+
+    }
+
+    function render_readonly_in_edit_form ($epfl_post)
+    {
+        $wp_post = $epfl_post->wp_post();
+        $permalink = get_permalink($wp_post);
+        global $post;
+        $subtitle = function_exists("get_the_subtitle") ? get_the_subtitle($post, "", "", false) : null;
+        ?>
+    <h1><?php echo $wp_post->post_title; ?></h1>
+    <?php if ($subtitle) : ?><h2><?php echo $subtitle; ?></h2><?php endif; ?>
+	<div id="edit-slug-box" class="hide-if-no-js">
+    <img class="actu-thumbnail" src="<?php echo $epfl_post->get_image_url() ?>"/>
+    <p><b>Permalink:</b> <a href="<?php echo $permalink; ?>"><?php echo $permalink; ?></a></p>
+    <?php echo $wp_post->post_content; ?>
+	</div>
+        <?php
+    }
+
+    static function editor_css ($hook)
+    {
+        if (! ('post.php' === $hook &&
+               static::get_model_class()::get($_GET["post"])) ) return;
+        wp_register_style(
+            'ws-editor',
+            plugins_url( 'ws-editor.css', __FILE__ ) );
+        wp_enqueue_style('ws-editor');
+    }
+
+    function pre_get_posts ($query) {
+		$qv = &$query->query_vars;
+
+        if (! is_admin() && $query->is_main_query()) {
+            // Loosely based on https://wordpress.stackexchange.com/q/181803/132235
+            $post_types = $query->get('post_type');
+            if ($post_types === 'post') {
+                $post_types = ['post'];
+            }
+            if (is_array($post_types) &&
+                (false === array_search(static::get_model_class()::get_post_type(), $post_types))) {
+                array_push($post_types, static::get_model_class()::get_post_type());
+                $query->set('post_type', $post_types);
+            }
+        }
+        return $query;
+    }
+
+    static function get_model_class ()
+    {
+        $taxonomy_class = static::get_taxonomy_class();
+        return $taxonomy_class::get_post_class();
+    }
 }
