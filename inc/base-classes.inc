@@ -752,6 +752,19 @@ abstract class APIChannelPostController
             }, 10, 2);
     }
 
+    /**
+     * Render an EPFL post as a thumbnail in an additional column in
+     * the wp-admin list view
+     *
+     * The base class appends size informations below $img. Subclasses
+     * may override this to render the thumbnail differently.
+     *
+     * @arg $epfl_post An instance of the class returned by @link
+     * get_model_class
+     *
+     * @arg $img HTML code for the thumbnail (as returned by
+     * Wordpress' @link get_the_post_thumbnail)
+     */
     static function render_thumbnail_column ($epfl_post, $img)
     {
         echo $img;
@@ -901,6 +914,9 @@ abstract class APIChannelPostController
         return $query;
     }
 
+    /**
+     * @return The model class for this controller
+     */
     static function get_model_class ()
     {
         $taxonomy_class = static::get_taxonomy_class();
