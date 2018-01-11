@@ -10,6 +10,8 @@ if (! defined('ABSPATH')) {
     die('Access denied.');
 }
 
+use WP_Query;
+
 require_once(dirname(__FILE__) . "/i18n.inc");
 
 /**
@@ -79,10 +81,9 @@ abstract class APIChannelTaxonomy
     {
         require_once (dirname(__FILE__) . "/ActuAPI.inc");
         $client = new \EPFL\WS\Actu\ActuAPIClient($this);
-        foreach ($client->fetch() as $APIelement) {
+        foreach ($client->fetch() as $api_result) {
             $post_class = $this->get_post_class();
-            $epfl_post = $post_class::get_or_create($APIelement["news_id"], $APIelement["translation_id"]);
-            $epfl_post->update($APIelement);
+            $epfl_post = $post_class::sync($api_result);
             $this->set_ownership($epfl_post);
         }
     }
@@ -238,4 +239,285 @@ abstract class APIChannelTaxonomyController
         $stream->set_url($_POST[self::CHANNEL_WIDGET_URL_SLUG]);
         $stream->sync();
     }
+}
+
+/**
+ * Abstract base class for Actu and Memento posts
+ *
+ * There is one instance of this class for every unique piece of news
+ * (identified by the "news_id"/"event_id" and "translation_id" API
+ * fields, and materialized as a WordPress "post" object of post_type
+ * == 'epfl-actu' or 'epfl-memento').
+ */
+
+abstract class APIChannelPost
+{
+    /**
+     * @return the post_type slug for instances of this class
+     */
+    static abstract function get_post_type ();
+
+    /**
+     * @return The name of the primary key component for the API ID,
+     *         i.e. either "news_id" or "event_id"
+     */
+    static abstract function get_api_id_key ();
+
+    /**
+     * @return The name of key in API results whose value is the
+     *         picture URL.
+     */
+    static abstract function get_image_url_key ();
+
+    var $ID;
+    var $api_id;
+    var $translation_id;
+
+    /**
+     * Private constructor — Call @link get, @link get_or_create
+     * or @link sync instead
+     */
+    function __construct ($id)
+    {
+        $this->ID = $id;
+    }
+
+    /**
+     * Retrieve one post per its primary key components.
+     *
+     * If the corresponding post does not exist in-database, it will
+     * be created with no contents besides the `meta_input` made up
+     * of $api_id and $translation_id (but see @link update).
+     */
+    static function get_or_create ($api_id, $translation_id)
+    {
+        $theclass = get_called_class();
+        $search_query = new WP_Query(array(
+           'post_type'  => $theclass::get_post_type(),
+           'meta_query' => array(
+               'relation' => 'AND',
+               array(
+                   'key'     => 'api_id',
+                   'value'   => $api_id,
+                   'compare' => '='
+               ),
+                array(
+                   'key'     => 'translation_id',
+                   'value'   => $translation_id,
+                   'compare' => '='
+               )
+           )
+        ));
+        $results = $search_query->get_posts();
+        if (0 === sizeof($results)) {
+            $id = wp_insert_post(array(
+                "post_type" => $theclass::get_post_type(),
+                "post_status" => "publish",
+                "meta_input" => array(
+                    "api_id" => $api_id,
+                    "translation_id" => $translation_id
+                )), true);
+            $self = new $theclass($id);
+        } else {
+            $self = new $theclass($results[0]->ID);
+        }
+        $self->api_id = $api_id;
+        $self->translation_id = $translation_id;
+        return $self;
+    }
+
+    /**
+     * Retrieve one API channel post, only if it does exist.
+     *
+     * @return an instance of this class or null.
+     */
+    static function get ($post_or_post_id)
+    {
+        $theclass = get_called_class();
+        if (is_object($post_or_post_id)) {
+            if ($post_or_post_id->post_type !== $theclass::get_post_type()) return;
+            $post_id = $post_or_post_id->ID;
+        } else {
+            $post_id = $post_or_post_id;
+            if (get_post_type($post_id) !== $theclass::get_post_type()) return;
+        }
+        $that = new $theclass($post_id);
+        if (is_object($post_or_post_id)) {
+            $that->_wp_post = $post_or_post_id;
+        }
+        return $that;
+    }
+
+    /**
+     * Create or update an instance from $api_result
+     *
+     * @param $api_result One of the API results returned by
+     *        @link ActuAPIClient#fetch
+     *
+     * @return The object instance that corresponds to the primary keys
+     *         present in $api_result (in the sense of @link get_or_create)
+     */
+    static function sync ($api_result) {
+        $that = static::get_or_create($api_result[static::get_api_id_key()],
+                                      $api_result["translation_id"]);
+
+        // "absolute_slug" is common to both APIs
+        $that->post_meta["absolute_slug"] = $api_result["absolute_slug"];
+
+        $that->_update_post_meta($api_result);
+        $that->post_meta[self::THUMBNAIL_META] = $that->_update_image_meta($meta);
+        // Polylang
+        if (function_exists("pll_set_post_language")) {
+            pll_set_post_language($that->ID, $api_result["language"]);
+        }
+
+        $update_post_args = array(
+            "ID"            => $that->ID,
+            "post_type"     => $that->get_post_type(),
+            "post_title"    => $that->_get_title($api_result),
+            "post_content"  => $that->_get_content($api_result),
+            "meta_input"    => $that->_post_meta
+        );
+
+        $excerpt = $that->_get_excerpt($api_result);
+        if ($excerpt) {
+            $update_post_args["post_excerpt"] = $excerpt;
+        }
+
+        wp_update_post($update_post_args);
+
+        $add_in_categories = $that->_get_auto_categories($api_result);
+        if (count($add_in_categories)) {
+            wp_set_post_categories($that->ID, $add_in_categories,
+                                   /* $append = */ true);
+        }
+        return $that;
+    }
+
+
+    /**
+     * Extract as much information as desired from $api_result and
+     * stash it into $this->_post_meta.
+     *
+     * The base class only picks "absolute_slug" out of $api_result.
+     * Subclasses are expected to pick up additional fields.
+     *
+     * See also @link _update_image_meta which is ran after
+     * _update_post_meta.
+     */
+    protected function _update_post_meta ($api_result) {
+        $this->_post_meta["absolute_slug"] = $api_result["absolute_slug"];
+    }
+
+    /**
+     * @return the value of the "post_title" standard (non-meta) WordPress field.
+     *
+     * Both APIs happen to use the same field, however this method is
+     * singled out for overloading in case of need.
+     */    
+    protected function _get_title ($api_result)
+    {
+        return $api_result["title"];
+    }
+
+    /**
+     * @return the value of the "post_excerpt" standard (non-meta) WordPress
+     * field.
+     *
+     * The base class does nothing. If your API has excerpts (e.g.,
+     * Actu), override in the subclass.
+     */
+    protected function _get_excerpt ($api_result) {
+        return null;
+    }
+
+    function wp_post ()
+    {
+        if (! $this->_wp_post) {
+            $this->_wp_post = get_post($this->ID);
+        }
+        return $this->_wp_post;
+    }
+
+    const THUMBNAIL_META  = "epfl_external_thumbnail";
+    const MAX_HEIGHT_META = "epfl_external_img_max_height";
+    const MAX_WIDTH_META  = "epfl_external_img_max_width";
+
+    protected function _get_post_meta ()
+    {
+        if (! $this->_post_meta) {
+            $this->_post_meta = array();
+            foreach (get_post_meta($this->ID) as $key => $array) {
+                // All meta keys are single-valued
+                $this->_post_meta[$key] = $array[0];
+            }
+        }
+        return $this->_post_meta;
+    }
+
+    function get_max_size ()
+    {
+        $meta = $this->_get_post_meta();
+        if ($meta[self::MAX_HEIGHT_META] &&
+            $meta[self::MAX_WIDTH_META]) {
+            return array("height" => $meta[self::MAX_HEIGHT_META],
+                         "width"  => $meta[self::MAX_WIDTH_META]);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Extract the image-related metadata from $api_result and
+     * stash them into $this->_post_meta.
+     *
+     * The base class obtains the thumbnail from the key named by
+     * @link get_image_url_key, and then probes the maximum image size
+     * server-side (see @link get_image_url for details on this
+     * feature of EPFL Actu and Memento). Subclasses may decide to
+     * override the method, and even forego calling the parent::
+     * altogether, if they know better what image to use (e.g. YouTube
+     * thumbnail for Actus with videos).
+     *
+     * @return The URL of the main (thumbnail) image for this post.
+     *         Caller will take care of stashing that into
+     *         $this->_post_meta[THUMBNAIL_META], therefore
+     *         _update_image_meta() need not worry about it.
+     */
+    protected function _update_image_meta ($api_result)
+    {
+        $image_url = $api_result[$this->get_image_url_key()];
+        if (! $image_url) return;
+        $max_size = get_image_size($this->get_image_url("8000x6000"));
+        $this->_post_meta[self::MAX_HEIGHT_META] = $max_size["height"];
+        $this->_post_meta[self::MAX_WIDTH_META]  = $max_size["width"];
+        return $image_url;
+    }
+
+    /**
+     * @return the URL for a server-side resized image of $size
+     *
+     * @param $size e.g. "1024x768". If omitted, utilize the thumbnail
+     *        size as returned by the API.
+     */
+    function get_image_url ($size = null)
+    {
+        $meta = $this->_get_post_meta();
+        $url = $meta[self::THUMBNAIL_META];
+        if (! $url) return null;
+        if (! $size) return $url;
+        $matched = array();
+        if (preg_match("/^(.*)\/(\d+x\d+)\.([a-zA-z]{1,6})$/", $url, $matched)) {
+            return sprintf("%s/%s.%s", $matched[1], $size, $matched[3]);
+        } else {
+            return $url;
+        }
+    }
+
+    function get_permalink ()
+    {
+        $meta = $this->_get_post_meta();
+        return $meta["absolute_slug"];
+    }
+
 }

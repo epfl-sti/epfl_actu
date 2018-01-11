@@ -16,8 +16,6 @@
 
 namespace EPFL\WS\Actu;
 
-use WP_Query;
-
 if (! defined('ABSPATH')) {
     die('Access denied.');
 }
@@ -59,95 +57,24 @@ class ActuStream extends \EPFL\WS\Base\APIChannelTaxonomy
  * There is one instance of the Actu class for every unique piece of
  * news (identified by the "news_id" and "translation_id" API fields,
  * and materialized as a WordPress "post" object of post_type ==
- * 'epfl-accred').
+ * 'epfl-actu').
  */
-class Actu
+class Actu extends \EPFL\WS\Base\APIChannelPost
 {
-    var $ID;
-    var $news_ID;
-    var $translation_ID;
-
     static function get_post_type ()
     {
         return 'epfl-actu';
     }
 
-    /**
-     * Private constructor — Call @link get_or_create instead
-     */
-    function __construct ($id)
+    static function get_api_id_key ()
     {
-        $this->ID = $id;
+        return "news_id";
     }
 
-    /**
-     * Retrieve one Actu item per its primary key components.
-     *
-     * If the corresponding post does not exist in-database, it will
-     * be created with no contents besides the `meta_input` made up
-     * of $news_id and $translation_id (but see @link update).
-     */
-    static function get_or_create ($news_id, $translation_id)
+    static function get_image_url_key ()
     {
-        $search_query = new WP_Query(array(
-           'post_type'  => Actu::get_post_type(),
-           'meta_query' => array(
-               'relation' => 'AND',
-               array(
-                   'key'     => 'news_id',
-                   'value'   => $news_id,
-                   'compare' => '='
-               ),
-                array(
-                   'key'     => 'translation_id',
-                   'value'   => $translation_id,
-                   'compare' => '='
-               )
-           )
-        ));
-        $results = $search_query->get_posts();
-        if (0 === sizeof($results)) {
-            $id = wp_insert_post(array(
-                "post_type" => Actu::get_post_type(),
-                "post_status" => "publish",
-                "meta_input" => array(
-                    "news_id" => $news_id,
-                    "translation_id" => $translation_id
-                )), true);
-            $self = new Actu($id);
-        } else {
-            $self = new Actu($results[0]->ID);
-        }
-        $self->news_id = $news_id;
-        $self->translation_id = $translation_id;
-        return $self;
+        return "news_thumbnail_absolute_url";
     }
-
-    /**
-     * Retrieve one Actu item, only if it does exist.
-     *
-     * @return an instance of Actu or null.
-     */
-    static function get ($post_or_post_id)
-    {
-        if (is_object($post_or_post_id)) {
-            if ($post_or_post_id->post_type !== Actu::get_post_type()) return;
-            $post_id = $post_or_post_id->ID;
-        } else {
-            $post_id = $post_or_post_id;
-            if (get_post_type($post_id) !== Actu::get_post_type()) return;
-        }
-        $theclass = get_called_class();
-        $that = new $theclass($post_id);
-        if (is_object($post_or_post_id)) {
-            $that->_wp_post = $post_or_post_id;
-        }
-        return $that;
-    }
-
-    const THUMBNAIL_META  = "epfl_actu_external_thumbnail";
-    const MAX_HEIGHT_META = "epfl_actu_external_img_max_height";
-    const MAX_WIDTH_META  = "epfl_actu_external_img_max_width";
 
     /**
      * Update this news post with $details, overwriting most of the
@@ -156,74 +83,45 @@ class Actu
      * Only taxonomy terms (categories, as well as @link
      * APIChannelTaxonomy#set_ownership) are left unchanged.
      */
-    function update ($details)
+    protected function _update_post_meta ($api_result)
     {
+        parent::_update_post_meta($api_result);
         $this->_post_meta = $meta = array();
-        foreach (["news_id", "translation_id", "news_thumbnail_absolute_url",
-                  "absolute_slug", "video", "news_has_video", "visual_and_thumbnail_description"]
+        foreach (["video", "news_has_video",
+                  "visual_and_thumbnail_description"]
                  as $keep_this_as_meta)
         {
-            if ($details[$keep_this_as_meta]) {
-                $meta[$keep_this_as_meta] = $details[$keep_this_as_meta];
+            if ($api_result[$keep_this_as_meta]) {
+                $meta[$keep_this_as_meta] = $api_result[$keep_this_as_meta];
             }
         }
 
-        $matched = array();
-        if (preg_match('#youtube.com/embed/([^/?]+)#', $details["video"],
-                       $matched)) {
-            $meta["youtube_id"] = $matched[1];
-        }
-
-        if ($meta["youtube_id"]) {
-            // The "right" thumbnail for a YouTube video is the one
-            // YouTube serves - See also
-            // https://stackoverflow.com/a/2068371/435004
-            $meta[self::THUMBNAIL_META] = sprintf(
-                "https://img.youtube.com/vi/%s/default.jpg",
-                $meta["youtube_id"]);
-        } elseif ($meta["news_thumbnail_absolute_url"]) {
-            $news_thumbnail_url = $meta["news_thumbnail_absolute_url"];
-            $meta[self::THUMBNAIL_META]  = $news_thumbnail_url;
-            $max_size = get_image_size($this->get_image_url("8000x6000"));
-            $meta[self::MAX_HEIGHT_META] = $max_size["height"];
-            $meta[self::MAX_WIDTH_META]  = $max_size["width"];
+        $youtube_id = $this->_extract_youtube_id($api_result);
+        if ($youtube_id) {
+            $meta["youtube_id"] = $youtube_id;
         }
 
         // Support for WP Subtitle plugin
         if (class_exists("WPSubtitle")) {
-            $subtitle = $this->extract_subtitle($details);
-            if ($subtitle && $subtitle !== $details["title"]) {
+            $subtitle = $this->extract_subtitle($api_result);
+            if ($subtitle && $subtitle !== $api_result["title"]) {
                 // Like private function get_post_meta_key() in subtitle.php
                 $subtitle_meta_key = apply_filters( 'wps_subtitle_key', 'wps_subtitle', $this->ID);
                 $meta[$subtitle_meta_key] = $subtitle;
             }
         }
+    }
 
-        // Polylang
-        if (function_exists("pll_set_post_language")) {
-            pll_set_post_language($this->ID, $details["language"]);
-        }
-
-        wp_update_post(
-            array(
-                "ID"            => $this->ID,
-                "post_type"     => Actu::get_post_type(),
-                "post_title"    => $details["title"],
-                "post_excerpt"  => $details["subtitle"],
-                "post_content"  => $details["text"],
-                "meta_input"    => $meta
-            )
-        );
-
-        $add_in_categories = array();
+    protected function _get_auto_categories($api_result) {
+        $categories = array();
         $actu_cat = ActuCategory::get_by_actu_id(
-            $details["news_category_id"],
-            function ($terms) use ($details) {
+            $api_result["news_category_id"],
+            function ($terms) use ($api_result) {
                 // Perhaps the returned categories are translations of each other?
                 $filtered_terms = array();
                 if (function_exists("pll_get_term")) {  // Polylang
                     foreach ($terms as $term) {
-                        if (pll_get_term($term->term_id, $details["language"]) === $term->term_id) {
+                        if (pll_get_term($term->term_id, $api_result["language"]) === $term->term_id) {
                             array_push($filtered_terms, $term);
                         }
                     }
@@ -235,43 +133,9 @@ class Actu
             }
         );
         if ($actu_cat) {
-            array_push($add_in_categories, $actu_cat->ID());
+            array_push($categories, $actu_cat->ID());
         }
-
-        if (count($add_in_categories)) {
-            wp_set_post_categories($this->ID, $add_in_categories,
-                                   /* $append = */ true);
-        }
-    }
-
-    function _get_post_meta ()
-    {
-        if (! $this->_post_meta) {
-            $this->_post_meta = array();
-            foreach (get_post_meta($this->ID) as $key => $array) {
-                // All meta keys are single-valued
-                $this->_post_meta[$key] = $array[0];
-            }
-        }
-        return $this->_post_meta;
-    }
-
-    function get_permalink ()
-    {
-        $meta = $this->_get_post_meta();
-        return $meta["absolute_slug"];
-    }
-
-    function get_max_size ()
-    {
-        $meta = $this->_get_post_meta();
-        if ($meta[self::MAX_HEIGHT_META] &&
-            $meta[self::MAX_WIDTH_META]) {
-            return array("height" => $meta[self::MAX_HEIGHT_META],
-                         "width"  => $meta[self::MAX_WIDTH_META]);
-        } else {
-            return null;
-        }
+        return $categories;
     }
 
     function get_youtube_id ()
@@ -279,32 +143,37 @@ class Actu
         return $this->_get_post_meta()["youtube_id"];
     }
 
-    function wp_post ()
+    protected function _update_image_meta ($api_result)
     {
-        if (! $this->_wp_post) {
-            $this->_wp_post = get_post($this->ID);
+        $youtube_id = $this->_extract_youtube_id($api_result);
+        if ($youtube_id) {
+            // The "right" thumbnail for a YouTube video is the one
+            // YouTube serves - See also
+            // https://stackoverflow.com/a/2068371/435004
+            return sprintf(
+                "https://img.youtube.com/vi/%s/default.jpg",
+                $youtube_id);
+        } else {
+            return parent::_update_image_meta($api_result);
         }
-        return $this->_wp_post;
     }
 
-    /**
-     * @return the URL for a server-side resized image of $size
-     *
-     * @param $size e.g. "1024x768". If omitted, utilize the thumbnail
-     *        size as returned by the API.
-     */
-    function get_image_url ($size = null)
+    private function _extract_youtube_id ($api_result)
     {
-        $meta = $this->_get_post_meta();
-        $url = $meta[self::THUMBNAIL_META];
-        if (! $url) return null;
-        if (! $size) return $url;
         $matched = array();
-        if (preg_match("/^(.*)\/(\d+x\d+)\.([a-zA-z]{1,6})$/", $url, $matched)) {
-            return sprintf("%s/%s.%s", $matched[1], $size, $matched[3]);
-        } else {
-            return $url;
+        if (preg_match('#youtube.com/embed/([^/?]+)#', $api_result["video"],
+                       $matched)) {
+            return $matched[1];
         }
+    }
+
+    protected function _get_excerpt ($api_result)
+    {
+        return $api_result["subtitle"];
+    }
+    protected function _get_content ($api_result)
+    {
+        return $api_result["text"];
     }
 
     /**
@@ -315,12 +184,12 @@ class Actu
      * However, some subtitles on actu.epfl.ch do start with a short
      * sentence followed with a <br />. If that is the case, return it.
      */
-    private function extract_subtitle ($details) {
+    private function extract_subtitle ($api_result) {
         $matched = array();
         $max_subtitle_length = 80;
-        if (preg_match("/^(.{1,$max_subtitle_length})<br/", $details["subtitle"], $matched)) {
+        if (preg_match("/^(.{1,$max_subtitle_length})<br/", $api_result["subtitle"], $matched)) {
             return trim($matched[1]);
-        } elseif (preg_match("/^<p>(.{1,$max_subtitle_length})<\/p>/", $details["subtitle"], $matched)) {
+        } elseif (preg_match("/^<p>(.{1,$max_subtitle_length})<\/p>/", $api_result["subtitle"], $matched)) {
             return trim($matched[1]);
         } else {
             return null;
@@ -746,7 +615,8 @@ class ActuCategoryController
         "5" => "Campus Life",
         );
 
-    static function get_actu_category_id ($tag_id) {
+    static function get_actu_category_id ($tag_id)
+    {
         return self::ACTU_CATEGORY_LIST[get_term_meta($tag_id, ActuCategory::ID_META, true)];
     }
 
