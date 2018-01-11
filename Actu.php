@@ -312,6 +312,7 @@ class ActuController
                     // One is not actually supposed to delete posts manually —
                     // This is just an escape hatch in case an ActuStream was
                     // deleted and referential integrity was breached.
+                    'delete_post'          => 'edit_epfl_actus',
                     'delete_posts'         => 'edit_epfl_actus',
                     'delete_private_posts' => 'edit_epfl_actus',
                     'delete_others_posts'  => 'edit_epfl_actus',
