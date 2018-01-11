@@ -15,6 +15,9 @@ use WP_Query;
 require_once(dirname(__FILE__) . "/i18n.inc");
 use function \EPFL\WS\Actu\___;
 
+require_once(dirname(__FILE__) . "/image-size.inc");
+use function EPFL\WS\get_image_size;
+
 /**
  * Abstract base classes for taxonomies whose terms correspond to an API URL.
  *
@@ -359,6 +362,8 @@ abstract class APIChannelPost
         return $that;
     }
 
+    const THUMBNAIL_META  = "epfl_external_thumbnail";
+
     /**
      * Create or update an instance from $api_result
      *
@@ -378,7 +383,7 @@ abstract class APIChannelPost
         $that->_post_meta["absolute_slug"] = $api_result["absolute_slug"];
 
         $that->_update_post_meta($api_result);
-        $that->_post_meta[self::THUMBNAIL_META] = $that->_update_image_meta($meta);
+        $that->_post_meta[self::THUMBNAIL_META] = $that->_update_image_meta($api_result);
         // Polylang
         if (function_exists("pll_set_post_language")) {
             pll_set_post_language($that->ID, $api_result["language"]);
@@ -452,10 +457,6 @@ abstract class APIChannelPost
         return $this->_wp_post;
     }
 
-    const THUMBNAIL_META  = "epfl_external_thumbnail";
-    const MAX_HEIGHT_META = "epfl_external_img_max_height";
-    const MAX_WIDTH_META  = "epfl_external_img_max_width";
-
     private function _init_post_meta ()
     {
         $this->_post_meta = array(
@@ -475,6 +476,9 @@ abstract class APIChannelPost
         }
         return $this->_post_meta;
     }
+
+    const MAX_HEIGHT_META = "epfl_external_img_max_height";
+    const MAX_WIDTH_META  = "epfl_external_img_max_width";
 
     function get_max_size ()
     {
@@ -736,7 +740,7 @@ abstract class APIChannelPostController
                     });
         add_action(
             sprintf('manage_%s_posts_custom_column', $post_type),
-            function () use ($this_class, $model_class) {
+            function ($column, $post_id) use ($this_class, $model_class) {
                 if ($column !== 'thumbnail') return;
                 $img = get_the_post_thumbnail($post_id);
                 if (! $img) return;
@@ -750,11 +754,9 @@ abstract class APIChannelPostController
 
     static function render_thumbnail_column ($epfl_post, $img)
     {
+        echo $img;
         if ($orig_size = $epfl_post->get_max_size()) {
-            echo $img;
             printf("<p>Size: %dx%d</p>", $orig_size["width"], $orig_size["height"]);
-        } else {
-            echo $img;
         }
     }
 

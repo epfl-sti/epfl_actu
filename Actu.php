@@ -23,8 +23,6 @@ if (! defined('ABSPATH')) {
 require_once(dirname(__FILE__) . "/inc/base-classes.inc");
 
 require_once(dirname(__FILE__) . "/inc/i18n.inc");
-require_once(dirname(__FILE__) . "/inc/image-size.inc");
-use function EPFL\WS\get_image_size;
 
 /**
  * Object model for Actu streams
@@ -271,13 +269,13 @@ class ActuController extends \EPFL\WS\Base\APIChannelPostController
     /**
      * Overloaded to show an actual embedded video in the admin area, yow!
      */
-    static function render_thumbnail_column ($epfl_post, $img)
+    static function render_thumbnail_column ($actu, $img)
     {
-        if ($epfl_post->get_youtube_id()) {
-            echo '<object style="width:160px;height:89px;float: none; clear: both; margin: 2px auto;" data="https://www.youtube.com/embed/'.$epfl_post->get_youtube_id().'"></object>';
+        if ($actu->get_youtube_id()) {
+            echo '<object style="width:160px;height:89px;float: none; clear: both; margin: 2px auto;" data="https://www.youtube.com/embed/'.$actu->get_youtube_id().'"></object>';
             printf("<p><a href=\"https://youtu.be/%s\">YouTube link</a></p>", $actu->get_youtube_id());
         } else {
-            parent::render_thumbnail_column ($epfl_post);
+            parent::render_thumbnail_column ($actu, $img);
         }
     }
 }
