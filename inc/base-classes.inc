@@ -296,16 +296,26 @@ abstract class APIChannelPost
            'post_type'  => $theclass::get_post_type(),
            'meta_query' => array(
                'relation' => 'AND',
-               array(
-                   'key'     => 'api_id',
-                   'value'   => $api_id,
-                   'compare' => '='
-               ),
                 array(
                    'key'     => 'translation_id',
                    'value'   => $translation_id,
                    'compare' => '='
-               )
+               ),
+               array(
+                   'relation' => 'OR',
+                   array(
+                       'key'     => 'api_id',
+                       'value'   => $api_id,
+                       'compare' => '='
+                   ),
+                   // For backward compatibility when Actu was the sole
+                   // class using this code:
+                   array(
+                       'key'     => 'news_id',
+                       'value'   => $api_id,
+                       'compare' => '='
+                   ),
+               ),
            )
         ));
         $results = $search_query->get_posts();
@@ -317,13 +327,13 @@ abstract class APIChannelPost
                     "api_id" => $api_id,
                     "translation_id" => $translation_id
                 )), true);
-            $self = new $theclass($id);
+            $that = new $theclass($id);
         } else {
-            $self = new $theclass($results[0]->ID);
+            $that = new $theclass($results[0]->ID);
         }
-        $self->api_id = $api_id;
-        $self->translation_id = $translation_id;
-        return $self;
+        $that->api_id = $api_id;
+        $that->translation_id = $translation_id;
+        return $that;
     }
 
     /**
@@ -361,11 +371,13 @@ abstract class APIChannelPost
         $that = static::get_or_create($api_result[static::get_api_id_key()],
                                       $api_result["translation_id"]);
 
+        $that->_init_post_meta();
+
         // "absolute_slug" is common to both APIs
-        $that->post_meta["absolute_slug"] = $api_result["absolute_slug"];
+        $that->_post_meta["absolute_slug"] = $api_result["absolute_slug"];
 
         $that->_update_post_meta($api_result);
-        $that->post_meta[self::THUMBNAIL_META] = $that->_update_image_meta($meta);
+        $that->_post_meta[self::THUMBNAIL_META] = $that->_update_image_meta($meta);
         // Polylang
         if (function_exists("pll_set_post_language")) {
             pll_set_post_language($that->ID, $api_result["language"]);
@@ -443,10 +455,18 @@ abstract class APIChannelPost
     const MAX_HEIGHT_META = "epfl_external_img_max_height";
     const MAX_WIDTH_META  = "epfl_external_img_max_width";
 
+    private function _init_post_meta ()
+    {
+        $this->_post_meta = array(
+            "api_id"         => $this->api_id,
+            "translation_id" => $this->translation_id
+        );
+    }
+
     protected function _get_post_meta ()
     {
         if (! $this->_post_meta) {
-            $this->_post_meta = array();
+            $this->_init_post_meta();
             foreach (get_post_meta($this->ID) as $key => $array) {
                 // All meta keys are single-valued
                 $this->_post_meta[$key] = $array[0];
