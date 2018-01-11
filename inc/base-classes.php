@@ -19,7 +19,8 @@ if (! defined('ABSPATH')) {
  * term is also a stream with an API URL from which news, events etc.
  * are continuously fetched.
  */
-abstract class StreamedTaxonomy {
+abstract class StreamedTaxonomy
+{
     /**
      * @return The object class for WP posts this StreamedTaxonomy.
      */
