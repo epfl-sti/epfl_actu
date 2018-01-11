@@ -18,6 +18,11 @@ use function \EPFL\WS\Actu\___;
 require_once(dirname(__FILE__) . "/image-size.inc");
 use function EPFL\WS\get_image_size;
 
+function _debug ($msg)
+{
+    // error_log($msg);
+}
+
 /**
  * Abstract base classes for taxonomies whose terms correspond to an API URL.
  *
@@ -278,6 +283,13 @@ abstract class APIChannelPost
     var $translation_id;
 
     /**
+     * Populated piecemeal at @link sync time by the various
+     * _update_* and _set_* methods; fetched all at once by
+     * @link _get_post_meta
+     */
+    protected $_post_meta;
+
+    /**
      * Private constructor — Call @link get, @link get_or_create
      * or @link sync instead
      */
@@ -383,7 +395,7 @@ abstract class APIChannelPost
         $that->_post_meta["absolute_slug"] = $api_result["absolute_slug"];
 
         $that->_update_post_meta($api_result);
-        $that->_post_meta[self::THUMBNAIL_META] = $that->_update_image_meta($api_result);
+        $that->_update_image_meta($api_result);
         // Polylang
         if (function_exists("pll_set_post_language")) {
             pll_set_post_language($that->ID, $api_result["language"]);
@@ -411,7 +423,6 @@ abstract class APIChannelPost
         }
         return $that;
     }
-
 
     /**
      * Extract as much information as desired from $api_result and
@@ -496,24 +507,30 @@ abstract class APIChannelPost
      * Extract the image-related metadata from $api_result and
      * stash them into $this->_post_meta.
      *
-     * The base class obtains the thumbnail from the key named by
-     * @link get_image_url_key, and then probes the maximum image size
-     * server-side (see @link get_image_url for details on this
-     * feature of EPFL Actu and Memento). Subclasses may decide to
-     * override the method, and even forego calling the parent::
+     * The base class obtains and stashes the thumbnail from the key
+     * named by @link get_image_url_key, and then probes the maximum
+     * image size server-side (see @link get_image_url for details on
+     * this feature of EPFL Actu and Memento). Subclasses may decide
+     * to override the method, and even forego calling the parent::
      * altogether, if they know better what image to use (e.g. YouTube
      * thumbnail for Actus with videos).
      *
-     * @return The URL of the main (thumbnail) image for this post.
-     *         Caller will take care of stashing that into
-     *         $this->_post_meta[THUMBNAIL_META], therefore
-     *         _update_image_meta() need not worry about it.
      */
     protected function _update_image_meta ($api_result)
     {
-        $image_url = $api_result[$this->get_image_url_key()];
-        if (! $image_url) return;
-        $max_size = get_image_size($this->get_image_url("8000x6000"));
+        $key = $this->get_image_url_key();
+        $image_url = $api_result[$key];
+        if (! $image_url) {
+            _debug("No key $key for post ID " . $this->ID);
+            return;
+        }
+        $this->_set_thumbnail_url($image_url);
+        $extra_big_image_url = $this->get_image_url("8000x6000");
+        if (! $extra_big_image_url) {
+            _debug(sprintf("Post %d: unable to scale %s", $this->ID, $image_url));
+            return;
+        }
+        $max_size = get_image_size($extra_big_image_url);
         $this->_post_meta[self::MAX_HEIGHT_META] = $max_size["height"];
         $this->_post_meta[self::MAX_WIDTH_META]  = $max_size["width"];
         return $image_url;
@@ -527,9 +544,11 @@ abstract class APIChannelPost
      */
     function get_image_url ($size = null)
     {
-        $meta = $this->_get_post_meta();
-        $url = $meta[self::THUMBNAIL_META];
-        if (! $url) return null;
+        $url = $this->_get_post_meta()[self::THUMBNAIL_META];
+        if (! $url) {
+            _debug("No " . self::THUMBNAIL_META . " found for post ID " . $this->ID);
+            return null;
+        }
         if (! $size) return $url;
         $matched = array();
         if (preg_match("/^(.*)\/(\d+x\d+)\.([a-zA-z]{1,6})$/", $url, $matched)) {
@@ -537,6 +556,16 @@ abstract class APIChannelPost
         } else {
             return $url;
         }
+    }
+
+    /**
+     * The opposite of @link get_image_url when called without arguments
+     *
+     * To be called from an _update_* method only.
+     */
+    protected function _set_thumbnail_url ($url)
+    {
+        $this->_post_meta[self::THUMBNAIL_META] = $url;
     }
 
     function get_permalink ()

@@ -9,6 +9,10 @@ if (! defined( 'ABSPATH' )) {
   die( 'Access denied.' );
 }
 
+function _image_size_debug ($msg) {
+    // error_log($msg);
+}
+
 /**
  * Get the first $nbytes out of $url
  *
@@ -41,6 +45,10 @@ function get_first_n_bytes($url, $nbytes)
 function get_image_size ($url)
 {
     $raw = get_first_n_bytes($url, 32768);
+    if (! $raw) {
+        _image_size_debug("No image at $url");
+        return;
+    }
     $im = imagecreatefromstring($raw);
     return array("width" => imagesx($im), "height" => imagesy($im));
 }

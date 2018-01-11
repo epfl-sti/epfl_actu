@@ -75,6 +75,12 @@ class Actu extends \EPFL\WS\Base\APIChannelPost
     }
 
     /**
+     * Incrementally constructed by the _update_* methods;
+     * read in one fell swoop by @link _get_post_meta
+     */
+    protected $_post_meta;
+
+    /**
      * Update this news post with $details, overwriting most of the
      * mutable state of it.
      *
@@ -84,19 +90,18 @@ class Actu extends \EPFL\WS\Base\APIChannelPost
     protected function _update_post_meta ($api_result)
     {
         parent::_update_post_meta($api_result);
-        $this->_post_meta = $meta = array();
         foreach (["video", "news_has_video",
                   "visual_and_thumbnail_description"]
                  as $keep_this_as_meta)
         {
             if ($api_result[$keep_this_as_meta]) {
-                $meta[$keep_this_as_meta] = $api_result[$keep_this_as_meta];
+                $this->_post_meta[$keep_this_as_meta] = $api_result[$keep_this_as_meta];
             }
         }
 
         $youtube_id = $this->_extract_youtube_id($api_result);
         if ($youtube_id) {
-            $meta["youtube_id"] = $youtube_id;
+            $this->_post_meta["youtube_id"] = $youtube_id;
         }
 
         // Support for WP Subtitle plugin
@@ -105,7 +110,7 @@ class Actu extends \EPFL\WS\Base\APIChannelPost
             if ($subtitle && $subtitle !== $api_result["title"]) {
                 // Like private function get_post_meta_key() in subtitle.php
                 $subtitle_meta_key = apply_filters( 'wps_subtitle_key', 'wps_subtitle', $this->ID);
-                $meta[$subtitle_meta_key] = $subtitle;
+                $this->_post_meta[$subtitle_meta_key] = $subtitle;
             }
         }
     }
@@ -143,16 +148,15 @@ class Actu extends \EPFL\WS\Base\APIChannelPost
 
     protected function _update_image_meta ($api_result)
     {
+        parent::_update_image_meta($api_result);
         $youtube_id = $this->_extract_youtube_id($api_result);
         if ($youtube_id) {
             // The "right" thumbnail for a YouTube video is the one
             // YouTube serves - See also
             // https://stackoverflow.com/a/2068371/435004
-            return sprintf(
+            $this->_set_thumbnail_url(sprintf(
                 "https://img.youtube.com/vi/%s/default.jpg",
-                $youtube_id);
-        } else {
-            return parent::_update_image_meta($api_result);
+                $youtube_id));
         }
     }
 
