@@ -387,7 +387,7 @@ class ActuController
         // https://stackoverflow.com/a/3354804/435004
         return array_merge(
             array_slice($columns, 0, 1, true),
-            array('thumbnail' => __( 'Thumbnail' )),
+            array('thumbnail' => ___( 'Thumbnail' )),
             array_slice($columns, 1, count($columns) - 1, true));
     }
 
