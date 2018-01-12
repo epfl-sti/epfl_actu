@@ -11,7 +11,7 @@ if (! defined('ABSPATH')) {
 
 require_once(dirname(__FILE__) . "/i18n.inc");
 
-const DEBUG_CRON = true;
+const DEBUG_CRON = false;
 
 function run_every ($seconds, $callable) {
     if (DEBUG_CRON) {
