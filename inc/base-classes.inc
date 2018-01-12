@@ -454,7 +454,7 @@ abstract class APIChannelPost
         $that->_update_image_meta($api_result);
         // Polylang
         if (function_exists("pll_set_post_language")) {
-            pll_set_post_language($that->ID, $api_result["language"] || $api_result["lang"]);
+            pll_set_post_language($that->ID, $this->_get_language($api_result));
         }
 
         $update_post_args = array(
@@ -474,13 +474,17 @@ abstract class APIChannelPost
 
         $auto_categories = $that->get_auto_category_class()::find(
             $api_result[$that->get_auto_category_id_key()],
-            /* $lang_hint = */ $api_result["language"]);
+            /* $lang_hint = */ $this->_get_language($api_result));
         wp_set_post_categories(
             $that->ID,
             array_map(function($cat) { return $cat->ID(); }, $auto_categories),
             /* $append = */ true);
 
         return $that;
+    }
+
+    function _get_language ($api_result) {
+        return $api_result["language"] || $api_result["lang"];
     }
 
     function wp_post ()
