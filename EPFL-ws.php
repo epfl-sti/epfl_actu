@@ -166,6 +166,3 @@ require_once(dirname(__FILE__) . "/Memento_shortcode.php");
 require_once(dirname(__FILE__) . "/Organigramme_shortcode.php");
 require_once(dirname(__FILE__) . "/ISAcademia_shortcode.php");
 require_once(dirname(__FILE__) . "/People_shortcode.php");
-
-
-?>
