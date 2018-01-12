@@ -273,11 +273,11 @@ class ActuCategory extends \EPFL\WS\Base\APIAutoCategory
     static function get_api_category_names () {
         // https://actus.epfl.ch/api/v1/categories/
         return array(
-            "1" => __x("EPFL",        "API category"),
-            "2" => __x("Education",   "API category"),
-            "3" => __x("Research",    "API category"),
-            "4" => __x("Innovation",  "API category"),
-            "5" => __x("Campus Life", "API category")
+            "1" => __x("EPFL",        "Actu API category"),
+            "2" => __x("Education",   "Actu API category"),
+            "3" => __x("Research",    "Actu API category"),
+            "4" => __x("Innovation",  "Actu API category"),
+            "5" => __x("Campus Life", "Actu API category")
         );
     }
 }
