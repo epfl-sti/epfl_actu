@@ -1068,12 +1068,12 @@ abstract class APIAutoCategory
         if (count($terms) > 1 && null !== $language_hint &&
             function_exists("pll_get_term")) {  // Polylang
             // Perhaps the multiple $terms are translations of each other?
-            $terms = array_filter(
+            $terms = array_values(array_filter(
                 $terms,
                 function($term) use ($language_hint) {
                     return ($term->term_id ===
                             pll_get_term($term->term_id, $language_hint));
-                });
+                }));
         }
         // No Polylang? No matter: just keep the first one (a notch
         // better than inserting into all of them, which we *could* do
