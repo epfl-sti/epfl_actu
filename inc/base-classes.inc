@@ -620,12 +620,14 @@ abstract class APIChannelPostController
     abstract static function get_taxonomy_class ();
 
     /**
-     * @return The name of the
-     * [dashicons](https://developer.wordpress.org/resource/dashicons/)
-     * icon to use in the header for this controller in the WP admin
-     * area
+     * Filter the arguments before they are passed to Wordpress' @link
+     * register_post_type
+     *
+     * The base class does nothing. Subclasses may want to set e.g.
+     * 'menu_icon' or 'menu_position'.
      */
-    abstract static function get_wpadmin_icon ();
+    static function filter_register_post_type (&$args) {
+    }
 
     static function hook ()
     {
@@ -662,13 +664,10 @@ abstract class APIChannelPostController
     {
         $taxonomy_class = static::get_taxonomy_class();
         $taxonomy_slug = $taxonomy_class::get_taxonomy_slug();
-        $menu_icon = static::get_wpadmin_icon();
         $post_class = $taxonomy_class::get_post_class();
-        $post_type = $post_class::get_post_type();
         $labels = static::get_human_labels();
-        register_post_type(
-            $post_type,
-            array(
+
+        $post_type_settings = array(
                 'labels'             => $labels,
                 'description'        => $labels['description'],
                 'public'             => true,
@@ -703,7 +702,9 @@ abstract class APIChannelPostController
                 'menu_position'      => 24,
                 'menu_icon'          => $menu_icon,
                 'supports'           => array('wps_subtitle')
-            ));
+            );
+        static::filter_register_post_type($post_type_settings);
+        register_post_type($post_class::get_post_type(), $post_type_settings);
     }
 
     const ROLES_THAT_MAY_VIEW_ACTUS = array('administrator', 'editor', 'author', 'contributor');

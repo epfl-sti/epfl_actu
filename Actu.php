@@ -225,8 +225,9 @@ class ActuController extends \EPFL\WS\Base\APIChannelPostController
         return ActuStream::class;
     }
 
-    static function get_wpadmin_icon () {
-        return 'dashicons-megaphone';
+    static function filter_register_post_type (&$settings) {
+        $settings["menu_icon"] = 'dashicons-megaphone';
+        $settings["menu_position"] = 41;
     }
 
     static function get_human_labels ()

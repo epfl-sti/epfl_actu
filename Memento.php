@@ -134,8 +134,9 @@ class MementoController extends \EPFL\WS\Base\APIChannelPostController
         return MementoStream::class;
     }
 
-    static function get_wpadmin_icon () {
-        return 'dashicons-calendar';
+    static function filter_register_post_type (&$settings) {
+        $settings["menu_icon"] = 'dashicons-calendar';
+        $settings["menu_position"] = 42;
     }
 
     static function get_human_labels ()
