@@ -13,7 +13,7 @@ if (! defined('ABSPATH')) {
 use WP_Query;
 
 require_once(dirname(__FILE__) . "/i18n.inc");
-use function \EPFL\WS\Actu\___;
+use function \EPFL\WS\___;
 
 require_once(dirname(__FILE__) . "/image-size.inc");
 use function EPFL\WS\get_image_size;

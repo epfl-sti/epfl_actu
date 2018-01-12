@@ -1,6 +1,6 @@
 <?php
 
-namespace EPFL\WS\Actu;
+namespace EPFL\WS;
 
 function ___($text)
 {

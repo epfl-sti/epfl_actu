@@ -23,6 +23,8 @@ if (! defined('ABSPATH')) {
 require_once(dirname(__FILE__) . "/inc/base-classes.inc");
 
 require_once(dirname(__FILE__) . "/inc/i18n.inc");
+use function \EPFL\WS\___;
+use function \EPFL\WS\__x;
 
 /**
  * Object model for Actu streams
