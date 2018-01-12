@@ -999,29 +999,40 @@ abstract class APIAutoCategory
      */
     static abstract function get_api_category_names();
 
-    function __construct ($tag_id)
+    /**
+     * Construct the model object for the category whose number is $term_id
+     *
+     * Note that this works for any category, whether or not it has
+     * been made an "auto" category for this APIAutoCategory subclass
+     * in the wp admin UI yet.
+     */
+    function __construct ($term_id)
     {
-        $this->tag_id = $tag_id;
+        $this->term_id = $term_id;
     }
 
     function ID ()
     {
-        return $this->tag_id;
+        return $this->term_id;
     }
 
+    /**
+     * @return The EPFL API-side number that encodes for Actu or Memento
+     *         records that will auto-assign to this category, or
+     *         null if no such relationship has been configured (yet)
+     *         in the admin UI.
+     */
     function get_api_id ()
     {
-        return get_term_meta($this->tag_id, $this->get_term_meta_slug(), true);
-    }
-
-    static function get_api_category_id ($term_id)
-    {
-        return get_term_meta($term_id, static::get_term_meta_slug(), true);
+        $id_as_text = get_term_meta($this->term_id, $this->get_term_meta_slug(), true);
+        return ("" === $id_as_text) ? null : (int) $id_as_text;
     }
 
     function get_api_category_name ()
     {
-        return $this->get_api_category_names()[$this->get_api_id()];
+        $api_id = $this->get_api_id();
+        if (null === $api_id) return "(None set)";
+        return $this->get_api_category_names()[$api_id];
     }
 
     /**
