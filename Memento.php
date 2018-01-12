@@ -48,7 +48,7 @@ class MementoStream extends \EPFL\WS\Base\APIChannelTaxonomy
 }
 
 /**
- * Object model for Actu posts
+ * Object model for Memento posts
  *
  * There is one instance of the Memento class for every unique event
  * (identified by the "event_id" and "translation_id" API fields, and
