@@ -14,6 +14,7 @@ use WP_Query;
 
 require_once(dirname(__FILE__) . "/i18n.inc");
 use function \EPFL\WS\___;
+use function \EPFL\WS\__x;
 
 require_once(dirname(__FILE__) . "/image-size.inc");
 use function EPFL\WS\get_image_size;
@@ -1031,7 +1032,7 @@ abstract class APIAutoCategory
     function get_api_category_name ()
     {
         $api_id = $this->get_api_id();
-        if (null === $api_id) return "(None set)";
+        if (null === $api_id) return __x("(Not set)", "API category name not set");
         return $this->get_api_category_names()[$api_id];
     }
 
@@ -1177,7 +1178,9 @@ abstract class APIAutoCategoryController
         $newval = $_REQUEST[$slug];
         if ( null !== $newval ) {
             delete_term_meta($term_id, $slug);
-            add_term_meta($term_id, $slug, $newval);
+            if ("-1" !== $_REQUEST[$slug]) {
+                add_term_meta($term_id, $slug, $newval);
+            }
         }
     }
 
