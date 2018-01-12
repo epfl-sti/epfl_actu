@@ -164,6 +164,11 @@ class MementoController extends \EPFL\WS\Base\APIChannelPostController
  */
 class MementoCategory extends \EPFL\WS\Base\APIAutoCategory
 {
+    static function get_post_class ()
+    {
+        return Memento::class;
+    }
+
     static function get_term_meta_slug ()
     {
         return "epfl_actu_category_id";

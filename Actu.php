@@ -268,6 +268,11 @@ class ActuController extends \EPFL\WS\Base\APIChannelPostController
  */
 class ActuCategory extends \EPFL\WS\Base\APIAutoCategory
 {
+    static function get_post_class ()
+    {
+        return Actu::class;
+    }
+
     static function get_term_meta_slug ()
     {
         return "epfl_actu_category_id";

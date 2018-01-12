@@ -39,7 +39,7 @@ function _debug ($msg)
 abstract class APIChannelTaxonomy
 {
     /**
-     * @return The object class for WP posts this APIChannelTaxonomy.
+     * @return The object class for WP posts this APIChannelTaxonomy applies to.
      */
     static abstract function get_post_class ();
 
@@ -982,6 +982,11 @@ abstract class APIChannelPostController
 abstract class APIAutoCategory
 {
     /**
+     * @return The object class for WP posts this APIAutoCategory applies to.
+     */
+    static abstract function get_post_class ();
+
+    /**
      * @return A slug (unique keyword) used to associate metadata
      *         (here, the API-side category code) to objects of this
      *         class in the WordPress database
@@ -1060,7 +1065,7 @@ abstract class APIAutoCategory
 abstract class APIAutoCategoryController
 {
     /**
-     * @return The model class for this controller
+     * @return The model class for this controller (subclass of APIAutoCategory)
      */
     abstract static function get_model_class ();
 
@@ -1085,8 +1090,8 @@ abstract class APIAutoCategoryController
 
     static function hook ()
     {
-        add_action ( 'category_add_form_fields', array(get_called_class(), 'render_category_id'));
-        add_action ( 'category_edit_form_fields', array(get_called_class(), 'render_category_id'));
+        add_action ( 'category_add_form_fields', array(get_called_class(), 'render_select_api_category'));
+        add_action ( 'category_edit_form_fields', array(get_called_class(), 'render_select_api_category'));
         add_action ( 'created_category', array(get_called_class(), 'save_category_id'), 10, 2);
         add_action ( 'edited_category', array(get_called_class(), 'save_category_id'), 10, 2);
 
@@ -1117,10 +1122,14 @@ abstract class APIAutoCategoryController
         }
     }
 
-    static function render_category_id ()
+    static function render_select_api_category ()
     {
-        $model_class = static::get_model_class();
-        $api_id = (new $model_class($_REQUEST['tag_ID']))->get_api_id();
+        $auto_category_class = static::get_model_class();
+        $post_class = $auto_category_class::get_post_class();
+        if ($_REQUEST["post_type"] != $post_class::get_post_type()) return;
+
+        // Will be null on the create form:
+        $current_api_id = (new $auto_category_class($_REQUEST['tag_ID']))->get_api_id();
         ?>
         <tr class="form-field <?php echo static::get_wp_admin_css_class() ?>">
             <th scope="row">
@@ -1132,7 +1141,7 @@ abstract class APIAutoCategoryController
                 <select name="epfl_api_category_id" id="epfl_api_category_id" class="postform">
                     <option value="-1">None</option>
                 <?php foreach (static::get_model_class()::get_api_category_names() as $catid => $cattitle) { ?>
-                    <option class="level-0" value="<?php echo $catid; ?>"<?php selected($api_id, $catid)  ?>><?php echo $cattitle; ?></option>
+                    <option class="level-0" value="<?php echo $catid; ?>"<?php selected($current_api_id, $catid)  ?>><?php echo $cattitle; ?></option>
                 <?php } ?>
                 </select>
                 <p><?php echo static::get_human_labels()["purpose_explanation"]; ?></p>
