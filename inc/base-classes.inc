@@ -451,7 +451,6 @@ abstract class APIChannelPost
 
     public function _sync($api_result)
     {
-        if (! $this->ID) die;
         $this->_init_post_meta();
 
         // "absolute_slug" is common to both APIs
