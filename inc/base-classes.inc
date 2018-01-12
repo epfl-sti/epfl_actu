@@ -1122,16 +1122,22 @@ abstract class APIAutoCategoryController
     static function get_custom_column_value ($content, $column_name, $term_id)
     {
         if ($column_name === static::get_term_meta_slug()) {
-            return self::get_category_name($term_id);
+            $category_class = static::get_model_class();
+            return (new $category_class($term_id))->get_api_category_name();
         }
+    }
+
+    static function render_select_api_category_if_post_type_is_right ()
+    {
+        $auto_category_class = static::get_model_class();
+        $post_class = $auto_category_class::get_post_class();
+        if ($_REQUEST["post_type"] != $post_class::get_post_type()) return;
+        static::render_select_api_category();
     }
 
     static function render_select_api_category ()
     {
         $auto_category_class = static::get_model_class();
-        $post_class = $auto_category_class::get_post_class();
-        if ($_REQUEST["post_type"] != $post_class::get_post_type()) return;
-
         // Will be null on the create form:
         $current_api_id = (new $auto_category_class($_REQUEST['tag_ID']))->get_api_id();
         $slug = static::get_term_meta_slug();
