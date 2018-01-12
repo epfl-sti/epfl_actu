@@ -454,7 +454,7 @@ abstract class APIChannelPost
         $that->_update_image_meta($api_result);
         // Polylang
         if (function_exists("pll_set_post_language")) {
-            pll_set_post_language($that->ID, $api_result["language"]);
+            pll_set_post_language($that->ID, $api_result["language"] || $api_result["lang"]);
         }
 
         $update_post_args = array(
