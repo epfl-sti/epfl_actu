@@ -1121,10 +1121,10 @@ abstract class APIAutoCategoryController
 
     static function get_custom_column_value ($content, $column_name, $term_id)
     {
-        if ($column_name === static::get_term_meta_slug()) {
-            $category_class = static::get_model_class();
-            return (new $category_class($term_id))->get_api_category_name();
-        }
+        if ($column_name !== static::get_term_meta_slug()) return $content;
+
+        $category_class = static::get_model_class();
+        return (new $category_class($term_id))->get_api_category_name();
     }
 
     static function render_select_api_category_if_post_type_is_right ()
