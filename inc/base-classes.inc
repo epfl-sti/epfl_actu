@@ -10,14 +10,20 @@ if (! defined('ABSPATH')) {
     die('Access denied.');
 }
 
-use WP_Query;
+use \WP_Query;
+use \Exception;
 
 require_once(dirname(__FILE__) . "/i18n.inc");
 use function \EPFL\WS\___;
 use function \EPFL\WS\__x;
 
+require_once(dirname(__FILE__) . "/cron.inc");
+use function \EPFL\WS\run_every;
+
 require_once(dirname(__FILE__) . "/image-size.inc");
-use function EPFL\WS\get_image_size;
+use function \EPFL\WS\get_image_size;
+
+use \WPPrometheusExporter;  // In a plug-in - No harm if it doesn't exist
 
 function _debug ($msg)
 {
@@ -67,6 +73,26 @@ abstract class APIChannelTaxonomy
         }
     }
 
+    static function get_all ()
+    {
+        $thisclass = get_called_class();
+        $all = array();
+        foreach (get_terms(array(
+            'taxonomy'   => $thisclass::get_taxonomy_slug(),
+            'hide_empty' => false
+        )) as $wp_term) {
+            if (is_wp_error($wp_term)) {
+                throw new Exception($wp_term->get_error_message());
+            } elseif (array_key_exists("invalid_taxonomy", $wp_term)) {
+                throw new Exception(sprintf(
+                    "get_terms() says %s is an invalid taxonomy",
+                    $thisclass::get_taxonomy_slug()));
+            }
+            array_push($all, new $thisclass($wp_term));
+        }
+        return $all;
+    }
+
     function get_url ()
     {
         if (! $this->url) {
@@ -82,9 +108,9 @@ abstract class APIChannelTaxonomy
         add_term_meta($this->ID, $this->get_term_meta_slug(), $url);
     }
 
-    function as_category ()
+    function as_wp_term ()
     {
-        return $this->ID;
+        return \WP_Term::get_instance($this->ID, $this->get_taxonomy_slug());
     }
 
     function sync ()
@@ -96,6 +122,10 @@ abstract class APIChannelTaxonomy
             $epfl_post = $post_class::sync($api_result);
             $this->set_ownership($epfl_post);
         }
+    }
+
+    function register_prometheus_metrics ()
+    {
     }
 
     /**
@@ -161,6 +191,69 @@ abstract class APIChannelTaxonomyController
     static function hook ()
     {
         add_action('init', array(get_called_class(), '_do_register_taxonomy'));
+
+        add_action('plugins_loaded', function () {
+            if (! class_exists("WPPrometheusExporter")) return;
+            WPPrometheusExporter::register_metric(
+                'epfl_ws_last_sync_success',
+                array(
+                    'help' => 'Timestamp of last successful sync from API'
+                ));
+            WPPrometheusExporter::register_metric(
+                'epfl_ws_sync_duration',
+                array(
+                    'help' => 'Duration of last sync from API (successful or not)',
+                    'has_timestamp' => true
+                )
+            );
+            WPPrometheusExporter::register_metric(
+                'epfl_ws_sync_success',
+                array(
+                    'type' => 'gauge',
+                    'help' => '0 for error, 1 for success',
+                    'has_timestamp' => true
+                )
+            );
+        });
+
+        $taxonomy_class = static::get_taxonomy_class();
+        run_every(600, function () use ($taxonomy_class) {
+            foreach ($taxonomy_class::get_all() as $stream) {
+                $stream_name = $stream->as_wp_term()->name;
+                $stream_slug = $stream->as_wp_term()->slug;
+                error_log("Syncing Actu stream $stream_name ($stream_slug)");
+                
+                $started = microtime(true);
+                try {
+                    $stream->sync();
+                    $failed = null;
+                } catch (Exception $e) {
+                    $failed = $e;
+                }
+                $duration = microtime(true) - $started;
+
+                error_log(sprintf(
+                    "Syncing Actu stream %s (%s), duration: %.03ds, status: %s",
+                    $stream_name,
+                    $stream_slug,
+                    $duration,
+                    ($failed ? $failed->getMessage() : "OK")));
+
+                if (! class_exists("WPPrometheusExporter")) continue;
+                $labels = array(
+                    'kind' => $taxonomy_class::get_taxonomy_slug(),
+                    'slug' => $stream_slug
+                );
+                (new WPPrometheusExporter('epfl_ws_sync_duration', $labels))
+                    ->update($duration);
+                (new WPPrometheusExporter('epfl_ws_sync_success', $labels))
+                    ->update($failed ? 0 : 1);
+                if (! $failed) {
+                    (new WPPrometheusExporter('epfl_ws_last_sync_success', $labels))
+                        ->update($started);
+                }
+            }
+        });
     }
 
     /**
