@@ -83,12 +83,6 @@ class Actu extends \EPFL\WS\Base\APIChannelPost
     }
 
     /**
-     * Incrementally constructed by the _update_* methods;
-     * read in one fell swoop by @link _get_post_meta
-     */
-    protected $_post_meta;
-
-    /**
      * Update this news post with $details, overwriting most of the
      * mutable state of it.
      *
