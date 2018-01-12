@@ -484,7 +484,8 @@ abstract class APIChannelPost
     }
 
     function _get_language ($api_result) {
-        return $api_result["language"] || $api_result["lang"];
+        return ($api_result["language"] ? $api_result["language"] :
+                $api_result["lang"]);
     }
 
     function wp_post ()
