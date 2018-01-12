@@ -171,7 +171,7 @@ class MementoCategory extends \EPFL\WS\Base\APIAutoCategory
 
     static function get_term_meta_slug ()
     {
-        return "epfl_actu_category_id";
+        return "epfl_memento_category_id";
     }
 
     static function get_api_category_names () {
