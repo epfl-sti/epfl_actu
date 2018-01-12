@@ -474,7 +474,7 @@ abstract class APIChannelPost
 
         $auto_categories = $that->get_auto_category_class()::find(
             $api_result[$that->get_auto_category_id_key()],
-            /* $lang_hint = */ $this->_get_language($api_result));
+            /* $lang_hint = */ $that->_get_language($api_result));
         wp_set_post_categories(
             $that->ID,
             array_map(function($cat) { return $cat->ID(); }, $auto_categories),
