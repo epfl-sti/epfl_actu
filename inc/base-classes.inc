@@ -1130,15 +1130,16 @@ abstract class APIAutoCategoryController
 
         // Will be null on the create form:
         $current_api_id = (new $auto_category_class($_REQUEST['tag_ID']))->get_api_id();
+        $slug = static::get_term_meta_slug();
         ?>
         <tr class="form-field <?php echo static::get_wp_admin_css_class() ?>">
             <th scope="row">
-                <label for="epfl_api_category_id">
+                <label for=<?php echo $slug; ?>>
                     <?php echo static::get_human_labels()["category_name_label"]; ?>
                 </label>
             </th>
             <td>
-                <select name="epfl_api_category_id" id="epfl_api_category_id" class="postform">
+                <select name=<?php echo $slug; ?> id=<?php echo $slug; ?> class="postform">
                     <option value="-1">None</option>
                 <?php foreach (static::get_model_class()::get_api_category_names() as $catid => $cattitle) { ?>
                     <option class="level-0" value="<?php echo $catid; ?>"<?php selected($current_api_id, $catid)  ?>><?php echo $cattitle; ?></option>
@@ -1151,10 +1152,11 @@ abstract class APIAutoCategoryController
     }
 
     static function save_category_id ($term_id, $unused_taxonomy) {
-        $newval = $_REQUEST['epfl_api_category_id'];
+        $slug = static::get_term_meta_slug();
+        $newval = $_REQUEST[$slug];
         if ( null !== $newval ) {
-            delete_term_meta($term_id, static::get_term_meta_slug());
-            add_term_meta($term_id, static::get_term_meta_slug(), $newval);
+            delete_term_meta($term_id, $slug);
+            add_term_meta($term_id, $slug, $newval);
         }
     }
 
