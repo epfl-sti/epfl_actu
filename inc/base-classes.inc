@@ -1014,6 +1014,16 @@ abstract class APIAutoCategory
         return get_term_meta($this->tag_id, $this->get_term_meta_slug(), true);
     }
 
+    static function get_api_category_id ($term_id)
+    {
+        return get_term_meta($term_id, static::get_term_meta_slug(), true);
+    }
+
+    function get_api_category_name ()
+    {
+        return $this->get_api_category_names()[$this->get_api_id()];
+    }
+
     /**
      * @return A list of categories to auto-include an instance
      * of @link APIChannelPost into.
@@ -1090,7 +1100,12 @@ abstract class APIAutoCategoryController
 
     static function hook ()
     {
-        add_action ( 'category_add_form_fields', array(get_called_class(), 'render_select_api_category'));
+        add_action ( 'category_add_form_fields',
+                     array(get_called_class(),
+                           'render_select_api_category_if_post_type_is_right'));
+        /* Since the "edit category" form is full-screen, it's confusing
+         * to display only one of the drop-down lists depending on how we
+         * arrived to that page. */
         add_action ( 'category_edit_form_fields', array(get_called_class(), 'render_select_api_category'));
         add_action ( 'created_category', array(get_called_class(), 'save_category_id'), 10, 2);
         add_action ( 'edited_category', array(get_called_class(), 'save_category_id'), 10, 2);
@@ -1102,17 +1117,6 @@ abstract class APIAutoCategoryController
     static function get_term_meta_slug()
     {
         return static::get_model_class()::get_term_meta_slug();
-    }
-
-    static function get_category_id ($tag_id)
-    {
-        return get_term_meta($tag_id, static::get_term_meta_slug(), true);
-    }
-
-    static function get_category_name ($tag_id)
-    {
-        return static::get_model_class()::get_api_category_names()[
-            static::get_category_id($tag_id)];
     }
 
     static function get_custom_column_value ($content, $column_name, $term_id)
