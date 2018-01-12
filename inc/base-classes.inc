@@ -291,6 +291,48 @@ abstract class APIChannelPost
      */
     static abstract function get_auto_category_id_key ();
 
+    /**
+     * Extract as much information as desired from $api_result and
+     * stash it into $this->_post_meta.
+     *
+     * The base class only picks "absolute_slug" out of $api_result.
+     * Subclasses are expected to pick up additional fields.
+     *
+     * See also @link _update_image_meta which is ran after
+     * _update_post_meta.
+     */
+    protected function _update_post_meta ($api_result)
+    {
+        $this->_post_meta["absolute_slug"] = $api_result["absolute_slug"];
+    }
+
+    /**
+     * @return the value of the "post_content" standard (non-meta) WordPress field.
+     */
+    abstract protected function _get_content ($api_result);
+
+    /**
+     * @return the value of the "post_title" standard (non-meta) WordPress field.
+     *
+     * Both APIs happen to use the same field, however this method is
+     * singled out for overloading in case of need.
+     */    
+    protected function _get_title ($api_result)
+    {
+        return $api_result["title"];
+    }
+
+    /**
+     * @return the value of the "post_excerpt" standard (non-meta) WordPress
+     * field.
+     *
+     * The base class does nothing. If your API has excerpts (e.g.,
+     * Actu), override in the subclass.
+     */
+    protected function _get_excerpt ($api_result) {
+        return null;
+    }
+
     var $ID;
     var $api_id;
     var $translation_id;
@@ -429,8 +471,8 @@ abstract class APIChannelPost
 
         wp_update_post($update_post_args);
 
-        $auto_categories = $this->get_auto_category_class()::find(
-            $api_result[$this->get_auto_category_id_key()],
+        $auto_categories = $that->get_auto_category_class()::find(
+            $api_result[$that->get_auto_category_id_key()],
             /* $lang_hint = */ $api_result["language"]);
         wp_set_post_categories(
             $that->ID,
@@ -438,42 +480,6 @@ abstract class APIChannelPost
             /* $append = */ true);
 
         return $that;
-    }
-
-    /**
-     * Extract as much information as desired from $api_result and
-     * stash it into $this->_post_meta.
-     *
-     * The base class only picks "absolute_slug" out of $api_result.
-     * Subclasses are expected to pick up additional fields.
-     *
-     * See also @link _update_image_meta which is ran after
-     * _update_post_meta.
-     */
-    protected function _update_post_meta ($api_result) {
-        $this->_post_meta["absolute_slug"] = $api_result["absolute_slug"];
-    }
-
-    /**
-     * @return the value of the "post_title" standard (non-meta) WordPress field.
-     *
-     * Both APIs happen to use the same field, however this method is
-     * singled out for overloading in case of need.
-     */    
-    protected function _get_title ($api_result)
-    {
-        return $api_result["title"];
-    }
-
-    /**
-     * @return the value of the "post_excerpt" standard (non-meta) WordPress
-     * field.
-     *
-     * The base class does nothing. If your API has excerpts (e.g.,
-     * Actu), override in the subclass.
-     */
-    protected function _get_excerpt ($api_result) {
-        return null;
     }
 
     function wp_post ()
