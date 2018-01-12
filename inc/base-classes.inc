@@ -216,7 +216,7 @@ abstract class APIChannelTaxonomyController
     {
         $taxonomy_class = static::get_taxonomy_class();
         $current_url = (new $taxonomy_class($term))->get_url();
-        ?><tr class="form-field actu-channel-url-wrap">
+        ?><tr class="form-field epfl-ws-channel-url-wrap">
             <th scope="row">
                 <label for="<?php echo self::CHANNEL_WIDGET_URL_SLUG ?>">
                     <?php echo self::_get_wp_admin_label("url_legend"); ?>
@@ -660,7 +660,7 @@ abstract class APIChannelPostController
         static::configure_rendering_in_edit_form();
         add_action("admin_enqueue_scripts", array(get_called_class(), "editor_css"));
 
-        // Behavior of Actu posts in search results
+        // Behavior of epfl-ws posts in search results
         add_filter('pre_get_posts', array(get_called_class(), "pre_get_posts"));
     }
 
@@ -699,9 +699,10 @@ abstract class APIChannelPostController
                     'edit_published_posts' => 'edit_epfl_ws_posts',
                     'assign_categories'    => 'edit_epfl_ws_posts',
                     'assign_post_tags'     => 'edit_epfl_ws_posts',
-                    // One is not actually supposed to delete posts manually —
-                    // This is just an escape hatch in case an ActuStream was
-                    // deleted and referential integrity was breached.
+                    // One is not normally supposed to delete posts
+                    // manually — This is just an escape hatch in case
+                    // an APIChannelTaxonomy was deleted and
+                    // referential integrity was breached.
                     'delete_post'          => 'edit_epfl_ws_posts',
                     'delete_posts'         => 'edit_epfl_ws_posts',
                     'delete_private_posts' => 'edit_epfl_ws_posts',
@@ -718,8 +719,8 @@ abstract class APIChannelPostController
         register_post_type($post_class::get_post_type(), $post_type_settings);
     }
 
-    const ROLES_THAT_MAY_VIEW_ACTUS = array('administrator', 'editor', 'author', 'contributor');
-    const ROLES_THAT_MAY_MANAGE_ACTUS = array('administrator', 'editor');
+    const ROLES_THAT_MAY_VIEW = array('administrator', 'editor', 'author', 'contributor');
+    const ROLES_THAT_MAY_MANAGE = array('administrator', 'editor');
     const ALL_ROLES = array('administrator', 'editor', 'author', 'contributor', 'subscriber');
     const CAPS_FOR_VIEWERS = array(
         'read_epfl_ws_posts'
@@ -737,22 +738,22 @@ abstract class APIChannelPostController
     );
 
     /**
-     * Register permissions ("capabilities") on Actu posts.
+     * Register permissions ("capabilities") on epfl-ws posts.
      *
      * Called at plugin activation time.
      *
      * The permission map is made so that administrators and editors can view and
-     * delete Actus, but not edit them.
+     * delete epfl-ws posts, but not edit them.
      */
     static function register_caps ()
     {
-        foreach (self::ROLES_THAT_MAY_VIEW_ACTUS as $role_name) {
+        foreach (self::ROLES_THAT_MAY_VIEW as $role_name) {
             $role = get_role($role_name);
             foreach (self::CAPS_FOR_VIEWERS as $cap) {
                 $role->add_cap($cap);
             }
         }
-        foreach (self::ROLES_THAT_MAY_MANAGE_ACTUS as $role_name) {
+        foreach (self::ROLES_THAT_MAY_MANAGE as $role_name) {
             $role = get_role($role_name);
             foreach (self::ALL_CAPS as $cap) {
                 $role->add_cap($cap);
@@ -761,7 +762,7 @@ abstract class APIChannelPostController
     }
 
     /**
-     * De-register permissions ("capabilities") on Actu posts.
+     * De-register permissions ("capabilities") on epfl-ws posts.
      *
      * Called at plugin deactivation time.
      */
@@ -832,7 +833,7 @@ abstract class APIChannelPostController
 
     /**
      * Make subtitles read-only by preventing WP Subtitles from
-     * initializing in the case of epfl-actu posts.
+     * initializing in the case of epfl-ws posts.
      */
     static function make_subtitles_readonly_in_admin ()
     {
@@ -854,10 +855,11 @@ abstract class APIChannelPostController
     /**
      * Arrange for get_the_post_thumbnail() to return the external thumbnail for epfl-ws posts.
      *
-     * This is set as a filter for WordPress' @link post_thumbnail_html hook. Note that
-     * it isn't as easy to hijack the return value of @link get_the_post_thumbnail_url
-     * in this way (but you can always call the @link get_image_url instance
-     * method on an Actu object).
+     * This is set as a filter for WordPress' @link
+     * post_thumbnail_html hook. Note that it isn't as easy to hijack
+     * the return value of @link get_the_post_thumbnail_url in this
+     * way (but you can always call the @link get_image_url method on
+     * an APIChannelPost instance).
      *
      * @return An <img /> tag with suitable attributes
      *
@@ -879,15 +881,15 @@ abstract class APIChannelPostController
     static function filter_post_thumbnail_html ($orig_html, $post_id, $unused_thumbnail_id,
                                                 $size, $attr)
     {
-        $actu = static::get_model_class()::get($post_id);
-        if (! $actu) return $orig_html;
+        $epfl_post = static::get_model_class()::get($post_id);
+        if (! $epfl_post) return $orig_html;
 
-        // Actu images are resizable server-side
+        // Actu and Memento images are resizable server-side
         // TODO: we could actually interpret $size in a much finer way
         if (($size === "full" || $size === "large")) {
-            $src = $actu->get_image_url("2048x1152");
+            $src = $epfl_post->get_image_url("2048x1152");
         } else {
-            $src = $actu->get_image_url();
+            $src = $epfl_post->get_image_url();
         }
         if (! $src) return $orig_html;
 
@@ -936,7 +938,7 @@ abstract class APIChannelPostController
     <h1><?php echo $wp_post->post_title; ?></h1>
     <?php if ($subtitle) : ?><h2><?php echo $subtitle; ?></h2><?php endif; ?>
 	<div id="edit-slug-box" class="hide-if-no-js">
-    <img class="actu-thumbnail" src="<?php echo $epfl_post->get_image_url() ?>"/>
+    <img class="epfl-ws-thumbnail" src="<?php echo $epfl_post->get_image_url() ?>"/>
     <p><b>Permalink:</b> <a href="<?php echo $permalink; ?>"><?php echo $permalink; ?></a></p>
     <?php echo $wp_post->post_content; ?>
 	</div>
