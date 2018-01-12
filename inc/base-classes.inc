@@ -441,46 +441,53 @@ abstract class APIChannelPost
      * @return The object instance that corresponds to the primary keys
      *         present in $api_result (in the sense of @link get_or_create)
      */
-    static function sync ($api_result) {
+    static function sync ($api_result)
+    {
         $that = static::get_or_create($api_result[static::get_api_id_key()],
                                       $api_result["translation_id"]);
+        $that->_sync($api_result);
+        return $that;
+    }
 
-        $that->_init_post_meta();
+    public function _sync($api_result)
+    {
+        if (! $this->ID) die;
+        $this->_init_post_meta();
 
         // "absolute_slug" is common to both APIs
-        $that->_post_meta["absolute_slug"] = $api_result["absolute_slug"];
+        $this->_post_meta["absolute_slug"] = $api_result["absolute_slug"];
 
-        $that->_update_post_meta($api_result);
-        $that->_update_image_meta($api_result);
+        $this->_update_post_meta($api_result);
+        $this->_update_image_meta($api_result);
         // Polylang
         if (function_exists("pll_set_post_language")) {
-            pll_set_post_language($that->ID, $that->_get_language($api_result));
+            pll_set_post_language($this->ID, $this->_get_language($api_result));
         }
 
         $update_post_args = array(
-            "ID"            => $that->ID,
-            "post_type"     => $that->get_post_type(),
-            "post_title"    => $that->_get_title($api_result),
-            "post_content"  => $that->_get_content($api_result),
-            "meta_input"    => $that->_post_meta
+            "ID"            => $this->ID,
+            "post_type"     => $this->get_post_type(),
+            "post_title"    => $this->_get_title($api_result),
+            "post_content"  => $this->_get_content($api_result),
+            "meta_input"    => $this->_post_meta
         );
 
-        $excerpt = $that->_get_excerpt($api_result);
+        $excerpt = $this->_get_excerpt($api_result);
         if ($excerpt) {
             $update_post_args["post_excerpt"] = $excerpt;
         }
 
         wp_update_post($update_post_args);
 
-        $auto_categories = $that->get_auto_category_class()::find(
-            $api_result[$that->get_auto_category_id_key()],
-            /* $lang_hint = */ $that->_get_language($api_result));
+        $auto_categories = $this->get_auto_category_class()::find(
+            $api_result[$this->get_auto_category_id_key()],
+            /* $lang_hint = */ $this->_get_language($api_result));
+        $auto_category_ids = array_map(function($cat) { return $cat->ID(); }, $auto_categories);
+        _debug(sprintf("Appending %s to post %d", var_export($auto_category_ids, true), $this->ID));
         wp_set_post_categories(
-            $that->ID,
+            $this->ID,
             array_map(function($cat) { return $cat->ID(); }, $auto_categories),
             /* $append = */ true);
-
-        return $that;
     }
 
     function _get_language ($api_result) {
