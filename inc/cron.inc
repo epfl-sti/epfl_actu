@@ -31,6 +31,7 @@ function run_every ($seconds, $callable) {
                 'display'  => sprintf(
                     ___('Every %d seconds (for epfl-ws)'), $seconds)
             );
+            return $schedules;
         });
     if (! wp_next_scheduled($slug)) {
         wp_schedule_event( time(), $slug, $slug);            
