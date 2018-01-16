@@ -84,6 +84,11 @@ class Memento extends \EPFL\WS\Base\APIChannelPost
     {
         return $api_result["description"];
     }
+
+    public function get_ical_link ()
+    {
+        return sprintf("https://memento.epfl.ch/event/export/%d", $this->translation_id);
+    }
 }
 
 /**
