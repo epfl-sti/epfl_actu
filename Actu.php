@@ -85,11 +85,7 @@ class Actu extends \EPFL\WS\Base\APIChannelPost
     }
 
     /**
-     * Update this news post with $details, overwriting most of the
-     * mutable state of it.
-     *
-     * Only taxonomy terms (categories, as well as @link
-     * APIChannelTaxonomy#set_ownership) are left unchanged.
+     * Overridden to retain video metadata and subtitle, if any
      */
     protected function _update_post_meta ($api_result)
     {

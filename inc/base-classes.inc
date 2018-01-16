@@ -398,6 +398,10 @@ abstract class APIChannelPost
     protected function _update_post_meta ($api_result)
     {
         $this->_post_meta["absolute_slug"] = $api_result["absolute_slug"];
+        // So technically we've been through a decode/encode cycle and
+        // we all know how harsh PHP can be to JSON... But we just want
+        // to keep as much metadata as possible.
+        $this->_post_meta["json_bkp"] = json_encode($api_result);
     }
 
     /**

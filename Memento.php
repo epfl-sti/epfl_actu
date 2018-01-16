@@ -89,6 +89,30 @@ class Memento extends \EPFL\WS\Base\APIChannelPost
     {
         return sprintf("https://memento.epfl.ch/event/export/%d", $this->translation_id);
     }
+
+    /**
+     * Overridden to retain video metadata and subtitle, if any
+     */
+    protected function _update_post_meta ($api_result)
+    {
+        parent::_update_post_meta($api_result);
+        foreach (["event_start_date", "event_end_date",
+                  "event_start_time", "event_end_time",
+                  "event_theme", "event_speaker",
+                  "event_place_and_room", "event_url_place_and_room",
+                  "event_canceled_reason"]
+                 as $keep_this_as_meta)
+        {
+            if ($api_result[$keep_this_as_meta]) {
+                $this->_post_meta[$keep_this_as_meta] = $api_result[$keep_this_as_meta];
+            }
+        }
+        foreach (["event_is_internal", "event_canceled"]
+        as $keep_this_as_bool_meta) {
+            $this->_post_meta[$keep_this_as_bool_meta] = (
+                strtolower($api_result[$keep_this_as_bool_meta]) === "true");
+        }
+    }
 }
 
 /**
