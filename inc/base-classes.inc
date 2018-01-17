@@ -432,8 +432,11 @@ abstract class APIChannelPost
     }
 
     var $ID;
-    var $api_id;
-    var $translation_id;
+    private $api_id;
+    private $translation_id;
+
+    function get_api_id () { return $this->api_id; }
+    function get_translation_id () { return $this->translation_id; }
 
     /**
      * Populated piecemeal at @link sync time by the various
@@ -446,9 +449,11 @@ abstract class APIChannelPost
      * Private constructor — Call @link get, @link get_or_create
      * or @link sync instead
      */
-    function __construct ($id)
+    function __construct ($id, $api_id, $translation_id)
     {
-        $this->ID = $id;
+        $this->ID             = $id;
+        $this->api_id         = $api_id;
+        $this->translation_id = $translation_id;
     }
 
     /**
@@ -496,13 +501,11 @@ abstract class APIChannelPost
                     "api_id" => $api_id,
                     "translation_id" => $translation_id
                 )), true);
-            $that = new $theclass($id);
         } else {
-            $that = new $theclass($results[0]->ID);
+            $id = $results[0]->ID;
         }
-        $that->api_id = $api_id;
-        $that->translation_id = $translation_id;
-        return $that;
+
+        return new $theclass($id, $api_id, $translation_id);
     }
 
     /**
@@ -513,14 +516,18 @@ abstract class APIChannelPost
     static function get ($post_or_post_id)
     {
         $theclass = get_called_class();
+        $expected_post_type = $theclass::get_post_type();
         if (is_object($post_or_post_id)) {
-            if ($post_or_post_id->post_type !== $theclass::get_post_type()) return;
+            if ($post_or_post_id->post_type !== $expected_post_type) return;
             $post_id = $post_or_post_id->ID;
         } else {
             $post_id = $post_or_post_id;
-            if (get_post_type($post_id) !== $theclass::get_post_type()) return;
+            if (get_post_type($post_id) !== $expected_post_type) return;
         }
-        $that = new $theclass($post_id);
+
+        $api_id         = get_post_meta($post_id, "api_id",         true);
+        $translation_id = get_post_meta($post_id, "translation_id", true);
+        $that = new $theclass($post_id, $api_id, $translation_id);
         if (is_object($post_or_post_id)) {
             $that->_wp_post = $post_or_post_id;
         }
