@@ -85,11 +85,6 @@ class Memento extends \EPFL\WS\Base\APIChannelPost
         return $api_result["description"];
     }
 
-    public function get_ical_link ()
-    {
-        return sprintf("https://memento.epfl.ch/event/export/%d", $this->translation_id);
-    }
-
     /**
      * Overridden to retain video metadata and subtitle, if any
      */
@@ -113,6 +108,37 @@ class Memento extends \EPFL\WS\Base\APIChannelPost
                 strtolower($api_result[$keep_this_as_bool_meta]) === "true");
         }
     }
+
+    public function get_ical_link ()
+    {
+        return sprintf("https://memento.epfl.ch/event/export/%d", $this->get_translation_id());
+    }
+
+    public function get_start_datetime ()
+    {
+        return $this->_parse_datetime(
+            get_post_meta($this->ID, "event_start_date", true),
+            get_post_meta($this->ID, "event_start_time", true));
+    }
+
+    public function get_end_datetime ()
+    {
+        return $this->_parse_datetime(
+            get_post_meta($this->ID, "event_end_date", true),
+            get_post_meta($this->ID, "event_end_time", true));
+    }
+
+    public function _parse_datetime ($date, $time)
+    {
+        if ($date && $time) {
+            return \DateTime::createFromFormat('Y-m-d H:i:s', "$date $time");
+        } elseif ($date) {
+            return \DateTime::createFromFormat('Y-m-d', $date);
+        } else {
+            return null;
+        }
+    }
+
 }
 
 /**
