@@ -170,7 +170,7 @@ class Person
         if (sizeof($results) > 1) {
             throw new DuplicatePersonException($sciper);
         }
-        return $results[0];
+        return static::get($results[0]);
     }
 
     function get_title ()
