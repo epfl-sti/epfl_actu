@@ -20,8 +20,20 @@ class LDAPClient
     const LDAP_SERVER = "ldap.epfl.ch";
     const BASE_DN     = "o=epfl,c=ch";
     const SEARCH_PERSON_BY_SCIPER = "(&(objectClass=person)(uniqueIdentifier=%d))";
+    const SEARCH_UNIT_BY_CN = "(&(objectClass=organizationalUnit)(cn=%s))";
 
-    static function query_by_sciper ($sciper) {
+    static function query_by_sciper ($sciper)
+    {
+        return self::_do_ldap_search(
+            sprintf(self::SEARCH_PERSON_BY_SCIPER, $sciper));
+    }
+
+    static function query_by_unit_name ($unit_name) {
+        return self::_do_ldap_search(
+            sprintf(self::SEARCH_UNIT_BY_CN, $unit_name));
+    }
+
+    static private function _do_ldap_search ($query) {
         self::_require_ldap();
         $ld = @ldap_connect(self::LDAP_SERVER);
         if (! ($ld && @ldap_bind($ld))) {
@@ -31,8 +43,7 @@ class LDAPClient
                         ldap_error($ld)));
         }
 
-        $results = @ldap_search($ld, self::BASE_DN,
-                               sprintf(self::SEARCH_PERSON_BY_SCIPER, $sciper));
+        $results = @ldap_search($ld, self::BASE_DN, $query);
         if (! $results) {
             throw new LDAPException(sprintf(
                 ___("ldap_search error: %s"), ldap_error($ld)));

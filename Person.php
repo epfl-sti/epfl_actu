@@ -122,6 +122,11 @@ class Person
         return get_post_meta($this->ID, 'sciper', true);  // Cached by WP
     }
 
+    public function get_full_name ()
+    {
+        return $this->wp_post()->post_title;
+    }
+
     public function set_sciper($sciper)
     {
         $metoo = get_called_class()::find_by_sciper($sciper);
@@ -186,7 +191,12 @@ class Person
 
     public function get_unit ()
     {
-        return get_post_meta($this->ID, 'unit', true);
+        return get_post_meta($this->ID, 'ou', true);
+    }
+
+    public function get_unit_long ()
+    {
+        return get_post_meta($this->ID, 'unit_quad', true);
     }
 
     public function update ()
@@ -220,9 +230,19 @@ class Person
             $meta["dn"] = $dn;
             $bricks = explode(',', $dn);
             // construct a unit string, e.g. EPFL / STI / STI-SG / STI-IT
-            $meta["unit"] = strtoupper(explode('=', $bricks[4])[1]) . " / " . strtoupper(explode('=', $bricks[3])[1]) . " / " . strtoupper(explode('=', $bricks[2])[1]) . " / " . strtoupper(explode('=', $bricks[1])[1]);
+            $meta["unit_quad"] = strtoupper(explode('=', $bricks[4])[1]) . " / " . strtoupper(explode('=', $bricks[3])[1]) . " / " . strtoupper(explode('=', $bricks[2])[1]) . " / " . strtoupper(explode('=', $bricks[1])[1]);
         }
 
+        $unit = $entries[0]["ou"][0];
+        $meta["ou"] = $unit;
+
+        $unit_entries = LDAPClient::query_by_unit_name($unit);
+        if ($unit_entries && count($unit_entries)) {
+            $labeleduri = $unit_entries[0]["labeleduri"][0];
+
+            $meta[self::LAB_WEBSITE_URL_META] = explode(" ", $labeleduri)[0];
+        }
+        
         $update = array(
             'ID'         => $this->ID,
             // We want a language-neutral post_title so we can't
@@ -241,15 +261,30 @@ class Person
 
     public function import_image_from_people ()
     {
-        $dom = scrape(sprintf("https://people.epfl.ch/%d",
-                              $this->get_sciper()));
+        $dom = $this->_get_people_dom();
         $xpath = new \DOMXpath($dom);
         $src_attr = $xpath->query("//div[@class=\"portrait\"]/img/@src")->item(0);
         if (! $src_attr) return null;
         $src = $src_attr->value;
         update_post_meta($this->ID, self::THUMBNAIL_META, $src);
-        return $src;
+        return $this;
     }
+
+    const LAB_WEBSITE_URL_META = "epfl_person_lab_website_url";
+    public function get_lab_website_url ()
+    {
+        return get_post_meta($this->ID, self::LAB_WEBSITE_URL_META, true);
+    }
+
+    private function _get_people_dom()
+    {
+        if (! $this->_people_dom) {
+            $this->_people_dom = scrape(sprintf("https://people.epfl.ch/%d",
+                                                $this->get_sciper()));
+        }
+        return $this->_people_dom;
+    }
+
 }
 
 /**
@@ -476,7 +511,7 @@ class PersonController
         $person = Person::get($post_id);
         if (! $person) return;
 
-        $unit = $person->get_unit();
+        $unit = $person->get_unit_long();
         if (! $unit) return;
 
         echo $unit;
