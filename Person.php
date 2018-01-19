@@ -131,7 +131,7 @@ class Person
     {
         $metoo = get_called_class()::find_by_sciper($sciper);
         if ($metoo) {
-            if ($metoo->ID === $this->ID) {
+            if ($metoo->wp_post()->ID === $this->ID) {
                 return $this;  // Nothing to do; still chainable
             } else {
                 throw new PersonAlreadyExistsException($sciper);
@@ -170,7 +170,11 @@ class Person
         if (sizeof($results) > 1) {
             throw new DuplicatePersonException($sciper);
         }
-        return static::get($results[0]);
+        if (sizeof($results)) {
+            return static::get($results[0]);
+        } else {
+            return null;
+        }
     }
 
     function get_title ()
