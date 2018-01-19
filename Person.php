@@ -1,4 +1,4 @@
-<?php
+<?php // -*- web-mode-code-indent-offset: 4; -*-
 /*
  * Plugin Name: EPFL Personal Pages (shortcode)
  * Description: Manage personal pages for EPFL staff
@@ -124,6 +124,35 @@ class Person
 
     public function set_sciper($sciper)
     {
+        $metoo = get_called_class()::find_by_sciper($sciper);
+        if ($metoo) {
+            if ($metoo->ID === $this->ID) {
+                return $this;  // Nothing to do; still chainable
+            } else {
+                throw new PersonAlreadyExistsException($sciper);
+            }
+        }
+
+        // Person doesn't exist; create them
+        $update = array(
+            'ID'         => $this->ID,
+            'post_name'  => $sciper,
+            'meta_input' => array(
+                'sciper' => $sciper
+            )
+        );
+        $title = $this->wp_post()->post_title;
+        if (! $title ||
+            // Ackpttht
+            in_array($title, ["Auto Draft", "Brouillon auto"])) {
+            $update['post_title'] = "[SCIPER $sciper]";
+        }
+        wp_update_post($update);
+        return $this;  // Chainable
+    }
+
+    public static function find_by_sciper ($sciper)
+    {
         $search_query = new \WP_Query(array(
             'post_type' => Person::get_post_type(),
             'meta_query' => array(array(
@@ -131,32 +160,12 @@ class Person
                 'value'   => $sciper,
                 'compare' => '='
             ))));
+
         $results = $search_query->get_posts();
         if (sizeof($results) > 1) {
             throw new DuplicatePersonException($sciper);
-        } elseif (sizeof($results) == 1) {
-            if ($results[0]->ID === $this->ID) {
-                return $this;  // Nothing to do; still chainable
-            } else {
-                throw new PersonAlreadyExistsException($sciper);
-            }
-        } else {
-            $update = array(
-                'ID'         => $this->ID,
-                'post_name'  => $sciper,
-                'meta_input' => array(
-                    'sciper' => $sciper
-                )
-            );
-            $title = $this->wp_post()->post_title;
-            if (! $title ||
-                // Ackpttht
-                in_array($title, ["Auto Draft", "Brouillon auto"])) {
-                $update['post_title'] = "[SCIPER $sciper]";
-            }
-            wp_update_post($update);
-            return $this;  // Chainable
         }
+        return $results[0];
     }
 
     function get_title ()
