@@ -449,7 +449,7 @@ abstract class APIChannelPost
      * Private constructor — Call @link get, @link get_or_create
      * or @link sync instead
      */
-    function __construct ($id, $api_id, $translation_id)
+    private function __construct ($id, $api_id, $translation_id)
     {
         $this->ID             = $id;
         $this->api_id         = $api_id;
