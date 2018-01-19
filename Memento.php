@@ -109,6 +109,11 @@ class Memento extends \EPFL\WS\Base\APIChannelPost
         }
     }
 
+    public function get_venue ()
+    {
+        return get_post_meta($this->ID, "event_place_and_room", true);
+    }
+
     public function get_ical_link ()
     {
         return sprintf("https://memento.epfl.ch/event/export/%d", $this->get_translation_id());
