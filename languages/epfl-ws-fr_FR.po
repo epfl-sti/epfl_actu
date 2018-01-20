@@ -1,12 +1,12 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the epfl-persons package.
+# This file is distributed under the same license as the epfl-ws package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: epfl-persons\n"
+"Project-Id-Version: epfl-ws\n"
 "Report-Msgid-Bugs-To: stiitweb@groupes.epfl.ch\n"
 "POT-Creation-Date: 2018-01-06 18:16+0100\n"
 "PO-Revision-Date: 2018-01-06 18:26+0100\n"
