@@ -1,11 +1,5 @@
 <?php // -*- web-mode-code-indent-offset: 4; -*-
-/*
- * Plugin Name: EPFL Personal Pages (shortcode)
- * Description: Manage personal pages for EPFL staff
- * Version:     0.1
- * Author:      STI Web Task Force
- * Author URI:  mailto:stiitweb@groupes.epfl.ch
- */
+
 namespace EPFL\Persons;
 
 if (! defined('ABSPATH')) {
