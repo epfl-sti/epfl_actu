@@ -4,9 +4,10 @@
  * LDAP client for the EPFL directory
  */
 
-namespace EPFL\Persons;
+namespace EPFL\WS;
 
-/* Only included from Person.php, so assume function_exists("___") */
+require_once(dirname(__FILE__) . "/i18n.inc");
+
 
 class LDAPException extends \Exception { }
 class LDAPUnsupportedException extends \Exception {

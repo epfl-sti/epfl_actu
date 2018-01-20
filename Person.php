@@ -1,24 +1,24 @@
 <?php // -*- web-mode-code-indent-offset: 4; -*-
 
-namespace EPFL\Persons;
+namespace EPFL\WS\Persons;
 
 if (! defined('ABSPATH')) {
     die('Access denied.');
 }
 
-require_once(dirname(__FILE__) . "/ldap.inc");
-require_once(dirname(__FILE__) . "/scrape.inc");
-require_once(dirname(__FILE__) . "/title.inc");
+require_once(dirname(__FILE__) . "/inc/ldap.inc");
+use \EPFL\WS\LDAPClient;
 
-function ___($text)
-{
-    return __($text, "epfl-persons");
-}
+require_once(dirname(__FILE__) . "/inc/scrape.inc");
+use function \EPFL\WS\scrape;
 
-function __x($text, $context)
-{
-    return _x($text, $context, "epfl-persons");
-}
+require_once(dirname(__FILE__) . "/inc/title.inc");
+use \EPFL\WS\Persons\NoSuchTitleException;
+use \EPFL\WS\Persons\Title;
+
+require_once(dirname(__FILE__) . "/inc/i18n.inc");
+use function \EPFL\WS\___;
+use function \EPFL\WS\__x;
 
 function ends_with($haystack, $needle)
 {
@@ -277,8 +277,9 @@ class Person
     private function _get_people_dom()
     {
         if (! $this->_people_dom) {
-            $this->_people_dom = scrape(sprintf("https://people.epfl.ch/%d",
-                                                $this->get_sciper()));
+            $this->_people_dom = scrape(
+                sprintf("https://people.epfl.ch/%d",
+                        $this->get_sciper()));
         }
         return $this->_people_dom;
     }

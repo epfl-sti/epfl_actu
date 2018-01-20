@@ -4,12 +4,12 @@
  * Scrape things out of plain old HTML servers @ EPFL
  */
 
-namespace EPFL\Persons;
+namespace EPFL\WS;
 
 class HTTPException extends \Exception { }
 class DOMException extends \Exception { }
 
-/* Only included from Person.php, so assume function_exists("___") */
+require_once(dirname(__FILE__) . "/i18n.inc");
 
 /**
  * @return DOMDocument

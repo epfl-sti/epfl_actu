@@ -16,11 +16,11 @@
  * they are likely to up-or-out of their current position.
  */
 
-namespace EPFL\Persons;
+namespace EPFL\WS\Persons;
 
-/* Only included from Person.php, so assume function_exists("___") and
- * function_exists("__x")
- */
+require_once(dirname(__FILE__) . "/i18n.inc");
+use function \EPFL\WS\___;
+use function \EPFL\WS\__x;
 
 class NoSuchTitleException extends \Exception { }
 
