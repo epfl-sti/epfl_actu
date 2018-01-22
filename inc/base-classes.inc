@@ -716,14 +716,12 @@ abstract class APIChannelPost
 
 
 /**
- * Model and controller for fields that *may not* be edited by users.
+ * Model for fields that *may not* be edited by users.
  *
  * An instance represents the auto fields associated to one model
  * class. Whenever some code non-interactively updates attributes, it
  * ought to call `AutoFields::of($model_class)->append($fields)`.
- * This has the effect of locking down $fields as custom fields for
- * all $model_class edits, provided controller code calls
- * `AutoFields::of($model_class)->lockdown()`.
+ * The APIChannelPostController makes sure to make these fields un-editable.
  */
 class AutoFields
 {
@@ -762,7 +760,7 @@ class AutoFields
         }
     }
 
-    function _clear () {
+    function clear () {
         remove_option($this->_get_option_key());
     }
 
@@ -770,28 +768,6 @@ class AutoFields
 
     private function _get_option_key () {
         return static::SLUG . $this->model_class;
-    }
-
-    function lockdown ()
-    {
-        $thisobject = $this;
-        $thisclass = get_called_class();
-        $protected_class = $this->model_class;
-
-        add_action("deactivated_plugin", function() use ($thisclass, $protected_class) {
-            (new $thisclass($protected_class))->_clear();
-        });
-        add_filter("is_protected_meta",
-                   function ($is_protected, $meta_key, $unused_meta_type)
-                       use ($thisobject, $protected_class) {
-                           global $post;
-                           if ($protected_class::get($post) &&
-                               array_search($meta_key, $thisobject->get())) {
-                               return true;
-                           } else {
-                               return $is_protected;
-                           }
-                       }, 10, 3);
     }
 }
 
@@ -852,7 +828,8 @@ abstract class APIChannelPostController
         static::add_thumbnail_column();
         static::configure_rendering_in_edit_form();
         add_action("admin_enqueue_scripts", array(get_called_class(), "editor_css"));
-        AutoFields::of(static::get_model_class())->lockdown();
+        add_filter("is_protected_meta", array(get_called_class(), "filter_is_protected_meta"), 10, 3);
+        add_action("deactivated_plugin", array(get_called_class(), "clear_auto_fields"));
 
         // Behavior of epfl-ws posts in search results
         add_filter('pre_get_posts', array(get_called_class(), "pre_get_posts"));
@@ -907,7 +884,8 @@ abstract class APIChannelPostController
                 'taxonomies'         => array($taxonomy_slug, 'category'),
                 'menu_position'      => 24,
                 'menu_icon'          => $menu_icon,
-                'supports'           => array('wps_subtitle', 'custom-fields')
+                'supports'           => array('wps_subtitle', 'custom-fields'),
+                'register_meta_box_cb' => array(get_called_class(), 'add_meta_boxes')
             );
         static::filter_register_post_type($post_type_settings);
         register_post_type($post_class::get_post_type(), $post_type_settings);
@@ -1174,6 +1152,56 @@ abstract class APIChannelPostController
     {
         $taxonomy_class = static::get_taxonomy_class();
         return $taxonomy_class::get_post_class();
+    }
+
+    static function add_meta_boxes ()
+    {
+        $model_class = static::get_model_class();
+        add_meta_box("epfl_readonly_meta_" . $model_class,
+                     ___("Automatic Custom Fields"),
+                     array(get_called_class(), "render_protected_meta_box"),
+                     null, 'normal', 'high');
+    }
+
+    static function filter_is_protected_meta ($is_protected, $meta_key, $unused_meta_type)
+    {
+        global $post;
+        $model_class = static::get_model_class();
+        if ($model_class::get($post) &&
+            FALSE !== array_search($meta_key, AutoFields::of($model_class)->get())) {
+                return true;
+            } else {
+                return $is_protected;
+            }
+    }
+
+    static function render_protected_meta_box ()
+    {
+        global $post;
+        $model_class = static::get_model_class();
+        if (! $model_class::get($post)) return;
+
+        $meta = get_post_meta($post->ID);
+        echo "<table>\n";
+        foreach (AutoFields::of($model_class)->get() as $key) {
+            // All meta keys are single-valued
+            $value = $meta[$key][0];
+            if (gettype($value) != "string") {
+                $value = "<pre>" . gettype($value) . "</pre>";
+            } else {
+                $max_length = 120;
+                if (strlen($value) > $max_length) {
+                    $value = substr($value, 0, $max_length) . "...";
+                }
+            }
+            echo "<tr><td>$key</td><td>$value</td></tr>\n";
+        }
+        echo "</table>\n";
+    }
+
+    static function clear_auto_fields ()
+    {
+        AutoFields::of(static::get_model_class())->clear();
     }
 }
 
