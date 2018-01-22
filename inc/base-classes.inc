@@ -1172,6 +1172,7 @@ abstract class APIChannelPostController
                     $value = substr($value, 0, $max_length) . "...";
                 }
             }
+            $value = htmlspecialchars($value);
             echo "<tr><td>$key</td><td>$value</td></tr>\n";
         }
         echo "</table>\n";
