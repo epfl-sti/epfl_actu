@@ -245,6 +245,33 @@ class ActuController extends \EPFL\WS\Base\APIChannelPostController
         );
     }
 
+    static function hook ()
+    {
+        parent::hook();
+        add_action('admin_init', array(get_called_class(), 'make_subtitles_readonly_in_admin'), 0);
+    }
+
+    /**
+     * Make subtitles read-only by preventing WP Subtitles from
+     * initializing in the case of epfl-ws posts.
+     */
+    static function make_subtitles_readonly_in_admin ()
+    {
+		$post_type = '';
+
+		if ( isset( $_REQUEST['post_type'] ) ) {
+			$post_type = sanitize_text_field( $_REQUEST['post_type'] );
+		} elseif ( isset( $_GET['post'] ) ) {
+			$post_type = get_post_type( absint( $_GET['post'] ) );
+        }
+        if ($post_type !== static::get_model_class()::get_post_type()) return;
+
+        remove_action('admin_init', array( 'WPSubtitle_Admin', '_admin_init' ) );
+        // Add back the subtitle column:
+        add_filter( 'manage_edit-' . $post_type . '_columns', array( 'WPSubtitle_Admin', 'manage_subtitle_columns' ) );
+        add_action( 'manage_' . $post_type . '_posts_custom_column', array( 'WPSubtitle_Admin', 'manage_subtitle_columns_content' ), 10, 2 );
+    }
+
     /**
      * Overloaded to show an actual embedded video in the admin area, yow!
      */
