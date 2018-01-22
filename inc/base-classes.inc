@@ -748,9 +748,9 @@ class AutoFields
     function append ($fields)
     {
         $protected = $this->get();
-        $changed = true;
+        $changed = false;
         foreach ($fields as $field) {
-            if (FALSE === array_search($field, $protected)) {
+            if (false === array_search($field, $protected)) {
                 array_push($protected, $field);
                 $changed = true;
             }
