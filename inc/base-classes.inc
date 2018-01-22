@@ -581,6 +581,7 @@ abstract class APIChannelPost
         }
 
         wp_update_post($update_post_args);
+        AutoFields::of(get_called_class())->append(array_keys($this->_post_meta));
 
         $auto_categories = $this->get_auto_category_class()::find(
             $api_result[$this->get_auto_category_id_key()],
@@ -713,6 +714,87 @@ abstract class APIChannelPost
     }
 }
 
+
+/**
+ * Model and controller for fields that *may not* be edited by users.
+ *
+ * An instance represents the auto fields associated to one model
+ * class. Whenever some code non-interactively updates attributes, it
+ * ought to call `AutoFields::of($model_class)->append($fields)`.
+ * This has the effect of locking down $fields as custom fields for
+ * all $model_class edits, provided controller code calls
+ * `AutoFields::of($model_class)->lockdown()`.
+ */
+class AutoFields
+{
+    private function __construct ($for_class)
+    {
+        $this->model_class = $for_class;
+    }
+
+    static function of ($for_class) {
+        $thisclass = get_called_class();
+        return new $thisclass($for_class);
+    }
+
+    function get ()
+    {
+        $auto_fields = get_option($this->_get_option_key());
+        if (! $auto_fields) { $auto_fields = []; }
+        return $auto_fields;
+    }
+
+    /**
+     * Mark these fields as protected
+     */
+    function append ($fields)
+    {
+        $protected = $this->get();
+        $changed = true;
+        foreach ($fields as $field) {
+            if (FALSE === array_search($field, $protected)) {
+                array_push($protected, $field);
+                $changed = true;
+            }
+        }
+        if ($changed) {
+            update_option($this->_get_option_key(), $protected);
+        }
+    }
+
+    function _clear () {
+        remove_option($this->_get_option_key());
+    }
+
+    const SLUG = "epfl_ws_protected_fields";
+
+    private function _get_option_key () {
+        return static::SLUG . $this->model_class;
+    }
+
+    function lockdown ()
+    {
+        $thisobject = $this;
+        $thisclass = get_called_class();
+        $protected_class = $this->model_class;
+
+        add_action("deactivated_plugin", function() use ($thisclass, $protected_class) {
+            (new $thisclass($protected_class))->_clear();
+        });
+        add_filter("is_protected_meta",
+                   function ($is_protected, $meta_key, $unused_meta_type)
+                       use ($thisobject, $protected_class) {
+                           global $post;
+                           if ($protected_class::get($post) &&
+                               array_search($meta_key, $thisobject->get())) {
+                               return true;
+                           } else {
+                               return $is_protected;
+                           }
+                       }, 10, 3);
+    }
+}
+
 /**
  * Configuration UI and WP callbacks for an APIChannelPost class.
  *
@@ -770,6 +852,7 @@ abstract class APIChannelPostController
         static::add_thumbnail_column();
         static::configure_rendering_in_edit_form();
         add_action("admin_enqueue_scripts", array(get_called_class(), "editor_css"));
+        AutoFields::of(static::get_model_class())->lockdown();
 
         // Behavior of epfl-ws posts in search results
         add_filter('pre_get_posts', array(get_called_class(), "pre_get_posts"));
@@ -824,7 +907,7 @@ abstract class APIChannelPostController
                 'taxonomies'         => array($taxonomy_slug, 'category'),
                 'menu_position'      => 24,
                 'menu_icon'          => $menu_icon,
-                'supports'           => array('wps_subtitle')
+                'supports'           => array('wps_subtitle', 'custom-fields')
             );
         static::filter_register_post_type($post_type_settings);
         register_post_type($post_class::get_post_type(), $post_type_settings);
