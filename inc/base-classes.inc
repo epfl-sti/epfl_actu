@@ -767,7 +767,7 @@ class AutoFields
     const SLUG = "epfl_ws_protected_fields";
 
     private function _get_option_key () {
-        return static::SLUG . $this->model_class;
+        return static::SLUG . "_" . sanitize_key($this->model_class);
     }
 }
 
