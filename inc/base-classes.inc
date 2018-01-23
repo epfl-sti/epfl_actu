@@ -761,7 +761,7 @@ class AutoFields
     }
 
     function clear () {
-        remove_option($this->_get_option_key());
+        delete_option($this->_get_option_key());
     }
 
     const SLUG = "epfl_ws_protected_fields";
@@ -828,7 +828,7 @@ abstract class APIChannelPostController
         static::configure_rendering_in_edit_form();
         add_action("admin_enqueue_scripts", array(get_called_class(), "editor_css"));
         add_filter("is_protected_meta", array(get_called_class(), "filter_is_protected_meta"), 10, 3);
-        add_action("deactivated_plugin", array(get_called_class(), "clear_auto_fields"));
+        register_deactivation_hook($main_plugin_file, array(get_called_class(), "clear_auto_fields"));
 
         // Behavior of epfl-ws posts in search results
         add_filter('pre_get_posts', array(get_called_class(), "pre_get_posts"));
