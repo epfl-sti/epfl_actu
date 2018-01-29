@@ -121,6 +121,12 @@ class Person
         return $this->wp_post()->post_title;
     }
 
+    public function get_publication_link ()
+    {
+        error_log("THIS PUBLICATION META: "  . var_export(get_post_meta($this->ID, 'publication_link'), true));
+        return get_post_meta($this->ID, 'publication_link', true);  // Cached by WP
+    }
+
     public function set_sciper($sciper)
     {
         $metoo = get_called_class()::find_by_sciper($sciper);
@@ -137,7 +143,8 @@ class Person
             'ID'         => $this->ID,
             'post_name'  => $sciper,
             'meta_input' => array(
-                'sciper' => $sciper
+                'sciper' => $sciper,
+                'publication_link' => ""
             )
         );
         $title = $this->wp_post()->post_title;
@@ -240,7 +247,7 @@ class Person
 
             $meta[self::LAB_WEBSITE_URL_META] = explode(" ", $labeleduri)[0];
         }
-        
+
         $update = array(
             'ID'         => $this->ID,
             // We want a language-neutral post_title so we can't
@@ -303,10 +310,14 @@ class PersonController
         /* Customize the edit form */
         add_action('edit_form_after_title',
                    array(get_called_class(), 'meta_boxes_above_editor'));
+        add_action( 'edit_form_after_editor',
+                   array(get_called_class(), 'meta_boxes_after_editor'));
+
         add_action(sprintf('save_post_%s', Person::get_post_type()),
                    array(get_called_class(), 'save_meta_boxes'), 10, 3);
         add_action("admin_notices",
                    array(get_called_class(), 'maybe_show_admin_error'));
+
 
         /* Customize the list in the admin aera */
         add_action( sprintf('manage_%s_posts_columns', Person::get_post_type()) , array(get_called_class(), "alter_columns"));
@@ -425,8 +436,10 @@ class PersonController
     {
         if (is_form_new()) {
             self::add_meta_box('find_by_sciper', ___('Find person'));
+            self::add_meta_box('show_publication_link', ___('Infoscience URL'), 'after-editor');
         } else {
             self::add_meta_box('show_person_details', ___('Person details'));
+            self::add_meta_box('show_publication_link', ___('Infoscience URL'), 'after-editor');
         }
     }
 
@@ -475,6 +488,34 @@ class PersonController
         // Still, it sort of makes sense that here be the place where
         // we sync data from LDAP again.
         Person::get($post_id)->update();
+    }
+
+    /**
+     * Render publication_link meta boxes after the editor.
+     */
+    static function render_meta_box_show_publication_link ($post)
+    {
+        if ($post->post_type !== Person::get_post_type()) return;
+        $person = Person::get($post->ID);
+        $publication_link = $person->get_publication_link();
+        echo '<div class="form-field">
+                <h3>Publications</h3>
+                <p class="label">
+                    Go to infoscience, make a query (e.g. author:lastname), click "Integrate these publication into my website" and get the link (<a href="https://jahia-prod.epfl.ch/page-59729-en.html">help</a>). The link looks like <code>https://infoscience.epfl.ch/curator/export/12345/?ln=en</code>.
+                </p>
+                <input class="widefat" type="text" id="publication_link" name="publication_link" placeholder="'.  ___("INFOSCIENCE URL") .'" value="'.$publication_link.'" />
+            </div>';
+    }
+
+    static function save_meta_box_show_publication_link ($post_id, $post, $is_update)
+    {
+        if (array_key_exists('publication_link', $_POST)) {
+            update_post_meta(
+                $post_id,
+                'publication_link',
+                $_POST['publication_link']
+            );
+        }
     }
 
     /**
@@ -598,18 +639,23 @@ class PersonController
     {
         // Bail if we're doing an auto save
         if (defined( 'DOING_AUTOSAVE' ) && \DOING_AUTOSAVE) return;
-
         foreach ($_REQUEST as $k => $v) {
             $matched = array();
             if (preg_match(sprintf('/%s-nonce-meta_box_([a-zA-Z0-9_]+)$/',
                                    Person::get_post_type()),
                            $k, $matched)) {
                 $save_method_name = "save_meta_box_" . $matched[1];
+                error_log("SAVE METHODE NAME: " . $save_method_name);
+                error_log("THE KEY: " . $k);
                 if (method_exists(get_called_class(), $save_method_name)) {
                     if (! wp_verify_nonce($v, $k)) {
                         wp_die(___("Nonce check failed"));
+                        error_log("NONCE SAVE METHODE NAME: " . $save_method_name);
+
                     } elseif (! current_user_can('edit_post')) {
                         wp_die(___("Permission denied: edit person"));
+                        error_log("USER SAVE METHODE NAME: " . $save_method_name);
+
                     } elseif (self::$saved_meta_boxes[$k]) {
                         // Break out of silly recursion: we call
                         // writer functions such as wp_insert_post()
@@ -635,6 +681,17 @@ class PersonController
         if ($post->post_type !== Person::get_post_type()) return;
         do_meta_boxes(get_current_screen(), 'above-editor', $post);
     }
+
+    /**
+     * Render all meta boxes configured to show up after the editor.
+     */
+    static function meta_boxes_after_editor ($post)
+    {
+        if ($post->post_type !== Person::get_post_type()) return;
+        do_meta_boxes(get_current_screen(), 'after-editor', $post);
+    }
+
+
 }
 
 PersonController::hook();
