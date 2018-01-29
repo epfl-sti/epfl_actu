@@ -123,7 +123,6 @@ class Person
 
     public function get_publication_link ()
     {
-        error_log("THIS PUBLICATION META: "  . var_export(get_post_meta($this->ID, 'publication_link'), true));
         return get_post_meta($this->ID, 'publication_link', true);  // Cached by WP
     }
 
@@ -645,17 +644,11 @@ class PersonController
                                    Person::get_post_type()),
                            $k, $matched)) {
                 $save_method_name = "save_meta_box_" . $matched[1];
-                error_log("SAVE METHODE NAME: " . $save_method_name);
-                error_log("THE KEY: " . $k);
                 if (method_exists(get_called_class(), $save_method_name)) {
                     if (! wp_verify_nonce($v, $k)) {
                         wp_die(___("Nonce check failed"));
-                        error_log("NONCE SAVE METHODE NAME: " . $save_method_name);
-
                     } elseif (! current_user_can('edit_post')) {
                         wp_die(___("Permission denied: edit person"));
-                        error_log("USER SAVE METHODE NAME: " . $save_method_name);
-
                     } elseif (self::$saved_meta_boxes[$k]) {
                         // Break out of silly recursion: we call
                         // writer functions such as wp_insert_post()
