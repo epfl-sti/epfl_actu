@@ -39,7 +39,7 @@ function _debug ($msg)
  * metadata, i.e. an API URL from which news, events etc. are
  * continuously fetched.
  *
- * Instances of the clas represent one so-called "term" in one of the
+ * Instances of the class represent one so-called "term" in one of the
  * EPFL-WS taxonomies such as "epfl-actu-channel" (for the ActuStream
  * subclass) or "epfl-memento-channel" (MementoStream subclass).
  */
@@ -222,7 +222,7 @@ abstract class APIChannelTaxonomyController
                 $stream_name = $stream->as_wp_term()->name;
                 $stream_slug = $stream->as_wp_term()->slug;
                 error_log("Syncing Actu stream $stream_name ($stream_slug)");
-                
+
                 $started = microtime(true);
                 try {
                     $stream->sync();
@@ -414,7 +414,7 @@ abstract class APIChannelPost
      *
      * Both APIs happen to use the same field, however this method is
      * singled out for overloading in case of need.
-     */    
+     */
     protected function _get_title ($api_result)
     {
         return $api_result["title"];
@@ -1073,7 +1073,7 @@ abstract class APIChannelPostController
         add_action("edit_form_after_title", function ($wp_post) use ($this_class) {
                 $epfl_post = $this_class::get_model_class()::get($wp_post);
                 if (! $epfl_post) return;
-               $this_class::render_readonly_in_edit_form($epfl_post); 
+               $this_class::render_readonly_in_edit_form($epfl_post);
             });
 
     }
