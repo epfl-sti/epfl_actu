@@ -302,6 +302,9 @@ class PersonController
     {
         add_action('init', array(get_called_class(), 'register_post_type'));
 
+        /* CSS for admin part */
+        add_action("admin_enqueue_scripts", array(get_called_class(), "init_styles"));
+
         /* Behavior of Persons on the main site */
         add_filter("post_thumbnail_html",
                    array(get_called_class(), "filter_post_thumbnail_html"), 10, 5);
@@ -380,6 +383,16 @@ class PersonController
                 'supports'           => array( 'editor', 'thumbnail' ),
                 'register_meta_box_cb' => array(get_called_class(), 'add_meta_boxes')
             ));
+    }
+
+    /**
+     * Style for admin page.
+     */
+    function init_styles () {
+        if (is_admin()) {
+            wp_register_style('person', plugins_url( 'css/person.css', __FILE__ ) );
+            wp_enqueue_style('person');
+        }
     }
 
     /**
