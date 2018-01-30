@@ -29,7 +29,7 @@ function ends_with($haystack, $needle)
 }
 
 /**
- * True iff we are on the "/post-new.php" page.
+ * True if we are on the "/post-new.php" page.
  */
 function is_form_new ()
 {
