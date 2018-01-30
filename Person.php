@@ -300,33 +300,33 @@ class PersonController
 {
     static function hook ()
     {
-        add_action('init', array(get_called_class(), 'register_post_type'));
+        add_action( 'init', array(get_called_class(), 'register_post_type'));
 
         /* CSS for admin part */
-        add_action("admin_enqueue_scripts", array(get_called_class(), "init_styles"));
+        add_action( 'admin_enqueue_scripts', array(get_called_class(), 'init_styles'));
 
         /* Behavior of Persons on the main site */
-        add_filter("post_thumbnail_html",
-                   array(get_called_class(), "filter_post_thumbnail_html"), 10, 5);
+        add_filter( 'post_thumbnail_html',
+                   array(get_called_class(), 'filter_post_thumbnail_html'), 10, 5);
 
         /* Customize the edit form */
-        add_action('edit_form_after_title',
+        add_action( 'edit_form_after_title',
                    array(get_called_class(), 'meta_boxes_above_editor'));
         add_action( 'edit_form_after_editor',
                    array(get_called_class(), 'meta_boxes_after_editor'));
 
-        add_action(sprintf('save_post_%s', Person::get_post_type()),
+        add_action( sprintf('save_post_%s', Person::get_post_type()),
                    array(get_called_class(), 'save_meta_boxes'), 10, 3);
-        add_action("admin_notices",
+        add_action( 'admin_notices',
                    array(get_called_class(), 'maybe_show_admin_error'));
 
 
         /* Customize the list in the admin aera */
-        add_action( sprintf('manage_%s_posts_columns', Person::get_post_type()) , array(get_called_class(), "alter_columns"));
+        add_action( sprintf('manage_%s_posts_columns', Person::get_post_type()) , array(get_called_class(), 'alter_columns'));
         add_action( sprintf('manage_%s_posts_custom_column', Person::get_post_type()),
-                    array(get_called_class(), "render_people_thumbnail_column"), 10, 2);
+                    array(get_called_class(), 'render_people_thumbnail_column'), 10, 2);
         add_action( sprintf('manage_%s_posts_custom_column', Person::get_post_type()),
-                    array(get_called_class(), "render_people_unit_column"), 10, 2);
+                    array(get_called_class(), 'render_people_unit_column'), 10, 2);
 
         /* Make permalinks work - See doc for flush_rewrite_rules() */
         register_deactivation_hook(__FILE__, 'flush_rewrite_rules' );
