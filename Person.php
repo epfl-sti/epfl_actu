@@ -205,8 +205,10 @@ class Person
 
     public function update ()
     {
+        if ($this->_updated_already) { return; }
         $this->update_from_ldap();
         $this->import_image_from_people();
+        $this->_updated_already = true;
         return $this;  // Chainable
     }
 
@@ -307,7 +309,7 @@ class PersonController
         add_filter( 'post_thumbnail_html',
                    array(get_called_class(), 'filter_post_thumbnail_html'), 10, 5);
         add_filter('single_template',
-                   array(get_called_class(), 'maybe_use_default_template'));
+                   array(get_called_class(), 'maybe_use_default_template'), 99);
 
         /* Behavior of Persons in the admin aera */
 
@@ -447,9 +449,10 @@ class PersonController
     static function maybe_use_default_template ($single_template) {
         $object = get_queried_object();
         if ($object->post_type != Person::get_post_type()) { return $single_template; }
-        $theme_provided_template = locate_template("single-{$object->post_type}-{$object->post_name}.php");
-        if (file_exists($theme_provided_template)) { return $theme_provided_template; }
-
+        if (file_exists($single_template)) {
+            // Some other filter, theme or plug-in already found the file; don't interfere.
+            return $single_template;
+        }
         return __DIR__ . "/example-templates/content-single-" . Person::get_post_type() . ".php";
     }
 
