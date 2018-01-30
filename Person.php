@@ -221,9 +221,12 @@ class Person
         if ($this->_updated_already) { return; }
         $this->update_from_ldap();
         $this->import_image_from_people();
+        if (! $this->get_bio()) {
+            $this->update_bio_from_people();
+        }
 
         $this->_updated_already = true;
-        $more_meta = apply_filters( 'epfl_person_additional_meta', array());
+        $more_meta = apply_filters('epfl_person_additional_meta', array(), $this);
         if ($more_meta) {
             $this->_update_meta($more_meta);
         }
@@ -296,6 +299,48 @@ class Person
         return $this;
     }
 
+    public function get_bio()
+    {
+        return $this->wp_post()->post_content;
+    }
+
+    public function update_bio_from_people ()
+    {
+        $dom = $this->_get_bio_dom();
+        $xpath = new \DOMXpath($dom);
+        $bio_nodes = $xpath->query("//div[@id='content']/h3[text()='Biography']/following-sibling::node()");
+        $biography = '';
+        foreach($bio_nodes as $element){
+            if (in_array($element->nodeName, array("h1", "h2", "h3"))) break;
+            $newdoc = new \DOMDocument();
+            $cloned = $element->cloneNode(TRUE);
+            $newdoc->appendChild($newdoc->importNode($cloned,TRUE));
+            $allowed_html = array(
+                                      'a' => array(
+                                          'href' => array(),
+                                          'title' => array()
+                                      ),
+                                      'br' => array(),
+                                      'em' => array(),
+                                      'strong' => array(),
+                                      'p' => array(),
+                                      'b' => array(),
+                                      'i' => array(),
+                                      'code' => array(),
+                                      'pre' => array(),
+                                  );
+            $biography .= wp_kses($newdoc->saveHTML(), $allowed_html);
+        }
+
+        $biography = apply_filters("epfl_person_bio", $biography, $this);
+
+        $update = array(
+            'ID'           => $this->ID,
+            'post_content' => $biography
+        );
+        wp_update_post($update);
+    }
+
     const LAB_WEBSITE_URL_META = "epfl_person_lab_website_url";
     public function get_lab_website_url ()
     {
@@ -310,6 +355,22 @@ class Person
                         $this->get_sciper()));
         }
         return $this->_people_dom;
+    }
+
+    private function _get_bio_dom()
+    {
+        if (! $this->_bio_dom) {
+            $bio_html = file_get_contents(sprintf(
+                "https://people.epfl.ch/cgi-bin/people?id=%d&op=bio&lang=en&cvlang=%s",
+                $this->get_sciper(),
+                "en"  // TODO: Offer multilingual bios
+            ));
+            $dom = new \DOMDocument();
+            // https://stackoverflow.com/questions/8218230/php-domdocument-loadhtml-not-encoding-utf-8-correctly
+            $dom->loadHTML(mb_convert_encoding($bio_html, 'HTML-ENTITIES', 'UTF-8'));
+            $this->_bio_dom = $dom;
+        }
+        return $this->_bio_dom;
     }
 
     private function _update_meta($meta_array) {
