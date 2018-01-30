@@ -206,6 +206,7 @@ class Person
     public function update ()
     {
         $this->update_from_ldap();
+        $this->import_image_from_people();
         return $this;  // Chainable
     }
 
@@ -481,8 +482,7 @@ class PersonController
         try {
             Person::get($post_id)
                 ->set_sciper(intval($_REQUEST['sciper']))
-                ->update()
-                ->import_image_from_people();
+                ->update();
         } catch (LDAPException $e) {
             // Not fatal, we'll try again later
             error_log(sprintf("LDAPException: %s", $e->getMessage()));
