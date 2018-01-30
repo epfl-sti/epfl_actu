@@ -20,6 +20,11 @@ require_once(dirname(__FILE__) . "/inc/i18n.inc");
 use function \EPFL\WS\___;
 use function \EPFL\WS\__x;
 
+require_once(dirname(__FILE__) . "/inc/auto-fields.inc");
+use \EPFL\WS\AutoFields;
+use \EPFL\WS\AutoFieldsController;
+
+
 function ends_with($haystack, $needle)
 {
     $length = strlen($needle);
@@ -121,9 +126,16 @@ class Person
         return $this->wp_post()->post_title;
     }
 
+    const PUBLICATION_LINK_SLUG = 'publication_link';
     public function get_publication_link ()
     {
-        return get_post_meta($this->ID, 'publication_link', true);  // Cached by WP
+        return get_post_meta($this->ID, self::PUBLICATION_LINK_SLUG, true);
+    }
+
+    public function set_publication_link ($link) {
+        $this->_update_meta(array(
+            self::PUBLICATION_LINK_SLUG => $link
+        ));
     }
 
     public function set_sciper($sciper)
@@ -143,9 +155,10 @@ class Person
             'post_name'  => $sciper,
             'meta_input' => array(
                 'sciper' => $sciper,
-                'publication_link' => ""
             )
         );
+        AutoFields::of(get_called_class())->append(array('sciper'));
+
         $title = $this->wp_post()->post_title;
         if (! $title ||
             // Ackpttht
@@ -208,7 +221,13 @@ class Person
         if ($this->_updated_already) { return; }
         $this->update_from_ldap();
         $this->import_image_from_people();
+
         $this->_updated_already = true;
+        $more_meta = apply_filters( 'epfl_person_additional_meta', array());
+        if ($more_meta) {
+            $this->_update_meta($more_meta);
+        }
+
         return $this;  // Chainable
     }
 
@@ -255,9 +274,9 @@ class Person
             // We want a language-neutral post_title so we can't
             // work in the greeting - Filters will be used for that instead.
             'post_title' => $entries[0]['cn'][0],
-            'meta_input' => $meta
         );
         wp_update_post($update);
+        $this->_update_meta($meta);
     }
 
     const THUMBNAIL_META  = "epfl_person_external_thumbnail";
@@ -273,7 +292,7 @@ class Person
         $src_attr = $xpath->query("//div[@class=\"portrait\"]/img/@src")->item(0);
         if (! $src_attr) return null;
         $src = $src_attr->value;
-        update_post_meta($this->ID, self::THUMBNAIL_META, $src);
+        $this->_update_meta(array(self::THUMBNAIL_META => $src));
         return $this;
     }
 
@@ -293,6 +312,13 @@ class Person
         return $this->_people_dom;
     }
 
+    private function _update_meta($meta_array) {
+        $auto_fields = AutoFields::of(get_called_class());
+        foreach ($meta_array as $k => $v) {
+            update_post_meta($this->ID, $k, $v);
+            $auto_fields->append(array($k));
+        }
+    }
 }
 
 /**
@@ -312,6 +338,7 @@ class PersonController
                    array(get_called_class(), 'maybe_use_default_template'), 99);
 
         /* Behavior of Persons in the admin aera */
+        (new AutoFieldsController(Person::class))->hook();
 
         /* Customize the edit form */
         add_action( 'edit_form_after_title',
@@ -473,6 +500,7 @@ class PersonController
             self::add_meta_box('show_person_details', ___('Person details'));
             self::add_meta_box('show_publication_link', ___('Infoscience URL'), 'after-editor');
         }
+        (new AutoFieldsController(Person::class))->add_meta_boxes();
     }
 
     static function render_meta_box_find_by_sciper ($unused_post)
@@ -541,11 +569,7 @@ class PersonController
     static function save_meta_box_show_publication_link ($post_id, $post, $is_update)
     {
         if (array_key_exists('publication_link', $_POST)) {
-            update_post_meta(
-                $post_id,
-                'publication_link',
-                $_POST['publication_link']
-            );
+            Person::get($post_id)->set_publication_link($_POST['publication_link']);
         }
     }
 

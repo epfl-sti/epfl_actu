@@ -23,6 +23,10 @@ use function \EPFL\WS\run_every;
 require_once(dirname(__FILE__) . "/image-size.inc");
 use function \EPFL\WS\get_image_size;
 
+require_once(dirname(__FILE__) . "/auto-fields.inc");
+use \EPFL\WS\AutoFields;
+use \EPFL\WS\AutoFieldsController;
+
 use \WPPrometheusExporter;  // In a plug-in - No harm if it doesn't exist
 
 function _debug ($msg)
@@ -714,63 +718,6 @@ abstract class APIChannelPost
     }
 }
 
-
-/**
- * Model for fields that *may not* be edited by users.
- *
- * An instance represents the auto fields associated to one model
- * class. Whenever some code non-interactively updates attributes, it
- * ought to call `AutoFields::of($model_class)->append($fields)`.
- * The APIChannelPostController makes sure to make these fields un-editable.
- */
-class AutoFields
-{
-    private function __construct ($for_class)
-    {
-        $this->model_class = $for_class;
-    }
-
-    static function of ($for_class) {
-        $thisclass = get_called_class();
-        return new $thisclass($for_class);
-    }
-
-    function get ()
-    {
-        $auto_fields = get_option($this->_get_option_key());
-        if (! $auto_fields) { $auto_fields = []; }
-        return $auto_fields;
-    }
-
-    /**
-     * Mark these fields as protected
-     */
-    function append ($fields)
-    {
-        $protected = $this->get();
-        $changed = false;
-        foreach ($fields as $field) {
-            if (false === array_search($field, $protected)) {
-                array_push($protected, $field);
-                $changed = true;
-            }
-        }
-        if ($changed) {
-            update_option($this->_get_option_key(), $protected);
-        }
-    }
-
-    function clear () {
-        delete_option($this->_get_option_key());
-    }
-
-    const SLUG = "epfl_ws_protected_fields";
-
-    private function _get_option_key () {
-        return static::SLUG . "_" . sanitize_key($this->model_class);
-    }
-}
-
 /**
  * Configuration UI and WP callbacks for an APIChannelPost class.
  *
@@ -827,7 +774,7 @@ abstract class APIChannelPostController
         static::add_thumbnail_column();
         static::configure_rendering_in_edit_form();
         add_action("admin_enqueue_scripts", array(get_called_class(), "editor_css"));
-        add_filter("is_protected_meta", array(get_called_class(), "filter_is_protected_meta"), 10, 3);
+        (new AutoFieldsController(self::get_model_class()))->hook();
         register_deactivation_hook($main_plugin_file, array(get_called_class(), "clear_auto_fields"));
 
         // Behavior of epfl-ws posts in search results
@@ -1135,52 +1082,12 @@ abstract class APIChannelPostController
     static function add_meta_boxes ()
     {
         $model_class = static::get_model_class();
-        add_meta_box("epfl_readonly_meta_" . $model_class,
-                     ___("Automatic Custom Fields"),
-                     array(get_called_class(), "render_protected_meta_box"),
-                     null, 'normal', 'high');
-    }
-
-    static function filter_is_protected_meta ($is_protected, $meta_key, $unused_meta_type)
-    {
-        global $post;
-        $model_class = static::get_model_class();
-        if ($model_class::get($post) &&
-            FALSE !== array_search($meta_key, AutoFields::of($model_class)->get())) {
-                return true;
-            } else {
-                return $is_protected;
-            }
-    }
-
-    static function render_protected_meta_box ()
-    {
-        global $post;
-        $model_class = static::get_model_class();
-        if (! $model_class::get($post)) return;
-
-        $meta = get_post_meta($post->ID);
-        echo "<table>\n";
-        foreach (AutoFields::of($model_class)->get() as $key) {
-            // All meta keys are single-valued
-            $value = $meta[$key][0];
-            if (gettype($value) != "string") {
-                $value = "<pre>" . gettype($value) . "</pre>";
-            } else {
-                $max_length = 120;
-                if (strlen($value) > $max_length) {
-                    $value = substr($value, 0, $max_length) . "...";
-                }
-            }
-            $value = htmlspecialchars($value);
-            echo "<tr><td>$key</td><td>$value</td></tr>\n";
-        }
-        echo "</table>\n";
+        (new AutoFieldsController($model_class))->add_meta_boxes();
     }
 
     static function clear_auto_fields ()
     {
-        AutoFields::of(static::get_model_class())->clear();
+        (new AutoFieldsController(static::get_model_class()))->clear_auto_fields();
     }
 }
 
