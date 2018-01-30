@@ -302,12 +302,13 @@ class PersonController
     {
         add_action( 'init', array(get_called_class(), 'register_post_type'));
 
-        /* CSS for admin part */
-        add_action( 'admin_enqueue_scripts', array(get_called_class(), 'init_styles'));
-
         /* Behavior of Persons on the main site */
         add_filter( 'post_thumbnail_html',
                    array(get_called_class(), 'filter_post_thumbnail_html'), 10, 5);
+        add_filter('single_template',
+                   array(get_called_class(), 'maybe_use_default_template'));
+
+        /* Behavior of Persons in the admin aera */
 
         /* Customize the edit form */
         add_action( 'edit_form_after_title',
@@ -320,8 +321,7 @@ class PersonController
         add_action( 'admin_notices',
                    array(get_called_class(), 'maybe_show_admin_error'));
 
-
-        /* Customize the list in the admin aera */
+        add_action( 'admin_enqueue_scripts', array(get_called_class(), 'init_styles'));
         add_action( sprintf('manage_%s_posts_columns', Person::get_post_type()) , array(get_called_class(), 'alter_columns'));
         add_action( sprintf('manage_%s_posts_custom_column', Person::get_post_type()),
                     array(get_called_class(), 'render_people_thumbnail_column'), 10, 2);
@@ -434,6 +434,22 @@ class PersonController
             $attrs .= sprintf(" %s=\"%s\"", $name, esc_attr($value));
         }
         return sprintf("<img src=\"%s\" %s/>", $src, $attrs);
+    }
+
+    /**
+     * Serve https://YOURWORDPRESS/epfl-person/123456 (where 123456 is a SCIPER)
+     * out of a default template that can be overridden by the theme.
+     *
+     * This applies the "Add single-{post_type}-{slug}.php to Template
+     * Hierarchy" recipe from the WordPress Codex.
+     */
+    static function maybe_use_default_template ($single_template) {
+        $object = get_queried_object();
+        if ($object->post_type != Person::get_post_type()) { return $single_template; }
+        $theme_provided_template = locate_template("single-{$object->post_type}-{$object->post_name}.php");
+        if (file_exists($theme_provided_template)) { return $theme_provided_template; }
+
+        return __DIR__ . "/example-templates/content-single-" . Person::get_post_type() . ".php";
     }
 
     /**
