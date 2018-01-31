@@ -353,6 +353,57 @@ abstract class APIChannelTaxonomyController
 }
 
 /**
+ * Abstract base class for classes that are stored as a custom post type
+ */
+abstract class Post
+{
+    /**
+     * @return the post_type slug for instances of this class
+     */
+    static abstract function get_post_type ();
+
+    /**
+     * Protected constructor
+     */
+    protected function __construct ($id)
+    {
+        $this->ID = $id;
+    }
+
+    /**
+     * Retrieve one post, only if it does exist.
+     *
+     * @return an instance of this class or null.
+     */
+    static function get ($post_or_post_id)
+    {
+        $theclass = get_called_class();
+        $expected_post_type = $theclass::get_post_type();
+        if (is_object($post_or_post_id)) {
+            if ($post_or_post_id->post_type !== $expected_post_type) return;
+            $post_id = $post_or_post_id->ID;
+        } else {
+            $post_id = $post_or_post_id;
+            if (get_post_type($post_id) !== $expected_post_type) return;
+        }
+
+        $that = new $theclass($post_id);
+        if (is_object($post_or_post_id)) {
+            $that->_wp_post = $post_or_post_id;
+        }
+        return $that;
+    }
+
+    function wp_post ()
+    {
+        if (! $this->_wp_post) {
+            $this->_wp_post = get_post($this->ID);
+        }
+        return $this->_wp_post;
+    }
+}
+
+/**
  * Abstract base class for Actu and Memento posts
  *
  * There is one instance of this class for every unique piece of news
@@ -361,13 +412,8 @@ abstract class APIChannelTaxonomyController
  * == 'epfl-actu' or 'epfl-memento').
  */
 
-abstract class APIChannelPost
+abstract class APIChannelPost extends Post
 {
-    /**
-     * @return the post_type slug for instances of this class
-     */
-    static abstract function get_post_type ();
-
     /**
      * @return The name of the primary key component for the API ID,
      *         i.e. either "news_id" or "event_id"
@@ -457,11 +503,19 @@ abstract class APIChannelPost
      * Private constructor — Call @link get, @link get_or_create
      * or @link sync instead
      */
-    private function __construct ($id, $api_id, $translation_id)
+    protected function __construct ($id, $api_id = null, $translation_id = null)
     {
-        $this->ID             = $id;
-        $this->api_id         = $api_id;
-        $this->translation_id = $translation_id;
+        parent::__construct($id);
+        if ($api_id !== null) {
+            $this->api_id = $api_id;
+        } else {
+            $this->api_id = get_post_meta($id, "api_id", true);
+        }
+        if ($translation_id !== null) {
+            $this->translation_id = $translation_id;
+        } else {
+            $this->translation_id = get_post_meta($id, "translation_id", true);
+        }
     }
 
     /**
@@ -517,7 +571,7 @@ abstract class APIChannelPost
     }
 
     /**
-     * Retrieve one API channel post, only if it does exist.
+     * Retrieve one post, only if it does exist.
      *
      * @return an instance of this class or null.
      */
@@ -605,14 +659,6 @@ abstract class APIChannelPost
     function _get_language ($api_result) {
         return ($api_result["language"] ? $api_result["language"] :
                 $api_result["lang"]);
-    }
-
-    function wp_post ()
-    {
-        if (! $this->_wp_post) {
-            $this->_wp_post = get_post($this->ID);
-        }
-        return $this->_wp_post;
     }
 
     private function _init_post_meta ()
