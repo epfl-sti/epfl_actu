@@ -27,6 +27,10 @@ require_once(dirname(__FILE__) . "/auto-fields.inc");
 use \EPFL\WS\AutoFields;
 use \EPFL\WS\AutoFieldsController;
 
+require_once(dirname(__FILE__) . "/activation.inc");
+use function \EPFL\WS\plugin_activation_hook;
+use function \EPFL\WS\plugin_deactivation_hook;
+
 use \WPPrometheusExporter;  // In a plug-in - No harm if it doesn't exist
 
 function _debug ($msg)
@@ -760,9 +764,8 @@ abstract class APIChannelPostController
     {
         add_action('init', array(get_called_class(), 'register_post_type'));
 
-        $main_plugin_file = dirname(dirname(__FILE__)) . "/EPFL-ws.php";
-        register_activation_hook($main_plugin_file, array(get_called_class(), "register_caps"));
-        register_deactivation_hook($main_plugin_file, array(get_called_class(), "deregister_caps"));
+        plugin_activation_hook(array(get_called_class(), "register_caps"));
+        plugin_deactivation_hook(array(get_called_class(), "deregister_caps"));
 
         // Behavior of epfl-ws posts on the main site
         add_filter("post_thumbnail_html",
@@ -774,11 +777,14 @@ abstract class APIChannelPostController
         static::add_thumbnail_column();
         static::configure_rendering_in_edit_form();
         add_action("admin_enqueue_scripts", array(get_called_class(), "editor_css"));
-        (new AutoFieldsController(self::get_model_class()))->hook();
-        register_deactivation_hook($main_plugin_file, array(get_called_class(), "clear_auto_fields"));
+        static::auto_fields_controller()->hook();
 
         // Behavior of epfl-ws posts in search results
         add_filter('pre_get_posts', array(get_called_class(), "pre_get_posts"));
+    }
+
+    private static function auto_fields_controller () {
+        return new AutoFieldsController(self::get_model_class());
     }
 
     /**
@@ -1079,15 +1085,15 @@ abstract class APIChannelPostController
         return $taxonomy_class::get_post_class();
     }
 
+    /**
+     * Called to add meta boxes on an "edit" page in wp-admin.
+     *
+     * The base class only puts @link AutoFieldsController in gear.
+     * Subclasses may want to override this to add more meta boxes.
+     */
     static function add_meta_boxes ()
     {
-        $model_class = static::get_model_class();
-        (new AutoFieldsController($model_class))->add_meta_boxes();
-    }
-
-    static function clear_auto_fields ()
-    {
-        (new AutoFieldsController(static::get_model_class()))->clear_auto_fields();
+        static::auto_fields_controller()->add_meta_boxes();
     }
 }
 

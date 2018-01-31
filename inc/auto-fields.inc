@@ -4,6 +4,9 @@
  */
 namespace EPFL\WS;
 
+require_once(dirname(__FILE__) . "/activation.inc");
+use function \EPFL\WS\plugin_deactivation_hook;
+
 /**
  * Auto fields of a model class.
  *
@@ -22,12 +25,6 @@ class AutoFields
 
     /**
      * Named constructor idiom.
-     *
-     * The following assumptions are made on @param $for_class:
-     *
-     * - The ::get() static function takes a post ID and returns NULL if there
-     *   is no instance of the class with that post ID (even if the post ID does
-     *   exist, but for a post that does not belong to the class)
      */
     static function of ($for_class) {
         $thisclass = get_called_class();
@@ -73,13 +70,37 @@ class AutoFields
 /**
  * Controller helper class for the admin area of classes that have AutoFields.
  *
- * Controller code for said class is supposed to call @link
- * add_meta_boxes and @link hook as indicated in their respective
- * docstrings.
+ * An instance of this class deals with one specific model class, and
+ * arrange for its auto-fields to be shown read-only in the wp-admin
+ * edit pages for items of that model class. In order to achieve this,
+ * controller code is supposed to call @link hook and @link
+ * add_meta_boxes as indicated in their respective docstrings.
  */
 class AutoFieldsController {
+    /**
+     * An instance of the class represents the auto-fields controller for
+     * one @param $model_class. Since the instance is stateless, it is fine to
+     * construct multiple, ephemeral instances at the different hook
+     * points in the controller.
+     *
+     * The following assumptions are made on @param $model_class:
+     *
+     * - The ::get() static function takes a post ID and returns NULL if there
+     *   is no instance of the class with that post ID (even if the post ID does
+     *   exist, but for a post that does not belong to the class)
+     */
     function __construct ($model_class) {
         $this->model_class = $model_class;
+    }
+
+    /**
+     * Should be called during the controller class' own
+     * initialization, i.e. its own "hook" method.
+     */
+    function hook ()
+    {
+        add_filter("is_protected_meta", array($this, "filter_is_protected_meta"), 10, 3);
+        plugin_deactivation_hook(array($this, "clear_auto_fields"));
     }
 
     /**
@@ -98,7 +119,7 @@ class AutoFieldsController {
     {
         global $post;
         if ($this->model_class::get($post) &&
-            FALSE !== array_search($meta_key, AutoFields::of($this->model_class)->get())) {
+            in_array($meta_key, AutoFields::of($this->model_class)->get())) {
                 return true;
             } else {
                 return $is_protected;
@@ -133,14 +154,4 @@ class AutoFieldsController {
     {
         AutoFields::of($this->model_class)->clear();
     }
-
-    /**
-     * Should be called from during the controller class' own
-     * initialization, i.e. its own "hook" method.
-     */
-    function hook ()
-    {
-        add_filter("is_protected_meta", array($this, "filter_is_protected_meta"), 10, 3);
-    }
-
 }
