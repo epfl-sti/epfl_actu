@@ -461,6 +461,7 @@ class PersonController
                     array(get_called_class(), 'render_people_thumbnail_column'), 10, 2);
         add_action( sprintf('manage_%s_posts_custom_column', Person::get_post_type()),
                     array(get_called_class(), 'render_people_unit_column'), 10, 2);
+        add_action( 'pre_get_posts', array(get_called_class(), 'sort_people_unit_column') );
         add_action( sprintf('manage_%s_posts_custom_column', Person::get_post_type()),
                     array(get_called_class(), 'render_people_publication_column'), 10, 2);
         add_action( 'pre_get_posts', array(get_called_class(), 'sort_people_publication_column') );
@@ -720,6 +721,17 @@ class PersonController
         echo $unit;
     }
 
+    static function sort_people_unit_column ($query) {
+        if ( ! is_admin() ) return;
+
+        $orderby = $query->get( 'orderby' );
+
+        if ( 'unit' == $orderby ) {
+            $query->set( 'meta_key', 'unit_quad' );
+            $query->set( 'orderby', 'meta_value' );
+        }
+
+    }
 
     static function render_people_publication_column ($column, $post_id) {
 
