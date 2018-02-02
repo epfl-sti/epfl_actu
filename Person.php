@@ -201,9 +201,29 @@ class Person
         return get_post_meta($this->ID, 'dn', true);
     }
 
+    public function get_mail ()
+    {
+        return get_post_meta($this->ID, 'mail', true);
+    }
+
+    public function get_profile ()
+    {
+        return get_post_meta($this->ID, 'profile', true);
+    }
+
     public function get_postaladdress ()
     {
         return get_post_meta($this->ID, 'postaladdress', true);
+    }
+
+    public function get_room ()
+    {
+        return get_post_meta($this->ID, 'room', true);
+    }
+
+    public function get_phone ()
+    {
+        return get_post_meta($this->ID, 'phone', true);
     }
 
     public function get_unit ()
@@ -249,9 +269,29 @@ class Person
             $meta["title_code"] = $title->code;
         }
 
+        $mail = $entries[0]["mail"][0];
+        if ($mail) {
+            $meta["mail"] = $mail;
+        }
+
+        $profile = $entries[0]["labeleduri"][0];
+        if ($profile) {
+            $meta["profile"] = explode(" ", $profile)[0];
+        }
+
         $postaladdress = $entries[0]["postaladdress"][0];
         if ($postaladdress) {
             $meta["postaladdress"] = $postaladdress;
+        }
+
+        $roomnumber = $entries[0]["roomnumber"][0];
+        if ($roomnumber) {
+          $meta["room"] = $roomnumber;
+        }
+
+        $telephonenumber = $entries[0]["telephonenumber"][0];
+        if ($telephonenumber) {
+            $meta["phone"] = $telephonenumber;
         }
 
         $dn = $entries[0]["dn"];
