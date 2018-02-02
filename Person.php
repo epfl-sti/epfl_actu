@@ -461,6 +461,8 @@ class PersonController
                     array(get_called_class(), 'render_people_thumbnail_column'), 10, 2);
         add_action( sprintf('manage_%s_posts_custom_column', Person::get_post_type()),
                     array(get_called_class(), 'render_people_unit_column'), 10, 2);
+        add_action( sprintf('manage_%s_posts_custom_column', Person::get_post_type()),
+                    array(get_called_class(), 'render_people_publication_column'), 10, 2);
 
         /* Make permalinks work - See doc for flush_rewrite_rules() */
         register_deactivation_hook(__FILE__, 'flush_rewrite_rules' );
@@ -689,6 +691,7 @@ class PersonController
             array('thumbnail' => __( 'Thumbnail' )),
             array_slice($columns, 1, 1, true),
             array('unit' => __( 'Unit' )),
+            array('publication' => __( 'Pub.' )),
             array_slice($columns, 2, count($columns) - 1, true));
     }
 
@@ -716,6 +719,20 @@ class PersonController
         echo $unit;
     }
 
+
+    static function render_people_publication_column ($column, $post_id) {
+
+        if ($column !== 'publication') return;
+        $person = Person::get($post_id);
+        if (! $person) return;
+
+        $pl = $person->get_publication_link();
+        if (! $pl) {
+            echo '<input type="checkbox" id="publication_' . $post_id . '" disabled="true" />';
+        } else {
+            echo '<input type="checkbox" id="publication_' . $post_id . '" checked="checked" disabled="true" title="'. $pl .'"/>';
+        }
+    }
     // https://codex.wordpress.org/Plugin_API/Filter_Reference/manage_edit-post_type_columns
     static function make_people_columns_sortable  ($columns) {
         $columns['publication'] = 'publication';
