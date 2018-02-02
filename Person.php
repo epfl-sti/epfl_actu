@@ -463,6 +463,7 @@ class PersonController
                     array(get_called_class(), 'render_people_unit_column'), 10, 2);
         add_action( sprintf('manage_%s_posts_custom_column', Person::get_post_type()),
                     array(get_called_class(), 'render_people_publication_column'), 10, 2);
+        add_action( 'pre_get_posts', array(get_called_class(), 'sort_people_publication_column') );
 
         /* Make permalinks work - See doc for flush_rewrite_rules() */
         register_deactivation_hook(__FILE__, 'flush_rewrite_rules' );
@@ -733,6 +734,21 @@ class PersonController
             echo '<input type="checkbox" id="publication_' . $post_id . '" checked="checked" disabled="true" title="'. $pl .'"/>';
         }
     }
+
+    // Help: https://www.ractoon.com/2016/11/wordpress-custom-sortable-admin-columns-for-custom-posts/
+    // https://code.tutsplus.com/articles/quick-tip-make-your-custom-column-sortable--wp-25095
+    static function sort_people_publication_column ($query) {
+        if ( ! is_admin() ) return;
+
+        $orderby = $query->get( 'orderby' );
+
+        if ( 'publication' == $orderby ) {
+            $query->set( 'meta_key', 'publication_link' );
+            $query->set( 'orderby', 'meta_value' );
+        }
+
+    }
+
     // https://codex.wordpress.org/Plugin_API/Filter_Reference/manage_edit-post_type_columns
     static function make_people_columns_sortable  ($columns) {
         $columns['publication'] = 'publication';
