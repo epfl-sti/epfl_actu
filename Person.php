@@ -440,6 +440,9 @@ class PersonController
 
         /* Behavior of Persons in the admin aera */
         (new AutoFieldsController(Person::class))->hook();
+        // Add you column name here to make it sortable
+        add_filter( sprintf('manage_edit-%s_sortable_columns', Person::get_post_type()),
+                   array(get_called_class(), 'make_people_columns_sortable'));
 
         /* Customize the edit form */
         add_action( 'edit_form_after_title',
@@ -711,6 +714,13 @@ class PersonController
         if (! $unit) return;
 
         echo $unit;
+    }
+
+    // https://codex.wordpress.org/Plugin_API/Filter_Reference/manage_edit-post_type_columns
+    static function make_people_columns_sortable  ($columns) {
+        $columns['publication'] = 'publication';
+        $columns['unit'] = 'unit';
+        return $columns;
     }
 
     /**
