@@ -407,7 +407,7 @@ class Person
             ));
             $dom = new \DOMDocument();
             // https://stackoverflow.com/questions/8218230/php-domdocument-loadhtml-not-encoding-utf-8-correctly
-            $dom->loadHTML(mb_convert_encoding($bio_html, 'HTML-ENTITIES', 'UTF-8'));
+            @$dom->loadHTML(mb_convert_encoding($bio_html, 'HTML-ENTITIES', 'UTF-8'));
             $this->_bio_dom = $dom;
         }
         return $this->_bio_dom;
