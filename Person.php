@@ -435,7 +435,7 @@ class PersonController
         /* Behavior of Persons on the main site */
         add_filter( 'post_thumbnail_html',
                    array(get_called_class(), 'filter_post_thumbnail_html'), 10, 5);
-        add_filter('single_template',
+        add_filter( 'single_template',
                    array(get_called_class(), 'maybe_use_default_template'), 99);
 
         /* Behavior of Persons in the admin aera */
@@ -702,7 +702,7 @@ class PersonController
         echo sprintf("<img src=\"%s\" %s/>", $src, $attrs);
     }
 
-    static function render_people_unit_column  ($column, $post_id) {
+    static function render_people_unit_column ($column, $post_id) {
         if ($column !== 'unit') return;
         $person = Person::get($post_id);
         if (! $person) return;
