@@ -204,9 +204,29 @@ class Person
         return get_post_meta($this->ID, 'dn', true);
     }
 
+    public function get_mail ()
+    {
+        return get_post_meta($this->ID, 'mail', true);
+    }
+
+    public function get_profile ()
+    {
+        return get_post_meta($this->ID, 'profile', true);
+    }
+
     public function get_postaladdress ()
     {
         return get_post_meta($this->ID, 'postaladdress', true);
+    }
+
+    public function get_room ()
+    {
+        return get_post_meta($this->ID, 'room', true);
+    }
+
+    public function get_phone ()
+    {
+        return get_post_meta($this->ID, 'phone', true);
     }
 
     public function get_unit ()
@@ -252,9 +272,29 @@ class Person
             $meta["title_code"] = $title->code;
         }
 
+        $mail = $entries[0]["mail"][0];
+        if ($mail) {
+            $meta["mail"] = $mail;
+        }
+
+        $profile = $entries[0]["labeleduri"][0];
+        if ($profile) {
+            $meta["profile"] = explode(" ", $profile)[0];
+        }
+
         $postaladdress = $entries[0]["postaladdress"][0];
         if ($postaladdress) {
             $meta["postaladdress"] = $postaladdress;
+        }
+
+        $roomnumber = $entries[0]["roomnumber"][0];
+        if ($roomnumber) {
+          $meta["room"] = $roomnumber;
+        }
+
+        $telephonenumber = $entries[0]["telephonenumber"][0];
+        if ($telephonenumber) {
+            $meta["phone"] = $telephonenumber;
         }
 
         $dn = $entries[0]["dn"];
@@ -381,7 +421,7 @@ class Person
             ));
             $dom = new \DOMDocument();
             // https://stackoverflow.com/questions/8218230/php-domdocument-loadhtml-not-encoding-utf-8-correctly
-            $dom->loadHTML(mb_convert_encoding($bio_html, 'HTML-ENTITIES', 'UTF-8'));
+            @$dom->loadHTML(mb_convert_encoding($bio_html, 'HTML-ENTITIES', 'UTF-8'));
             $this->_bio_dom = $dom;
         }
         return $this->_bio_dom;
@@ -409,11 +449,14 @@ class PersonController
         /* Behavior of Persons on the main site */
         add_filter( 'post_thumbnail_html',
                    array(get_called_class(), 'filter_post_thumbnail_html'), 10, 5);
-        add_filter('single_template',
+        add_filter( 'single_template',
                    array(get_called_class(), 'maybe_use_default_template'), 99);
 
         /* Behavior of Persons in the admin aera */
         (new AutoFieldsController(Person::class))->hook();
+        // Add you column name here to make it sortable
+        add_filter( sprintf('manage_edit-%s_sortable_columns', Person::get_post_type()),
+                   array(get_called_class(), 'make_people_columns_sortable'));
 
         /* Customize the edit form */
         add_action( 'edit_form_after_title',
@@ -432,6 +475,10 @@ class PersonController
                     array(get_called_class(), 'render_people_thumbnail_column'), 10, 2);
         add_action( sprintf('manage_%s_posts_custom_column', Person::get_post_type()),
                     array(get_called_class(), 'render_people_unit_column'), 10, 2);
+        add_action( 'pre_get_posts', array(get_called_class(), 'sort_people_unit_column') );
+        add_action( sprintf('manage_%s_posts_custom_column', Person::get_post_type()),
+                    array(get_called_class(), 'render_people_publication_column'), 10, 2);
+        add_action( 'pre_get_posts', array(get_called_class(), 'sort_people_publication_column') );
 
         /* Make permalinks work - See doc for flush_rewrite_rules() */
         register_deactivation_hook(__FILE__, 'flush_rewrite_rules' );
@@ -660,6 +707,7 @@ class PersonController
             array('thumbnail' => __( 'Thumbnail' )),
             array_slice($columns, 1, 1, true),
             array('unit' => __( 'Unit' )),
+            array('publication' => __( 'Pub.' )),
             array_slice($columns, 2, count($columns) - 1, true));
     }
 
@@ -676,7 +724,7 @@ class PersonController
         echo sprintf("<img src=\"%s\" %s/>", $src, $attrs);
     }
 
-    static function render_people_unit_column  ($column, $post_id) {
+    static function render_people_unit_column ($column, $post_id) {
         if ($column !== 'unit') return;
         $person = Person::get($post_id);
         if (! $person) return;
@@ -685,6 +733,53 @@ class PersonController
         if (! $unit) return;
 
         echo $unit;
+    }
+
+    static function sort_people_unit_column ($query) {
+        if ( ! is_admin() ) return;
+
+        $orderby = $query->get( 'orderby' );
+
+        if ( 'unit' == $orderby ) {
+            $query->set( 'meta_key', 'unit_quad' );
+            $query->set( 'orderby', 'meta_value' );
+        }
+
+    }
+
+    static function render_people_publication_column ($column, $post_id) {
+
+        if ($column !== 'publication') return;
+        $person = Person::get($post_id);
+        if (! $person) return;
+
+        $pl = $person->get_publication_link();
+        if (! $pl) {
+            echo '<input type="checkbox" id="publication_' . $post_id . '" disabled="true" />';
+        } else {
+            echo '<input type="checkbox" id="publication_' . $post_id . '" checked="checked" disabled="true" title="'. $pl .'"/>';
+        }
+    }
+
+    // Help: https://www.ractoon.com/2016/11/wordpress-custom-sortable-admin-columns-for-custom-posts/
+    // https://code.tutsplus.com/articles/quick-tip-make-your-custom-column-sortable--wp-25095
+    static function sort_people_publication_column ($query) {
+        if ( ! is_admin() ) return;
+
+        $orderby = $query->get( 'orderby' );
+
+        if ( 'publication' == $orderby ) {
+            $query->set( 'meta_key', 'publication_link' );
+            $query->set( 'orderby', 'meta_value' );
+        }
+
+    }
+
+    // https://codex.wordpress.org/Plugin_API/Filter_Reference/manage_edit-post_type_columns
+    static function make_people_columns_sortable  ($columns) {
+        $columns['publication'] = 'publication';
+        $columns['unit'] = 'unit';
+        return $columns;
     }
 
     /**
