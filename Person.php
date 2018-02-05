@@ -6,21 +6,21 @@ if (! defined('ABSPATH')) {
     die('Access denied.');
 }
 
-require_once(dirname(__FILE__) . "/inc/ldap.inc");
+require_once(__DIR__ . "/inc/ldap.inc");
 use \EPFL\WS\LDAPClient;
 
-require_once(dirname(__FILE__) . "/inc/scrape.inc");
+require_once(__DIR__ . "/inc/scrape.inc");
 use function \EPFL\WS\scrape;
 
-require_once(dirname(__FILE__) . "/inc/title.inc");
+require_once(__DIR__ . "/inc/title.inc");
 use \EPFL\WS\Persons\NoSuchTitleException;
 use \EPFL\WS\Persons\Title;
 
-require_once(dirname(__FILE__) . "/inc/i18n.inc");
+require_once(__DIR__ . "/inc/i18n.inc");
 use function \EPFL\WS\___;
 use function \EPFL\WS\__x;
 
-require_once(dirname(__FILE__) . "/inc/auto-fields.inc");
+require_once(__DIR__ . "/inc/auto-fields.inc");
 use \EPFL\WS\AutoFields;
 use \EPFL\WS\AutoFieldsController;
 
@@ -430,7 +430,7 @@ class PersonController
         add_action('plugins_loaded', function () {
             load_plugin_textdomain(
                 'epfl-persons', false,
-                basename(dirname(__FILE__)) . '/languages');
+                basename(__DIR__) . '/languages');
         });
     }
 
