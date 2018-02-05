@@ -39,9 +39,13 @@ class Lab extends Post
 {
     const SLUG = "epfl-lab";
 
-    const WEBSITE_URL_META = "epfl_lab_website_url";
-    const UNIQUE_ID_META = "epfl_unique_id";
-    const OU_META = "epfl_ou";
+    const WEBSITE_URL_META        = "epfl_lab_website_url";
+    const UNIQUE_ID_META          = "epfl_unique_id";
+    const OU_META                 = "epfl_ou";
+    const LAB_DESCRIPTION_FR_META  = "epfl_lab_description_fr";
+    const LAB_DESCRIPTION_EN_META  = "epfl_lab_description_en";
+    const LAB_MANAGER_META         = "epfl_lab_manager";
+    const LAB_POSTAL_ADDRESS_META  = "epfl_lab_postal_address";
 
     static function get_post_type ()
     {
@@ -73,15 +77,19 @@ class Lab extends Post
     {
         $ldap_result = $this->_get_ldap_result();
         $meta_input = array(
-            self::UNIQUE_ID_META   => $this->get_unique_id(),
-            self::OU_META          => $ldap_result["ou"][0],
-            self::WEBSITE_URL_META => explode(" ", $ldap_result["labeleduri"][0])[0],
+            self::UNIQUE_ID_META          => $this->get_unique_id(),
+            self::WEBSITE_URL_META        => explode(" ", $ldap_result["labeleduri"][0])[0],
+            self::OU_META                 => $ldap_result["ou"][0],
+            self::LAB_DESCRIPTION_FR_META => $ldap_result["description"][0],
+            self::LAB_DESCRIPTION_EN_META => $ldap_result["description;lang-en"][0],
+            self::LAB_MANAGER_META        => $ldap_result["unitmanager"][0],
+            self::LAB_POSTAL_ADDRESS_META => $ldap_result["postaladdress"][0],
         );
 
         wp_update_post(array(
             "ID"            => $this->ID,
             "post_type"     => $this->get_post_type(),
-            "post_title"    => $ldap_result["ou"][1],
+            "post_title"    => $ldap_result["description;lang-en"][0],
             "meta_input"    => $meta_input
         ));
         AutoFields::of(get_called_class())->append(array_keys($meta_input));
@@ -116,6 +124,12 @@ class Lab extends Post
         return get_post_meta($this->ID, self::OU_META, true);
     }
 
+    public function get_description ($lang='en')
+    {
+        return ($lang == 'fr') ? get_post_meta($this->ID, self::LAB_DESCRIPTION_FR_META, true) :
+                                 get_post_meta($this->ID, self::LAB_DESCRIPTION_EN_META, true);
+    }
+
     public function get_website_url ()
     {
         return get_post_meta($this->ID, self::WEBSITE_URL_META, true);
@@ -126,6 +140,16 @@ class Lab extends Post
         $unique_id_meta = self::UNIQUE_ID_META;
         return $this->$unique_id_meta;  // Set by ->_get_by_primary_key() or
                                         // ->_get_or_create()
+    }
+
+    public function get_lab_manager ()
+    {
+        return get_post_meta($this->ID, self::LAB_MANAGER_META, true);
+    }
+
+    public function get_postaladdress ()
+    {
+        return get_post_meta($this->ID, self::LAB_POSTAL_ADDRESS_META, true);
     }
 }
 
