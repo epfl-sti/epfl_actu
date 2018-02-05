@@ -223,7 +223,7 @@ class ActuController extends \EPFL\WS\Base\APIChannelPostController
 
     static function filter_register_post_type (&$settings) {
         $settings["menu_icon"] = 'dashicons-megaphone';
-        $settings["menu_position"] = 41;
+        $settings["menu_position"] = 50;
     }
 
     static function get_human_labels ()

@@ -196,7 +196,7 @@ class MementoController extends \EPFL\WS\Base\APIChannelPostController
 
     static function filter_register_post_type (&$settings) {
         $settings["menu_icon"] = 'dashicons-calendar';
-        $settings["menu_position"] = 42;
+        $settings["menu_position"] = 51;
     }
 
     static function get_human_labels ()

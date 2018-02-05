@@ -465,11 +465,11 @@ class PersonController
                 'publicly_queryable' => true,
                 'show_ui'            => true,
                 'show_in_menu'       => true,
+                'menu_position'      => 40,
                 'query_var'          => true,
                 'capability_type'    => 'post',
                 'has_archive'        => true,
                 'hierarchical'       => false,
-                'menu_position'      => 40,
                 'menu_icon'          => 'dashicons-welcome-learn-more',  // Mortar hat
                 'supports'           => array( 'editor', 'thumbnail' ),
                 'register_meta_box_cb' => array(get_called_class(), 'add_meta_boxes')
