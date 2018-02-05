@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Model and controller for an EPFL lab
+ * Model and controller for an EPFL lab, research group or administrative unit
  */
 
 namespace EPFL\WS\Labs;
