@@ -45,6 +45,9 @@ class AutoFields
     {
         $protected = $this->get();
         $changed = false;
+        if (! is_array($fields)) {
+            $fields = [$fields];
+        }
         foreach ($fields as $field) {
             if (false === array_search($field, $protected)) {
                 array_push($protected, $field);
