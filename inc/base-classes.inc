@@ -401,6 +401,59 @@ abstract class Post
         }
         return $this->_wp_post;
     }
+
+    /**
+     * Retrieve one post per its primary key components.
+     *
+     * @param $unique_key_array A PHP associative array whose keys
+     * are the names of WordPress "meta" fields that compose the Post's
+     * unique identity, and whose values are the corresponding values.
+     */
+    static protected function _get_by_primary_key ($unique_key_array)
+    {
+        $meta_query = array('relation' => 'AND');
+        foreach ($unique_key_array as $k => $v) {
+            array_push($meta_query, array(
+                'key'     => $k,
+                'value'   => $v,
+                'compare' => '='
+            ));
+        }
+
+        $theclass = get_called_class();
+        $search_query = new WP_Query(array(
+           'post_type'  => $theclass::get_post_type(),
+           'meta_query' => $meta_query
+        ));
+        $results = $search_query->get_posts();
+        if (0 === sizeof($results)) { return null; }
+
+        $that = new $theclass($results[0]->ID);
+        foreach ($unique_key_array as $k => $v) {
+            $that->$k = $v;
+        }
+        return $that;
+    }
+
+    /**
+     * Like @link _get_by_primary_key, except create a new WordPress
+     * post if searching by $unique_key_array yields no results.
+     */
+    static protected function _get_or_create ($unique_key_array)
+    {
+        $that = static::_get_by_primary_key($unique_key_array);
+        if ($that !== null) { return $that; }
+
+        $id = wp_insert_post(array(
+            "post_type" => $theclass::get_post_type(),
+            "post_status" => "publish",
+            "meta_input" => $unique_key_array), true);
+        $that = new $theclass($id);
+        foreach ($unique_key_array as $k => $v) {
+            $that->$k = $v;
+        }
+        return $that;
+    }
 }
 
 /**
@@ -500,8 +553,7 @@ abstract class APIChannelPost extends Post
     protected $_post_meta;
 
     /**
-     * Private constructor — Call @link get, @link get_or_create
-     * or @link sync instead
+     * Private constructor — Call @link get or @link sync instead
      */
     protected function __construct ($id, $api_id = null, $translation_id = null)
     {
@@ -516,58 +568,6 @@ abstract class APIChannelPost extends Post
         } else {
             $this->translation_id = get_post_meta($id, "translation_id", true);
         }
-    }
-
-    /**
-     * Retrieve one post per its primary key components.
-     *
-     * If the corresponding post does not exist in-database, it will
-     * be created with no contents besides the `meta_input` made up
-     * of $api_id and $translation_id (but see @link update).
-     */
-    static function get_or_create ($api_id, $translation_id)
-    {
-        $theclass = get_called_class();
-        $search_query = new WP_Query(array(
-           'post_type'  => $theclass::get_post_type(),
-           'meta_query' => array(
-               'relation' => 'AND',
-                array(
-                   'key'     => 'translation_id',
-                   'value'   => $translation_id,
-                   'compare' => '='
-               ),
-               array(
-                   'relation' => 'OR',
-                   array(
-                       'key'     => 'api_id',
-                       'value'   => $api_id,
-                       'compare' => '='
-                   ),
-                   // For backward compatibility when Actu was the sole
-                   // class using this code:
-                   array(
-                       'key'     => 'news_id',
-                       'value'   => $api_id,
-                       'compare' => '='
-                   ),
-               ),
-           )
-        ));
-        $results = $search_query->get_posts();
-        if (0 === sizeof($results)) {
-            $id = wp_insert_post(array(
-                "post_type" => $theclass::get_post_type(),
-                "post_status" => "publish",
-                "meta_input" => array(
-                    "api_id" => $api_id,
-                    "translation_id" => $translation_id
-                )), true);
-        } else {
-            $id = $results[0]->ID;
-        }
-
-        return new $theclass($id, $api_id, $translation_id);
     }
 
     /**
@@ -605,12 +605,13 @@ abstract class APIChannelPost extends Post
      *        @link ActuAPIClient#fetch
      *
      * @return The object instance that corresponds to the primary keys
-     *         present in $api_result (in the sense of @link get_or_create)
+     *         present in $api_result
      */
     static function sync ($api_result)
     {
-        $that = static::get_or_create($api_result[static::get_api_id_key()],
-                                      $api_result["translation_id"]);
+        $that = static::_get_or_create(array(
+            "api_id"         => $api_result[static::get_api_id_key()],
+            "translation_id" => $api_result["translation_id"]));
         $that->_sync($api_result);
         return $that;
     }
