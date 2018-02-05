@@ -20,8 +20,9 @@ class LDAPClient
 {
     const LDAP_SERVER = "ldap.epfl.ch";
     const BASE_DN     = "o=epfl,c=ch";
-    const SEARCH_PERSON_BY_SCIPER = "(&(objectClass=person)(uniqueIdentifier=%d))";
-    const SEARCH_UNIT_BY_CN = "(&(objectClass=organizationalUnit)(cn=%s))";
+    const SEARCH_PERSON_BY_SCIPER  = "(&(objectClass=person)(uniqueIdentifier=%d))";
+    const SEARCH_UNIT_BY_CN        = "(&(objectClass=EPFLorganizationalUnit)(cn=%s))";
+    const SEARCH_UNIT_BY_UNIQUE_ID = "(&(objectClass=EPFLorganizationalUnit)(uniqueIdentifier=%d))";
 
     static function query_by_sciper ($sciper)
     {
@@ -32,6 +33,11 @@ class LDAPClient
     static function query_by_unit_name ($unit_name) {
         return self::_do_ldap_search(
             sprintf(self::SEARCH_UNIT_BY_CN, $unit_name));
+    }
+
+    static function query_by_unit_unique_id ($unique_id) {
+        return self::_do_ldap_search(
+            sprintf(self::SEARCH_UNIT_BY_UNIQUE_ID, $unique_id));
     }
 
     static private function _do_ldap_search ($query) {

@@ -444,6 +444,7 @@ abstract class Post
         $that = static::_get_by_primary_key($unique_key_array);
         if ($that !== null) { return $that; }
 
+        $theclass = get_called_class();
         $id = wp_insert_post(array(
             "post_type" => $theclass::get_post_type(),
             "post_status" => "publish",

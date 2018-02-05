@@ -6,6 +6,9 @@ if (! defined('ABSPATH')) {
     die('Access denied.');
 }
 
+require_once(__DIR__ . "/Lab.php");
+use \EPFL\WS\Labs\Lab;
+
 require_once(__DIR__ . "/inc/ldap.inc");
 use \EPFL\WS\LDAPClient;
 
@@ -263,13 +266,17 @@ class Person
         }
 
         $unit = $entries[0]["ou"][0];
-        $meta["ou"] = $unit;
-
-        $unit_entries = LDAPClient::query_by_unit_name($unit);
-        if ($unit_entries && count($unit_entries)) {
-            $labeleduri = $unit_entries[0]["labeleduri"][0];
-
-            $meta[self::LAB_WEBSITE_URL_META] = explode(" ", $labeleduri)[0];
+        $lab = $this->get_lab();
+        if ($lab) {
+            $lab->sync();
+            if ($unit !== $lab->get_abbrev()) {
+                $lab = null;  // And try again below
+            }
+        }
+        if (! $lab) {
+            $lab = Lab::get_or_create_by_name($unit);
+            $meta[self::LAB_UNIQUE_ID_META] = $lab->get_unique_id();
+            $lab->sync();
         }
 
         $update = array(
@@ -280,6 +287,14 @@ class Person
         );
         wp_update_post($update);
         $this->_update_meta($meta);
+    }
+
+    const LAB_UNIQUE_ID_META = "epfl_person_lab_id";
+    public function get_lab ()
+    {
+        $unique_id = get_post_meta($this->ID, self::LAB_UNIQUE_ID_META, true);
+        if (! $unique_id) { return; }
+        return Lab::get_by_unique_id($unique_id);
     }
 
     const THUMBNAIL_META  = "epfl_person_external_thumbnail";
@@ -341,10 +356,9 @@ class Person
         wp_update_post($update);
     }
 
-    const LAB_WEBSITE_URL_META = "epfl_person_lab_website_url";
     public function get_lab_website_url ()
     {
-        return get_post_meta($this->ID, self::LAB_WEBSITE_URL_META, true);
+        return $this->get_lab()->get_website_url();
     }
 
     private function _get_people_dom()
