@@ -251,8 +251,6 @@ class Course extends Post
             self::UNIQUE_ID_META        => $course_data["id"],
             self::CODE_META             => $course_data["code"],
             self::YEAR_META             => $course_data["year"],
-             // TODO: Use Polylang instead.
-            self::LANGUAGE_META         => $course_data["language"],
         );
 
         wp_update_post(array(
@@ -262,6 +260,9 @@ class Course extends Post
             "post_content"  => $course_data["summary"],
             "meta_input"    => $meta_input
         ));
+        if (function_exists("pll_set_post_language")) {
+            pll_set_post_language($this->ID, $course_data["language"]);
+        }
         AutoFields::of(get_called_class())->append(array_keys($meta_input));
     }
 
