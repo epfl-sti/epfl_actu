@@ -881,7 +881,7 @@ abstract class APIChannelPostController
                 ),
                 'has_archive'        => true,
                 'hierarchical'       => false,
-                'taxonomies'         => array($taxonomy_slug, 'category'),
+                'taxonomies'         => array($taxonomy_slug, 'category', 'post_tag'),
                 'menu_position'      => 24,
                 'menu_icon'          => $menu_icon,
                 'supports'           => array('wps_subtitle', 'custom-fields'),

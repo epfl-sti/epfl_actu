@@ -174,6 +174,7 @@ class LabController
                 'capability_type'    => 'post',
                 'has_archive'        => true,
                 'hierarchical'       => false,
+                'taxonomies'         => array('category', 'post_tag'),
                 'menu_icon'          => 'dashicons-lightbulb',
                 'supports'           => array( 'editor', 'thumbnail', 'custom-fields' ),
                 'register_meta_box_cb' => array(get_called_class(), 'add_meta_boxes')

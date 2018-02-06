@@ -484,6 +484,7 @@ class PersonController
                 'capability_type'    => 'post',
                 'has_archive'        => true,
                 'hierarchical'       => false,
+                'taxonomies'         => array('category', 'post_tag'),
                 'menu_icon'          => 'dashicons-welcome-learn-more',  // Mortar hat
                 'supports'           => array( 'editor', 'thumbnail' ),
                 'register_meta_box_cb' => array(get_called_class(), 'add_meta_boxes')
