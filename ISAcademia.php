@@ -87,7 +87,29 @@ class CourseTaxonomy {
     {
         require_once (__DIR__ . "/inc/ISAcademiaAPI.inc");
         foreach (parse_getCours($this->get_url()) as $course_url) {
-            Course::get_or_create_by_url($course_url)->sync();
+            $course = Course::get_or_create_by_url($course_url);
+            $course->sync();
+            $this->set_ownership($course);
+        }
+    }
+
+    /**
+     * Mark in the database that $course was found by
+     * fetching from this ISAcademia feed.
+     *
+     * This is materialized by a relationship in the
+     * wp_term_relationships SQL table, using the @link
+     * wp_set_post_terms API.
+     */
+    function set_ownership($course)
+    {
+        $terms = wp_get_post_terms(
+            $course->ID, $this->get_taxonomy_slug(),
+            array('fields' => 'ids'));
+        if (! in_array($this->ID, $terms)) {
+            wp_set_post_terms($course->ID, array($this->ID),
+                              $this->get_taxonomy_slug(),
+                              true);  // Append
         }
     }
 }
