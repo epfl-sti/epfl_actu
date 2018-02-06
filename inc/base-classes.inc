@@ -132,10 +132,6 @@ abstract class APIChannelTaxonomy
         }
     }
 
-    function register_prometheus_metrics ()
-    {
-    }
-
     /**
      * Mark in the database that $post was found by
      * fetching from this stream object.
