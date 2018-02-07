@@ -5,6 +5,8 @@
 
 namespace EPFL\WS;
 
+use \WPPrometheusExporter;  // In a plug-in - No harm if it doesn't exist
+
 if (! defined('ABSPATH')) {
     die('Access denied.');
 }

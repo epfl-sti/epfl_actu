@@ -32,8 +32,6 @@ require_once(dirname(__FILE__) . "/activation.inc");
 use function \EPFL\WS\plugin_activation_hook;
 use function \EPFL\WS\plugin_deactivation_hook;
 
-use \WPPrometheusExporter;  // In a plug-in - No harm if it doesn't exist
-
 function _debug ($msg)
 {
     // error_log($msg);
