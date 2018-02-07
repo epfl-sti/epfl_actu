@@ -164,6 +164,7 @@ require_once(dirname(__FILE__) . "/ISAcademia.php");
 require_once(dirname(__FILE__) . "/ISAcademia_shortcode.php");
 require_once(dirname(__FILE__) . "/Infoscience_shortcode.php");
 require_once(dirname(__FILE__) . "/Lab.php");
+require_once(dirname(__FILE__) . "/widgets/Map.php");
 require_once(dirname(__FILE__) . "/Memento.php");
 require_once(dirname(__FILE__) . "/Memento_shortcode.php");
 require_once(dirname(__FILE__) . "/Organigramme_shortcode.php");
