@@ -17,8 +17,9 @@ require_once(dirname(__FILE__) . "/i18n.inc");
 use function \EPFL\WS\___;
 use function \EPFL\WS\__x;
 
-require_once(dirname(__FILE__) . "/cron.inc");
+require_once(dirname(__FILE__) . "/batch.inc");
 use function \EPFL\WS\run_every;
+use \EPFL\WS\BatchTask;
 
 require_once(dirname(__FILE__) . "/image-size.inc");
 use function \EPFL\WS\get_image_size;
@@ -196,66 +197,18 @@ abstract class APIChannelTaxonomyController
     {
         add_action('init', array(get_called_class(), '_do_register_taxonomy'));
 
-        add_action('plugins_loaded', function () {
-            if (! class_exists("WPPrometheusExporter")) return;
-            WPPrometheusExporter::register_metric(
-                'epfl_ws_last_sync_success',
-                array(
-                    'help' => 'Timestamp of last successful sync from API'
-                ));
-            WPPrometheusExporter::register_metric(
-                'epfl_ws_sync_duration',
-                array(
-                    'help' => 'Duration of last sync from API (successful or not)',
-                    'has_timestamp' => true
-                )
-            );
-            WPPrometheusExporter::register_metric(
-                'epfl_ws_sync_success',
-                array(
-                    'type' => 'gauge',
-                    'help' => '0 for error, 1 for success',
-                    'has_timestamp' => true
-                )
-            );
-        });
-
         $taxonomy_class = static::get_taxonomy_class();
         run_every(600, function () use ($taxonomy_class) {
             foreach ($taxonomy_class::get_all() as $stream) {
                 $stream_name = $stream->as_wp_term()->name;
                 $stream_slug = $stream->as_wp_term()->slug;
-                error_log("Syncing Actu stream $stream_name ($stream_slug)");
-
-                $started = microtime(true);
-                try {
-                    $stream->sync();
-                    $failed = null;
-                } catch (Exception $e) {
-                    $failed = $e;
-                }
-                $duration = microtime(true) - $started;
-
-                error_log(sprintf(
-                    "Syncing Actu stream %s (%s), duration: %.03ds, status: %s",
-                    $stream_name,
-                    $stream_slug,
-                    $duration,
-                    ($failed ? $failed->getMessage() : "OK")));
-
-                if (! class_exists("WPPrometheusExporter")) continue;
-                $labels = array(
-                    'kind' => $taxonomy_class::get_taxonomy_slug(),
-                    'slug' => $stream_slug
-                );
-                (new WPPrometheusExporter('epfl_ws_sync_duration', $labels))
-                    ->update($duration);
-                (new WPPrometheusExporter('epfl_ws_sync_success', $labels))
-                    ->update($failed ? 0 : 1);
-                if (! $failed) {
-                    (new WPPrometheusExporter('epfl_ws_last_sync_success', $labels))
-                        ->update($started);
-                }
+                (new BatchTask())
+                    ->set_banner("Syncing Actu stream $stream_name ($stream_slug)")
+                    ->set_prometheus_labels(array(
+                            'kind' => $taxonomy_class::get_taxonomy_slug(),
+                            'slug' => $stream_slug
+                        ))
+                    ->run(array($stream, "sync"));
             }
         });
     }

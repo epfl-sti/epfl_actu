@@ -23,6 +23,9 @@ require_once(__DIR__ . "/inc/i18n.inc");
 use function \EPFL\WS\___;
 use function \EPFL\WS\__x;
 
+require_once(dirname(__FILE__) . "/inc/batch.inc");
+use function \EPFL\WS\run_every;
+use \EPFL\WS\BatchTask;
 
 /**
  * A taxonomy of courses obtained out of IS-Academia
@@ -61,6 +64,26 @@ class CourseTaxonomy {
         } else {
             $this->ID = $term_or_term_id;
         }
+    }
+
+    static function get_all ()
+    {
+        $thisclass = get_called_class();
+        $all = array();
+        foreach (get_terms(array(
+            'taxonomy'   => $thisclass::get_taxonomy_slug(),
+            'hide_empty' => false
+        )) as $wp_term) {
+            if (is_wp_error($wp_term)) {
+                throw new Exception($wp_term->get_error_message());
+            } elseif (array_key_exists("invalid_taxonomy", $wp_term)) {
+                throw new Exception(sprintf(
+                    "get_terms() says %s is an invalid taxonomy",
+                    $thisclass::get_taxonomy_slug()));
+            }
+            array_push($all, new $thisclass($wp_term));
+        }
+        return $all;
     }
 
     function get_url ()
@@ -122,6 +145,20 @@ class CourseTaxonomyController
 
         add_action('plugins_loaded', function () {
             if (! class_exists("WPPrometheusExporter")) { return; }
+        });
+
+        run_every(600, function () {
+            foreach (CourseTaxonomy::get_all() as $feed) {
+                $feed_name = $feed->as_wp_term()->name;
+                $feed_slug = $feed->as_wp_term()->slug;
+                (new BatchTask())
+                    ->set_banner("Syncing ISAcademia feed $feed_name ($feed_slug)")
+                    ->set_prometheus_labels(array(
+                            'kind' => CourseTaxonomy::get_taxonomy_slug(),
+                            'slug' => $feed_slug
+                        ))
+                    ->run(array($feed, "sync"));
+            }
         });
     }
 
