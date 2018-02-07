@@ -210,12 +210,13 @@ abstract class StreamTaxonomyController
         $taxonomy_class = static::get_taxonomy_class();
         run_every(600, function () use ($taxonomy_class) {
             foreach ($taxonomy_class::get_all() as $stream) {
-                $stream_name = $stream->as_wp_term()->name;
-                $stream_slug = $stream->as_wp_term()->slug;
+                $stream_name   = $stream->as_wp_term()->name;
+                $stream_slug   = $stream->as_wp_term()->slug;
+                $taxonomy_slug = $taxonomy_class::get_taxonomy_slug();
                 (new BatchTask())
-                    ->set_banner("Syncing Actu stream $stream_name ($stream_slug)")
+                    ->set_banner("Syncing $taxonomy_slug $stream_name ($stream_slug)")
                     ->set_prometheus_labels(array(
-                            'kind' => $taxonomy_class::get_taxonomy_slug(),
+                            'kind' => $taxonomy_slug,
                             'slug' => $stream_slug
                         ))
                     ->run(array($stream, "sync"));
