@@ -151,7 +151,7 @@ class Memento extends \EPFL\WS\Base\APIChannelPost
  *
  * This is a "pure static" class; no instances are ever constructed.
  */
-class MementoStreamController extends \EPFL\WS\Base\APIChannelTaxonomyController
+class MementoStreamController extends \EPFL\WS\Base\StreamTaxonomyController
 {
     static function get_taxonomy_class () {
         return MementoStream::class;
@@ -171,7 +171,7 @@ class MementoStreamController extends \EPFL\WS\Base\APIChannelTaxonomyController
             'new_item_name'     => ___( 'New Channel Name'),
             'menu_name'         => ___( 'Event Channels'),
 
-            // These are internal to APIChannelTaxonomyController
+            // These are internal to StreamTaxonomyController
             'url_legend'        => ___('Memento Channel API URL'),
             'url_legend_long'   => ___("Source URL of the JSON data. Use <a href=\"https://wiki.epfl.ch/api-rest-actu-memento/memento\" target=\"_blank\">memento-doc</a> for details.")
         );

@@ -178,7 +178,7 @@ class Actu extends \EPFL\WS\Base\APIChannelPost
  *
  * This is a "pure static" class; no instances are ever constructed.
  */
-class ActuStreamController extends \EPFL\WS\Base\APIChannelTaxonomyController
+class ActuStreamController extends \EPFL\WS\Base\StreamTaxonomyController
 {
     static function get_taxonomy_class () {
         return ActuStream::class;
@@ -198,7 +198,7 @@ class ActuStreamController extends \EPFL\WS\Base\APIChannelTaxonomyController
             'new_item_name'     => ___( 'New Channel Name'),
             'menu_name'         => ___( 'News Channels'),
 
-            // These are internal to APIChannelTaxonomyController
+            // These are internal to StreamTaxonomyController
             'url_legend'        => ___('Actu Channel API URL'),
             'url_legend_long'   => ___("Source URL of the JSON data. Use <a href=\"https://wiki.epfl.ch/api-rest-actu-memento/actu\" target=\"_blank\">actu-doc</a> for details.")
         );

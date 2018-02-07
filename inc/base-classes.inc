@@ -40,19 +40,17 @@ function _debug ($msg)
 }
 
 /**
- * Abstract base classes for taxonomies whose terms correspond to an API URL.
+ * Abstract base classes for taxonomies whose terms have an URL as metadata.
  *
  * A "taxonomy" is a complicated word for a way to organize WordPress
- * posts together. Actu and Memento entries are grouped by "channels",
- * i.e. the feed they come from. Channels have names and host suitable
- * metadata, i.e. an API URL from which news, events etc. are
- * continuously fetched.
+ * posts together. Post types that are automatically scraped from some kind
+ * of API or Web service, belong to a taxonomy which is represented by
+ * a subclass of ScrapedTaxonomy (e.g. ActuStream, CourseTaxonomy etc.)
  *
- * Instances of the class represent one so-called "term" in one of the
- * EPFL-WS taxonomies such as "epfl-actu-channel" (for the ActuStream
- * subclass) or "epfl-memento-channel" (MementoStream subclass).
+ * Instances of these subclasses represent one so-called "term", that
+ * is, one API channel or feed with its initial URL.
  */
-abstract class APIChannelTaxonomy
+abstract class StreamTaxonomy
 {
     /**
      * @return The object class for WP posts this APIChannelTaxonomy applies to.
@@ -67,11 +65,17 @@ abstract class APIChannelTaxonomy
     static abstract function get_taxonomy_slug ();
 
     /**
-     * @return A slug (unique keyword) used to associate metadata
-     *         (here, the API URL) to objects of this class in the
+     * @return A slug (unique keyword) used to associate the URL
+     *         metadata to objects of this class ("terms") in the
      *         WordPress database
      */
     static abstract function get_term_meta_slug ();
+
+    /**
+     * Actually fetch data from @link get_url and create / update
+     * as many instances of @get_post_class as needed
+     */
+    abstract function sync ();
 
     function __construct($term_or_term_id)
     {
@@ -122,17 +126,6 @@ abstract class APIChannelTaxonomy
         return \WP_Term::get_instance($this->ID, $this->get_taxonomy_slug());
     }
 
-    function sync ()
-    {
-        require_once (dirname(__FILE__) . "/ActuAPI.inc");
-        $client = new \EPFL\WS\Actu\ActuAPIClient($this);
-        foreach ($client->fetch() as $api_result) {
-            $post_class = $this->get_post_class();
-            $epfl_post = $post_class::sync($api_result);
-            $this->set_ownership($epfl_post);
-        }
-    }
-
     /**
      * Mark in the database that $post was found by
      * fetching from this stream object.
@@ -155,13 +148,32 @@ abstract class APIChannelTaxonomy
 }
 
 /**
- * Configuration UI and WP callbacks for a APIChannelTaxonomy class.
+ * Subclass to StreamTaxonomy for Actu and Memento streams
+ *
+ * This class just mixes in a @link sync method that uses ActuAPIClient.
+ */
+abstract class APIChannelTaxonomy extends StreamTaxonomy
+{
+    function sync ()
+    {
+        require_once (dirname(__FILE__) . "/ActuAPI.inc");
+        $client = new \EPFL\WS\Actu\ActuAPIClient($this);
+        foreach ($client->fetch() as $api_result) {
+            $post_class = $this->get_post_class();
+            $epfl_post = $post_class::sync($api_result);
+            $this->set_ownership($epfl_post);
+        }
+    }
+}
+
+/**
+ * Configuration UI and WP callbacks for a StreamTaxonomy class.
  *
  * A taxonomy is pretty much an end-user-invisible concept so much of the
  * responsibility of this class is towards wp-admin. This class has
  * no instances.
  */
-abstract class APIChannelTaxonomyController
+abstract class StreamTaxonomyController
 {
     /**
      * @return The @link APIChannelTaxonomy subclass this controller serves.
@@ -170,7 +182,7 @@ abstract class APIChannelTaxonomyController
 
     /**
      * @return An URL to show as an example in the "URL" field of a new
-     * APIChannelTaxonomy instance being created in wp-admin
+     * StreamTaxonomy instance being created in wp-admin
      */
     abstract static function get_placeholder_api_url ();
 
@@ -182,7 +194,7 @@ abstract class APIChannelTaxonomyController
      *         array gets passed as-is as the 'labels' value to
      *         WordPress' @link register_taxonomy, and therefore ought
      *         to contain like-named keys. Additionally the following
-     *         keys are used by APIChannelTaxonomyController directly:
+     *         keys are used by StreamTaxonomyController directly:
      *
      * - url_legend: A short label to display next to the
      *               channel API URL field
@@ -720,11 +732,19 @@ abstract class APIChannelPost extends Post
 }
 
 /**
- * Configuration UI and WP callbacks for an APIChannelPost class.
+ * Abstract base class for the controller of a model class whose
+ * instances are streamed from an API (as opposed to typed in manually
+ * from wp-admin).
  *
  * This is a "pure static" class; no instances are ever constructed.
+ *
+ * Posts managed by a subclass of StreamPostController are displayed
+ * read-only in the wp-admin area, and are assumed to have a
+ * "homepage" that is external to WordPress (obtained with the
+ * `get_permalink` method in the class returned by @link
+ * get_model_class).
  */
-abstract class APIChannelPostController
+abstract class StreamPostController
 {
     /**
      * Get the labels to display in various places in the UI.
@@ -734,7 +754,7 @@ abstract class APIChannelPostController
      *         array gets passed as-is as the 'labels' value to
      *         WordPress' @link register_post_type, and therefore ought
      *         to contain like-named keys. Additionally the following
-     *         keys are used by APIChannelTaxonomyController directly:
+     *         keys are used by StreamTaxonomyController directly:
      *
      * - description: The post type description for wp_admin (passed
      *                as the `"description"` field to `register_post_type`)
@@ -743,7 +763,7 @@ abstract class APIChannelPostController
     abstract static function get_human_labels ();
 
     /**
-     * @return The @link APIChannelTaxonomy subclass this controller serves.
+     * @return The @link StreamTaxonomy subclass this controller serves.
      */
     abstract static function get_taxonomy_class ();
 
@@ -765,13 +785,10 @@ abstract class APIChannelPostController
         plugin_deactivation_hook(array(get_called_class(), "deregister_caps"));
 
         // Behavior of epfl-ws posts on the main site
-        add_filter("post_thumbnail_html",
-                   array(get_called_class(), "filter_post_thumbnail_html"), 10, 5);
         add_filter("post_type_link",
                    array(get_called_class(), "filter_post_link"), 10, 4);
 
         // Behavior of epfl-ws posts in the wp-admin area
-        static::add_thumbnail_column();
         static::configure_rendering_in_edit_form();
         add_action("admin_enqueue_scripts", array(get_called_class(), "editor_css"));
         static::auto_fields_controller()->hook();
@@ -819,9 +836,9 @@ abstract class APIChannelPostController
                     'edit_published_posts' => 'edit_epfl_ws_posts',
                     'assign_categories'    => 'edit_epfl_ws_posts',
                     'assign_post_tags'     => 'edit_epfl_ws_posts',
-                    // One is not normally supposed to delete posts
-                    // manually — This is just an escape hatch in case
-                    // an APIChannelTaxonomy was deleted and
+                    // One is not normally supposed to delete streamed
+                    // posts manually — This is just an escape hatch
+                    // in case a StreamTaxonomy was deleted and
                     // referential integrity was breached.
                     'delete_post'          => 'edit_epfl_ws_posts',
                     'delete_posts'         => 'edit_epfl_ws_posts',
@@ -901,55 +918,119 @@ abstract class APIChannelPostController
     }
 
     /**
-     * Make room for a column that shows the thumbnails and some
-     * details
+     * Serve the permalink from actu.epfl.ch / memento.epfl.ch instead of our own.
+     *
+     * Mostly, we keep the full text of the article in-database just for the search engine.
      */
-    static function add_thumbnail_column ()
+    static function filter_post_link ($orig_link, $post, $unused_leavename, $unused_is_sample)
+    {
+        $epfl_post = static::get_model_class()::get($post);
+        if (! $epfl_post) return $orig_link;
+        $true_permalink = $epfl_post->get_permalink();
+        return $true_permalink ? $true_permalink : $orig_link;
+    }
+
+    static function configure_rendering_in_edit_form ()
     {
         $this_class = get_called_class();
-        $model_class = $this_class::get_model_class();
-        $post_type = $model_class::get_post_type();
-        add_action( sprintf('manage_%s_posts_columns', $post_type),
-                    function ($columns) {
-                        // https://stackoverflow.com/a/3354804/435004
-                        return array_merge(
-                            array_slice($columns, 0, 1, true),
-                            array('thumbnail' => ___( 'Thumbnail' )),
-                            array_slice($columns, 1, count($columns) - 1, true));
-                    });
-        add_action(
-            sprintf('manage_%s_posts_custom_column', $post_type),
-            function ($column, $post_id) use ($this_class, $model_class) {
-                if ($column !== 'thumbnail') return;
-                $img = get_the_post_thumbnail($post_id);
-                if (! $img) return;
-
-                $epfl_post = $model_class::get($post_id);
+        add_action("edit_form_after_title", function ($wp_post) use ($this_class) {
+                $epfl_post = $this_class::get_model_class()::get($wp_post);
                 if (! $epfl_post) return;
+               $this_class::render_readonly_in_edit_form($epfl_post);
+            });
 
-                $this_class::render_thumbnail_column($epfl_post, $img);
-            }, 10, 2);
+    }
+
+    function render_readonly_in_edit_form ($epfl_post)
+    {
+        $wp_post = $epfl_post->wp_post();
+        $permalink = get_permalink($wp_post);
+        global $post;
+        $subtitle = function_exists("get_the_subtitle") ? get_the_subtitle($post, "", "", false) : null;
+        ?>
+    <h1><?php echo $wp_post->post_title; ?></h1>
+    <?php if ($subtitle) : ?><h2><?php echo $subtitle; ?></h2><?php endif; ?>
+	<div id="edit-slug-box" class="hide-if-no-js">
+    <?php if (method_exists($epfl_post, "get_image_url")): ?>
+    <img class="epfl-ws-thumbnail" src="<?php echo $epfl_post->get_image_url() ?>"/>
+    <?php endif; ?>
+    <p><b>Permalink:</b> <a href="<?php echo $permalink; ?>"><?php echo $permalink; ?></a></p>
+    <?php echo $wp_post->post_content; ?>
+	</div>
+        <?php
+    }
+
+    static function editor_css ($hook)
+    {
+        if (! ('post.php' === $hook &&
+               static::get_model_class()::get($_GET["post"])) ) return;
+        wp_register_style(
+            'ws-editor',
+            plugins_url( 'ws-editor.css', __FILE__ ) );
+        wp_enqueue_style('ws-editor');
+    }
+
+    function pre_get_posts ($query) {
+		$qv = &$query->query_vars;
+
+        if (! is_admin() && $query->is_main_query()) {
+            // Loosely based on https://wordpress.stackexchange.com/q/181803/132235
+            $post_types = $query->get('post_type');
+            if ($post_types === 'post') {
+                $post_types = ['post'];
+            }
+            if (is_array($post_types) &&
+                (false === array_search(static::get_model_class()::get_post_type(), $post_types))) {
+                array_push($post_types, static::get_model_class()::get_post_type());
+                $query->set('post_type', $post_types);
+            }
+        }
+        return $query;
     }
 
     /**
-     * Render an EPFL post as a thumbnail in an additional column in
-     * the wp-admin list view
-     *
-     * The base class appends size informations below $img. Subclasses
-     * may override this to render the thumbnail differently.
-     *
-     * @param $epfl_post An instance of the class returned by @link
-     * get_model_class
-     *
-     * @param $img HTML code for the thumbnail (as returned by
-     * Wordpress' @link get_the_post_thumbnail)
+     * @return The model class for this controller
      */
-    static function render_thumbnail_column ($epfl_post, $img)
+    static function get_model_class ()
     {
-        echo $img;
-        if ($orig_size = $epfl_post->get_max_size()) {
-            printf("<p>Size: %dx%d</p>", $orig_size["width"], $orig_size["height"]);
-        }
+        $taxonomy_class = static::get_taxonomy_class();
+        return $taxonomy_class::get_post_class();
+    }
+
+    /**
+     * Called to add meta boxes on an "edit" page in wp-admin.
+     *
+     * The base class only puts @link AutoFieldsController in gear.
+     * Subclasses may want to override this to add more meta boxes.
+     */
+    static function add_meta_boxes ()
+    {
+        static::auto_fields_controller()->add_meta_boxes();
+    }
+}
+
+/**
+ * Configuration UI and WP callbacks for an APIChannelPost class.
+ *
+ * This is a "pure static" class; no instances are ever constructed.
+ *
+ * Compared to the parent class @link StreamPostController, this class
+ * adds support for server-side image resizing; also, it arranges to
+ * show thumbnails and metadata (i.e. max image size) in the wp-admin
+ * area.
+ */
+abstract class APIChannelPostController extends StreamPostController
+{
+    /**
+     * Overridden to deal with thumbnails.
+     */
+    static function hook ()
+    {
+        parent::hook();
+
+        add_filter("post_thumbnail_html",
+                   array(get_called_class(), "filter_post_thumbnail_html"), 10, 5);
+        static::add_thumbnail_column();
     }
 
     /**
@@ -1004,93 +1085,57 @@ abstract class APIChannelPostController
         return sprintf("<img src=\"%s\" %s/>", $src, $attrs);
     }
 
-    /**
-     * Serve the permalink from actu.epfl.ch / memento.epfl.ch instead of our own.
-     *
-     * Mostly, we keep the full text of the article in-database just for the search engine.
-     */
-    static function filter_post_link ($orig_link, $post, $unused_leavename, $unused_is_sample)
-    {
-        $epfl_post = static::get_model_class()::get($post);
-        if (! $epfl_post) return $orig_link;
-        $true_permalink = $epfl_post->get_permalink();
-        return $true_permalink ? $true_permalink : $orig_link;
-    }
 
-    static function configure_rendering_in_edit_form ()
+    /**
+     * Make room for a column that shows the thumbnails and some
+     * details
+     */
+    static function add_thumbnail_column ()
     {
         $this_class = get_called_class();
-        add_action("edit_form_after_title", function ($wp_post) use ($this_class) {
-                $epfl_post = $this_class::get_model_class()::get($wp_post);
+        $model_class = $this_class::get_model_class();
+        $post_type = $model_class::get_post_type();
+        add_action( sprintf('manage_%s_posts_columns', $post_type),
+                    function ($columns) {
+                        // https://stackoverflow.com/a/3354804/435004
+                        return array_merge(
+                            array_slice($columns, 0, 1, true),
+                            array('thumbnail' => ___( 'Thumbnail' )),
+                            array_slice($columns, 1, count($columns) - 1, true));
+                    });
+        add_action(
+            sprintf('manage_%s_posts_custom_column', $post_type),
+            function ($column, $post_id) use ($this_class, $model_class) {
+                if ($column !== 'thumbnail') return;
+                $img = get_the_post_thumbnail($post_id);
+                if (! $img) return;
+
+                $epfl_post = $model_class::get($post_id);
                 if (! $epfl_post) return;
-               $this_class::render_readonly_in_edit_form($epfl_post);
-            });
 
-    }
-
-    function render_readonly_in_edit_form ($epfl_post)
-    {
-        $wp_post = $epfl_post->wp_post();
-        $permalink = get_permalink($wp_post);
-        global $post;
-        $subtitle = function_exists("get_the_subtitle") ? get_the_subtitle($post, "", "", false) : null;
-        ?>
-    <h1><?php echo $wp_post->post_title; ?></h1>
-    <?php if ($subtitle) : ?><h2><?php echo $subtitle; ?></h2><?php endif; ?>
-	<div id="edit-slug-box" class="hide-if-no-js">
-    <img class="epfl-ws-thumbnail" src="<?php echo $epfl_post->get_image_url() ?>"/>
-    <p><b>Permalink:</b> <a href="<?php echo $permalink; ?>"><?php echo $permalink; ?></a></p>
-    <?php echo $wp_post->post_content; ?>
-	</div>
-        <?php
-    }
-
-    static function editor_css ($hook)
-    {
-        if (! ('post.php' === $hook &&
-               static::get_model_class()::get($_GET["post"])) ) return;
-        wp_register_style(
-            'ws-editor',
-            plugins_url( 'ws-editor.css', __FILE__ ) );
-        wp_enqueue_style('ws-editor');
-    }
-
-    function pre_get_posts ($query) {
-		$qv = &$query->query_vars;
-
-        if (! is_admin() && $query->is_main_query()) {
-            // Loosely based on https://wordpress.stackexchange.com/q/181803/132235
-            $post_types = $query->get('post_type');
-            if ($post_types === 'post') {
-                $post_types = ['post'];
-            }
-            if (is_array($post_types) &&
-                (false === array_search(static::get_model_class()::get_post_type(), $post_types))) {
-                array_push($post_types, static::get_model_class()::get_post_type());
-                $query->set('post_type', $post_types);
-            }
-        }
-        return $query;
+                $this_class::render_thumbnail_column($epfl_post, $img);
+            }, 10, 2);
     }
 
     /**
-     * @return The model class for this controller
-     */
-    static function get_model_class ()
-    {
-        $taxonomy_class = static::get_taxonomy_class();
-        return $taxonomy_class::get_post_class();
-    }
-
-    /**
-     * Called to add meta boxes on an "edit" page in wp-admin.
+     * Render an EPFL post as a thumbnail in an additional column in
+     * the wp-admin list view
      *
-     * The base class only puts @link AutoFieldsController in gear.
-     * Subclasses may want to override this to add more meta boxes.
+     * The base class appends size informations below $img. Subclasses
+     * may override this to render the thumbnail differently.
+     *
+     * @param $epfl_post An instance of the class returned by @link
+     * get_model_class
+     *
+     * @param $img HTML code for the thumbnail (as returned by
+     * Wordpress' @link get_the_post_thumbnail)
      */
-    static function add_meta_boxes ()
+    static function render_thumbnail_column ($epfl_post, $img)
     {
-        static::auto_fields_controller()->add_meta_boxes();
+        echo $img;
+        if ($orig_size = $epfl_post->get_max_size()) {
+            printf("<p>Size: %dx%d</p>", $orig_size["width"], $orig_size["height"]);
+        }
     }
 }
 
