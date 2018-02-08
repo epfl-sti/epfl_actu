@@ -193,7 +193,7 @@ class LabController
                 'publicly_queryable' => true,
                 'show_ui'            => true,
                 'show_in_menu'       => true,
-                'menu_position'      => 41,
+                'menu_position'      => 42,
                 'query_var'          => true,
                 'capability_type'    => 'post',
                 'has_archive'        => true,

@@ -876,7 +876,7 @@ abstract class StreamPostController
                 'has_archive'        => true,
                 'hierarchical'       => false,
                 'taxonomies'         => array($taxonomy_slug, 'category', 'post_tag'),
-                'menu_position'      => 24,
+                'menu_position'      => 40,
                 'menu_icon'          => isset($menu_icon) ? $menu_icon : '',
                 'supports'           => array('wps_subtitle', 'custom-fields'),
                 'register_meta_box_cb' => array(get_called_class(), 'add_meta_boxes')
