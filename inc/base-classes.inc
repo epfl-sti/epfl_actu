@@ -313,9 +313,63 @@ abstract class StreamTaxonomyController
 }
 
 /**
- * Abstract base class for classes that are stored as a custom post type
+ * Abstract base class for posts
+ *
+ * Since WP_Post is final (https://core.trac.wordpress.org/ticket/24672),
+ * the next best thing is a has-a relationship.
  */
 abstract class Post
+{
+   /**
+    * Subclasses should define this method to return a Boolean
+    * indicating whether $this->ID points to a "real" instance
+    * of said subclass.
+    */
+    abstract protected function _belongs ();
+
+    /**
+     * Protected constructor
+     */
+    protected function __construct ($id)
+    {
+        $this->ID = $id;
+    }
+
+    /**
+     * Wrap one WP_Post in a Post instance
+     *
+     * @return an instance of this class or null
+     */
+    static function get ($post_or_post_id)
+    {
+        if (is_object($post_or_post_id)) {
+            $post_id = $post_or_post_id->ID;
+        } else {
+            $post_id = $post_or_post_id;
+        }
+
+        $theclass = get_called_class();
+        $that = new $theclass($post_id);
+        if (is_object($post_or_post_id)) {
+            $that->_wp_post = $post_or_post_id;
+        }
+        if (! $that->_belongs()) { return; }
+        return $that;
+    }
+
+    function wp_post ()
+    {
+        if (! $this->_wp_post) {
+            $this->_wp_post = get_post($this->ID);
+        }
+        return $this->_wp_post;
+    }
+}
+
+/**
+ * Abstract base class for posts that belong to a custom post type
+ */
+abstract class TypedPost extends Post
 {
     /**
      * @return the post_type slug for instances of this class
@@ -330,36 +384,10 @@ abstract class Post
         $this->ID = $id;
     }
 
-    /**
-     * Retrieve one post, only if it does exist.
-     *
-     * @return an instance of this class or null.
-     */
-    static function get ($post_or_post_id)
+    function _belongs ()
     {
-        $theclass = get_called_class();
-        $expected_post_type = $theclass::get_post_type();
-        if (is_object($post_or_post_id)) {
-            if ($post_or_post_id->post_type !== $expected_post_type) return;
-            $post_id = $post_or_post_id->ID;
-        } else {
-            $post_id = $post_or_post_id;
-            if (get_post_type($post_id) !== $expected_post_type) return;
-        }
-
-        $that = new $theclass($post_id);
-        if (is_object($post_or_post_id)) {
-            $that->_wp_post = $post_or_post_id;
-        }
-        return $that;
-    }
-
-    function wp_post ()
-    {
-        if (! $this->_wp_post) {
-            $this->_wp_post = get_post($this->ID);
-        }
-        return $this->_wp_post;
+        return ($this->wp_post()->post_type ===
+                get_called_class()::get_post_type());
     }
 
     /**
@@ -426,7 +454,7 @@ abstract class Post
  * == 'epfl-actu' or 'epfl-memento').
  */
 
-abstract class APIChannelPost extends Post
+abstract class APIChannelPost extends TypedPost
 {
     /**
      * @return The name of the primary key component for the API ID,

@@ -11,7 +11,7 @@ if (! defined('ABSPATH')) {
 }
 
 require_once(__DIR__ . "/inc/base-classes.inc");
-use \EPFL\WS\Base\Post;
+use \EPFL\WS\Base\TypedPost;
 use \EPFL\WS\Base\StreamPostController;
 use \EPFL\WS\Base\StreamTaxonomy;
 use \EPFL\WS\Base\StreamTaxonomyController;
@@ -102,7 +102,7 @@ class CourseTaxonomyController extends StreamTaxonomyController
     }
 }
 
-class Course extends Post
+class Course extends TypedPost
 {
     const SLUG = "epfl-course";
 

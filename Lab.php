@@ -14,7 +14,7 @@ require_once(__DIR__ . "/inc/ldap.inc");
 use \EPFL\WS\LDAPClient;
 
 require_once(__DIR__ . "/inc/base-classes.inc");
-use \EPFL\WS\Base\Post;
+use \EPFL\WS\Base\TypedPost;
 
 require_once(__DIR__ . "/inc/auto-fields.inc");
 use \EPFL\WS\AutoFields;
@@ -35,7 +35,7 @@ class LabUnicityException extends \Exception { }
  *
  * Labs represented in WordPress as a custom post type.
  */
-class Lab extends Post
+class Lab extends TypedPost
 {
     const SLUG = "epfl-lab";
 
