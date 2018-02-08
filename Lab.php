@@ -42,10 +42,10 @@ class Lab extends TypedPost
     const WEBSITE_URL_META        = "epfl_lab_website_url";
     const UNIQUE_ID_META          = "epfl_unique_id";
     const OU_META                 = "epfl_ou";
-    const LAB_DESCRIPTION_FR_META  = "epfl_lab_description_fr";
-    const LAB_DESCRIPTION_EN_META  = "epfl_lab_description_en";
-    const LAB_MANAGER_META         = "epfl_lab_manager";
-    const LAB_POSTAL_ADDRESS_META  = "epfl_lab_postal_address";
+    const LAB_DESCRIPTION_FR_META = "epfl_lab_description_fr";
+    const LAB_DESCRIPTION_EN_META = "epfl_lab_description_en";
+    const LAB_MANAGER_META        = "epfl_lab_manager";
+    const LAB_POSTAL_ADDRESS_META = "epfl_lab_postal_address";
 
     static function get_post_type ()
     {
