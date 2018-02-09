@@ -81,6 +81,21 @@ class Person
 {
     const SLUG = "epfl-person";
 
+    // Auto fields
+    const DN_META                 = 'dn';
+    const ROOM_META               = 'room';
+    const PHONE_META              = 'phone';
+    const EMAIL_META              = 'mail';
+    const OU_META                 = 'epfl_ou';
+    const UNIT_QUAD_META          = 'unit_quad';
+    const TITLE_CODE_META         = 'title_code';
+    const PROFILE_URL_META        = 'profile';
+    const POSTAL_ADDRESS_META     = 'postaladdress';
+    const LAB_UNIQUE_ID_META      = 'epfl_person_lab_id';
+    const THUMBNAIL_META          = 'epfl_person_external_thumbnail';
+    // User-editable field
+    const PUBLICATION_LINK_META   = 'publication_link';
+ 
     static function get_post_type ()
     {
         return self::SLUG;
@@ -129,15 +144,14 @@ class Person
         return $this->wp_post()->post_title;
     }
 
-    const PUBLICATION_LINK_SLUG = 'publication_link';
     public function get_publication_link ()
     {
-        return get_post_meta($this->ID, self::PUBLICATION_LINK_SLUG, true);
+        return get_post_meta($this->ID, self::PUBLICATION_LINK_META, true);
     }
 
     public function set_publication_link ($link) {
         $this->_update_meta(array(
-            self::PUBLICATION_LINK_SLUG => $link
+            self::PUBLICATION_LINK_META => $link
         ));
     }
 
@@ -201,42 +215,42 @@ class Person
 
     public function get_dn ()
     {
-        return get_post_meta($this->ID, 'dn', true);
+        return get_post_meta($this->ID, self::DN_META, true);
     }
 
     public function get_mail ()
     {
-        return get_post_meta($this->ID, 'mail', true);
+        return get_post_meta($this->ID, self::EMAIL_META, true);
     }
 
-    public function get_profile ()
+    public function get_profile_url ()
     {
-        return get_post_meta($this->ID, 'profile', true);
+        return get_post_meta($this->ID, self::PROFILE_URL_META, true);
     }
 
     public function get_postaladdress ()
     {
-        return get_post_meta($this->ID, 'postaladdress', true);
+        return get_post_meta($this->ID, self::POSTAL_ADDRESS_META, true);
     }
 
     public function get_room ()
     {
-        return get_post_meta($this->ID, 'room', true);
+        return get_post_meta($this->ID, self::ROOM_META, true);
     }
 
     public function get_phone ()
     {
-        return get_post_meta($this->ID, 'phone', true);
+        return get_post_meta($this->ID, self::PHONE_META, true);
     }
 
     public function get_unit ()
     {
-        return get_post_meta($this->ID, 'ou', true);
+        return get_post_meta($this->ID, self::OU_META, true);
     }
 
     public function get_unit_long ()
     {
-        return get_post_meta($this->ID, 'unit_quad', true);
+        return get_post_meta($this->ID, self::UNIT_QUAD_META, true);
     }
 
     public function update ()
@@ -269,40 +283,40 @@ class Person
         $meta = array();
         $title = Title::from_ldap($entries);
         if ($title) {
-            $meta["title_code"] = $title->code;
+            $meta[self::TITLE_CODE_META] = $title->code;
         }
 
         $mail = $entries[0]["mail"][0];
         if ($mail) {
-            $meta["mail"] = $mail;
+            $meta[self::EMAIL_META] = $mail;
         }
 
         $profile = $entries[0]["labeleduri"][0];
         if ($profile) {
-            $meta["profile"] = explode(" ", $profile)[0];
+            $meta[self::PROFILE_URL_META] = explode(" ", $profile)[0];
         }
 
         $postaladdress = $entries[0]["postaladdress"][0];
         if ($postaladdress) {
-            $meta["postaladdress"] = $postaladdress;
+            $meta[self::POSTAL_ADDRESS_META] = $postaladdress;
         }
 
         $roomnumber = $entries[0]["roomnumber"][0];
         if ($roomnumber) {
-          $meta["room"] = $roomnumber;
+          $meta[self::ROOM_META] = $roomnumber;
         }
 
         $telephonenumber = $entries[0]["telephonenumber"][0];
         if ($telephonenumber) {
-            $meta["phone"] = $telephonenumber;
+            $meta[self::PHONE_META] = $telephonenumber;
         }
 
         $dn = $entries[0]["dn"];
         if ($dn) {
-            $meta["dn"] = $dn;
+            $meta[self::DN_META] = $dn;
             $bricks = explode(',', $dn);
             // construct a unit string, e.g. EPFL / STI / STI-SG / STI-IT
-            $meta["unit_quad"] = strtoupper(explode('=', $bricks[4])[1]) . " / " . strtoupper(explode('=', $bricks[3])[1]) . " / " . strtoupper(explode('=', $bricks[2])[1]) . " / " . strtoupper(explode('=', $bricks[1])[1]);
+            $meta[self::UNIT_QUAD_META] = strtoupper(explode('=', $bricks[4])[1]) . " / " . strtoupper(explode('=', $bricks[3])[1]) . " / " . strtoupper(explode('=', $bricks[2])[1]) . " / " . strtoupper(explode('=', $bricks[1])[1]);
         }
 
         $unit = $entries[0]["ou"][0];
@@ -329,7 +343,6 @@ class Person
         $this->_update_meta($meta);
     }
 
-    const LAB_UNIQUE_ID_META = "epfl_person_lab_id";
     public function get_lab ()
     {
         $unique_id = get_post_meta($this->ID, self::LAB_UNIQUE_ID_META, true);
@@ -337,7 +350,6 @@ class Person
         return Lab::get_by_unique_id($unique_id);
     }
 
-    const THUMBNAIL_META  = "epfl_person_external_thumbnail";
     public function get_image_url ($size = null)
     {
         return get_post_meta($this->ID, self::THUMBNAIL_META, true);
