@@ -1,6 +1,6 @@
 <?php
 /**
- * Show a EPFL Map from plan.epfl.ch.
+ * Turn any widget into a shortcode.
  */
 
 namespace EPFL\WS\Widgets;
