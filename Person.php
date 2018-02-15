@@ -83,14 +83,14 @@ class Person
 
     // Auto fields
     const DN_META                 = 'dn';
+    const EMAIL_META              = 'mail';
+    const PROFILE_URL_META        = 'profile';
+    const POSTAL_ADDRESS_META     = 'postaladdress';
     const ROOM_META               = 'room';
     const PHONE_META              = 'phone';
-    const EMAIL_META              = 'mail';
     const OU_META                 = 'epfl_ou';
     const UNIT_QUAD_META          = 'unit_quad';
     const TITLE_CODE_META         = 'title_code';
-    const PROFILE_URL_META        = 'profile';
-    const POSTAL_ADDRESS_META     = 'postaladdress';
     const LAB_UNIQUE_ID_META      = 'epfl_person_lab_id';
     const THUMBNAIL_META          = 'epfl_person_external_thumbnail';
     // User-editable field
