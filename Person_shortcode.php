@@ -8,6 +8,11 @@
  *   - [person sciper=169419 center=on]
  *   - [person sciper=218367,218367,218367,218367,218367 split=3]
  *   - [person sciper=111182,162030 center=on]
+ *
+ * ToDo:
+ *   - Use schema.org for micro data
+ *   - Allow user to specifiy the person function (e.g. Chair of the Committee on Academic Promotion)
+ *   - Group people below a title (i.e. Associate Deans)
  */
 
 namespace EPFL\WS\Person;
