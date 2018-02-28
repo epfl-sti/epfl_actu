@@ -10,6 +10,7 @@
  *   - [person sciper=111182,162030 center=on]
  *
  * ToDo:
+ *   - Translations
  *   - Use schema.org for micro data
  *   - Allow user to specifiy the person function (e.g. Chair of the Committee on Academic Promotion)
  *   - Group people below a title (i.e. Associate Deans)
