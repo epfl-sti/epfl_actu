@@ -125,10 +125,10 @@ class PersonShortCode {
         <div class=\"card-body\">
           <p class=\"card-text\">" .  $this->person->get_title()->as_greeting() . " " . $this->person->get_full_name() . "</p>
           <div class=\"person-contact\" style=\"float:right\">
-            <i class=\"fas fa-phone-square\"></i>
-            <i class=\"fas fa-envelope-square\"></i>
-            <i class=\"fas fa-newspaper\"></i>
-            <i class=\"fas fa-user\"></i>
+            <a href=\"tel:" . $this->person->get_phone() . "\" title=\"" .  $this->person->get_title()->as_greeting() . " " . $this->person->get_full_name() . "'s phone number\"><i class=\"fas fa-phone-square\"></i></a>
+            <a href=\"mailto:" . $this->person->get_mail() . "\" title=\"" .  $this->person->get_title()->as_greeting() . " " . $this->person->get_full_name() . "'s email\"><i class=\"fas fa-envelope-square\"></i></a>
+            <a href=\"https://infoscience.epfl.ch/search?f=author&action=Search&p=" . $this->person->get_full_name() . "\" title=\"" .  $this->person->get_title()->as_greeting() . " " . $this->person->get_full_name() . "'s publications\"><i class=\"fas fa-newspaper\"></i></a>
+            <a href=\"/epfl-person/" . $this->person->get_sciper() . "\" title=\"" .  $this->person->get_title()->as_greeting() . " " . $this->person->get_full_name() . " personal's page\"><i class=\"fas fa-user\"></i></a>
           </div>
         </div>
       </div>";
