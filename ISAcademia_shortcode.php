@@ -35,6 +35,7 @@ class ISAcademiaShortCode {
                                         'display'  => '', // sorting, display=byprof
                                         'detail'   => '', // &detail=S > name of course with link + teachers, &detail=M > the same + description and language, &detail=L > the same + curriculum + academic year
                                         'url'      => '', // https://jahia.epfl.ch/external-content/course-plan
+                                        'isaurl'   => '', // hhttps://isa.epfl.ch/pe/plan_etude_bama_cyclemaster_gm_en.html
                                       ], $atts, $tag);
 
     $lang     = esc_attr($isacademia_atts['lang']);
@@ -45,6 +46,7 @@ class ISAcademiaShortCode {
     $display  = esc_attr($isacademia_atts['display']);
     $detail   = esc_attr($isacademia_atts['detail']);
     $url      = esc_attr($isacademia_atts['url']);
+    $isaurl   = esc_attr($isacademia_atts['isaurl']);
 
     $isacademiaws = false;
 
@@ -71,6 +73,7 @@ class ISAcademiaShortCode {
         // DO YOU FEEL MY PAIN ?
       $isacademia = '<style>';
       $isacademia .= $this->ws->get_items( 'https://sti.epfl.ch/templates/epfl/css/legacy.css' );
+      //$isacademia .= $this->ws->get_items( 'https://sti.epfl.ch/templates/epfl/css/epfl.css' );
       $isacademia .= '</style>';
       $isacademia .= $this->ws->get_items( $isacademiaurl ); // add , array('timeout' => 10) in case of timeout
     } else {
