@@ -191,6 +191,7 @@ class OrganizationalUnitTable extends \WP_List_Table
         $columns = array();
         $columns['cb']         = '<input type="checkbox" />';
         $columns['title']      = __x('Title', 'OrganizationalUnitTable');
+        $columns['labs']       = __x('Labs', 'OrganizationalUnitTable');
         $columns['categories'] = __x('Categories', 'OrganizationalUnitTable');
         $columns['tags']       = __x('Tags', 'OrganizationalUnitTable');
         return $columns;
@@ -212,6 +213,18 @@ class OrganizationalUnitTable extends \WP_List_Table
         } finally {
             $post = null;
         }
+    }
+
+    protected function column_labs ($item)
+    {
+        $html = "";
+        $ou = OrganizationalUnit::get($item);
+        foreach ($ou->get_all_labs() as $lab) {
+            $html .= sprintf('<a href="%s">%s</a><br/>' . "\n",
+                             get_edit_post_link($lab->wp_post()->ID),
+                             $lab->get_name());
+        }
+        return $html;
     }
 
     protected function column_categories ($item)
