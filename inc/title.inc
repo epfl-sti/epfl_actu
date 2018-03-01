@@ -107,4 +107,14 @@ class Title
             return __x("Doctor", "greeting");
         }
     }
+
+    public function as_short_greeting ()
+    {
+        if (self::compare($this, "PROF_TITULAIRE") <= 0) {
+            return __x("Prof.", "greeting");
+        } else {
+            return __x("Dr.", "greeting");
+        }
+    }
+
 }
