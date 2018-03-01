@@ -25,6 +25,11 @@ require_once(__DIR__ . "/inc/i18n.inc");
 use function \EPFL\WS\___;
 use function \EPFL\WS\__x;
 
+require_once(__DIR__ . "/Person.php");
+use \EPFL\WS\Persons\Person;
+
+require_once(__DIR__ . "/OrganizationalUnit.php");
+use \EPFL\WS\OrganizationalUnits\OrganizationalUnit;
 
 class LabNotFoundException extends \Exception { }
 class LabUnicityException extends \Exception { }
@@ -41,6 +46,7 @@ class Lab extends TypedPost
 
     const WEBSITE_URL_META        = "epfl_lab_website_url";
     const UNIQUE_ID_META          = "epfl_unique_id";
+    const DN_META                 = "epfl_dn";
     const OU_META                 = "epfl_ou";
     const LAB_DESCRIPTION_FR_META = "epfl_lab_description_fr";
     const LAB_DESCRIPTION_EN_META = "epfl_lab_description_en";
@@ -73,6 +79,21 @@ class Lab extends TypedPost
         ));
     }
 
+    public static function find_all_by_dn_suffix ($dn_suffix)
+    {
+        $query = new \WP_Query(array(
+            'post_type' => self::get_post_type(),
+            'meta_query' => array(array(
+                'key'     => self::DN_META,
+                'value'   => "%,$dn_suffix",
+                'compare' => 'LIKE'
+            ))));
+        $thisclass = get_called_class();
+        return array_map(function($result) use ($thisclass) {
+            return $thisclass::get($result);
+        }, $query->get_posts());
+    }
+
     public function sync ()
     {
         $ldap_result = $this->_get_ldap_result();
@@ -80,6 +101,7 @@ class Lab extends TypedPost
             self::UNIQUE_ID_META          => $this->get_unique_id(),
             self::WEBSITE_URL_META        => explode(" ", $ldap_result["labeleduri"][0])[0],
             self::OU_META                 => $ldap_result["ou"][0],
+            self::DN_META                 => $ldap_result["dn"],
             self::LAB_DESCRIPTION_FR_META => $ldap_result["description"][0],
             self::LAB_DESCRIPTION_EN_META => $ldap_result["description;lang-en"][0],
             self::LAB_MANAGER_META        => $ldap_result["unitmanager"][0],
@@ -144,7 +166,19 @@ class Lab extends TypedPost
 
     public function get_lab_manager ()
     {
-        return get_post_meta($this->ID, self::LAB_MANAGER_META, true);
+        $sciper = get_post_meta($this->ID, self::LAB_MANAGER_META, true);
+        return Person::find_by_sciper($sciper);
+    }
+
+    public function get_dn ()
+    {
+        return get_post_meta($this->ID, self::DN_META, true);
+    }
+
+    public function get_organizational_unit ()
+    {
+        $parent_dn = preg_replace("@^.*?,@", "", $this->get_dn());
+        return OrganizationalUnit::find_by_dn($parent_dn);
     }
 
     public function get_postaladdress ()
@@ -217,7 +251,6 @@ class LabController
     {
         return new AutoFieldsController(Lab::class);
     }
-
 }
 
 LabController::hook();
