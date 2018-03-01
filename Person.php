@@ -368,7 +368,7 @@ class Person
 
     public function get_bio()
     {
-        return $this->wp_post()->post_content;
+        return do_shortcode($this->wp_post()->post_content);
     }
 
     public function update_bio_from_people ()
