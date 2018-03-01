@@ -11,7 +11,7 @@
  * Senior Scientist: 168009 (Dr. Luca Pattaroni)
  * Lecturer:         106791 (Dr. Pierre Zweiacker)
  * Scientist:        248798 (Dr. Jonathan Scarlett)
- * 
+ *
  * Of course, the lower down the ladder someone is, the sooner
  * they are likely to up-or-out of their current position.
  */
