@@ -73,7 +73,7 @@ class OrganizationalUnit extends Post
     static function all ()
     {
         $query = new \WP_Query(array(
-            'post_type' => 'any',
+            'post_type' => ['post', 'page'],
             'meta_query' => array(array(
                 'key'     => self::DN_META,
                 'compare' => 'EXISTS'
@@ -107,6 +107,14 @@ class OrganizationalUnitController
 
     static function render_list ()
     {
+        echo ___('
+        <p>💡 To create a new institute or section:
+         <ol>
+          <li>First create a page or post,</li>
+          <li>then add an <code>epfl_dn</code> custom field to it.</li>
+         </ol>
+        </p>
+        ');
         $table = new OrganizationalUnitTable();
         $pagenum = $table->get_pagenum();
         if ($table->current_action()) {
@@ -152,8 +160,17 @@ class OrganizationalUnitController
 /**
  * A subclass of WP_List_Table to show the list of organizational units
  */
-class OrganizationalUnitTable extends \WP_List_Table {
+class OrganizationalUnitTable extends \WP_List_Table
+{
     const SLUG_PLURAL = 'epfl-ws-organizational-units';
+
+    static function hook ()
+    {
+        add_filter('pll_get_post_types', function($post_types) {
+            $post_types[self::SLUG_PLURAL] = self::SLUG_PLURAL;
+            return $post_types;
+        });
+    }
 
     function __construct ()
     {
@@ -166,7 +183,7 @@ class OrganizationalUnitTable extends \WP_List_Table {
 
     public function get_screen ()
     {
-        return WP_Screen::get(self::SLUG_PLURAL);
+        return WP_Screen::get("edit- " . self::SLUG_PLURAL);
     }
 
     public function get_columns ()
@@ -186,17 +203,27 @@ class OrganizationalUnitTable extends \WP_List_Table {
 
     protected function column_title ($item)
     {
-        return "(Title here)";
+        $ptable = new \WP_Posts_List_Table;
+        global $post;
+        $post = $item;
+        try {
+            $title_column_html = $ptable->column_title($item);
+            return $title_column_html;
+        } finally {
+            $post = null;
+        }
     }
 
     protected function column_categories ($item)
     {
-        return "<pre>" . var_export($item, true) . "</pre>\n"; // XXX
+        $ptable = new \WP_Posts_List_Table;
+        return $ptable->column_default($item, 'categories');
     }
 
    protected function column_tags ($item)
     {
-        return "(Tag here)";
+        $ptable = new \WP_Posts_List_Table;
+        return $ptable->column_default($item, 'tags');
     }
 
     /**
@@ -208,9 +235,10 @@ class OrganizationalUnitTable extends \WP_List_Table {
      */
     public function prepare_items( $items = array() )
     {
+        $orgs = OrganizationalUnit::all();
         $this->items = array_map(function($ou) {
             return $ou->wp_post();
-        }, OrganizationalUnit::all());
+        }, $orgs);
     }
 
 	protected function get_primary_column_name() {
@@ -219,3 +247,4 @@ class OrganizationalUnitTable extends \WP_List_Table {
 }
 
 OrganizationalUnitController::hook();
+OrganizationalUnitTable::hook();
