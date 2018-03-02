@@ -27,6 +27,9 @@ require_once(__DIR__ . "/inc/auto-fields.inc");
 use \EPFL\WS\AutoFields;
 use \EPFL\WS\AutoFieldsController;
 
+require_once(dirname(__FILE__) . "/inc/batch.inc");
+use function \EPFL\WS\run_every;
+use \EPFL\WS\BatchTask;
 
 function ends_with($haystack, $needle)
 {
@@ -204,6 +207,19 @@ class Person
             return static::get($results[0]);
         } else {
             return null;
+        }
+    }
+
+    public static function foreach ($callback)
+    {
+        $all = new \WP_Query(array(
+            'post_type' => Person::get_post_type()));
+        while ($all->have_posts()) {
+            $all->next_post();
+            $person = static::get($all->post);
+            if ($person) {
+                call_user_func($callback, $person);
+            }
         }
     }
 
@@ -505,6 +521,8 @@ class PersonController
                 'epfl-persons', false,
                 basename(__DIR__) . '/languages');
         });
+
+        run_every(600, array(get_called_class(), "sync_all"));
     }
 
     /**
@@ -923,7 +941,22 @@ class PersonController
         do_meta_boxes(get_current_screen(), 'after-editor', $post);
     }
 
-
+    /**
+     * Periodically refresh all Persons (and indirectly, Labs)
+     */
+    static function sync_all ()
+    {
+        (new BatchTask())
+            ->set_banner("Syncing all Persons and their Labs")
+            ->set_prometheus_labels(array(
+                'kind' => Person::get_post_type()
+            ))
+            ->run(function() {
+                Person::foreach(function($person) {
+                    $person->sync();
+                });
+            });
+    }
 }
 
 PersonController::hook();
