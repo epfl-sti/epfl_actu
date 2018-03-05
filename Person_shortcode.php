@@ -92,8 +92,14 @@ class PersonShortCode {
         echo "<div class=\"row\">";
       }
 
-      $this->get_person_data($sciper);
-
+      $this->person = Person::find_by_sciper($sciper);
+      if (!$this->person) {
+        continue;
+      }
+      $this->person_post = $this->person->wp_post();
+      foreach (get_post_meta($this->person_post->ID) as $key => $array) {
+        $this->person_meta[$key] = $array[0];
+      }
       $sti_decanat_box = ($this->tmpl == "dean") ? " sti_decanat_box" : "";
       $colOffset = '';
       if ($this->center && $numberOfSciper*(12/$this->split) < 12 && $i==0) {
@@ -111,19 +117,11 @@ class PersonShortCode {
     }
   }
 
-  private function get_person_data($sciper) {
-    $this->person = Person::find_by_sciper($sciper);
-    $this->person_post = $this->person->wp_post();
-    foreach (get_post_meta($this->person_post->ID) as $key => $array) {
-      $this->person_meta[$key] = $array[0];
-    }
-  }
-
   private function display() {
     if ($this->tmpl == 'default' || $this->tmpl == 'bootstrap') {
       echo "
-      <div class=\"card bg-light\">
-        <img class=\"card-img-top\" src=\"" . $this->person_meta["epfl_person_external_thumbnail"] . "\" alt=\"" .  $this->person->get_title()->as_greeting() . " " . $this->person->get_full_name() . "\">
+      <div class=\"card bg-light\">".
+        get_the_post_thumbnail($this->person_post, 'post-thumbnail', array( 'class' => 'card-img-top', 'title' => $this->person->get_title()->as_greeting() . " " . $this->person->get_full_name() ) ) ."
         <div class=\"card-body\">
           <h5 class=\"card-title\">" .  $this->person->get_title()->as_short_greeting() . " " . $this->person->get_full_name() . "
             <div class=\"person-contact\" style=\"float:right\">
@@ -136,7 +134,7 @@ class PersonShortCode {
           <div style=\"border-top:1px solid #5A5A5A !important; padding 0px !important; margin 0px !important;\">" .  $this->person->get_title()->localize() . "</div>
         </div>
         <div class=\"card-divider bg-warning\" style=\"border-top:2px solid #5A5A5A !important;border-bottom:4px solid #D0131B !important;\"></div>
-        <div class=\"card-footer bg-light\"  style=\"border-top:2px solid #5A5A5A !important;\">
+        <div class=\"card-footer bg-light\" style=\"border-top:2px solid #5A5A5A !important;\">
           lorem ipsum
         </div>
       </div>";
@@ -145,7 +143,7 @@ class PersonShortCode {
     if ($this->tmpl == 'dean') {
       ?>
       <div class="sti_decanat_portrait">
-        <img src="<?php echo $this->person_meta["epfl_person_external_thumbnail"]; ?>">
+        <?php echo get_the_post_thumbnail($this->person_post, 'post-thumbnail', array( 'class' => 'card-img-top', 'title' => $this->person->get_title()->as_greeting() . " " . $this->person->get_full_name() ) ); ?>
       </div>
       <div class="sti_decanat_grey">
         <table>
