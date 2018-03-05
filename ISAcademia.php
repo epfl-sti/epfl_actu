@@ -26,10 +26,6 @@ require_once(__DIR__ . "/inc/i18n.inc");
 use function \EPFL\WS\___;
 use function \EPFL\WS\__x;
 
-require_once(dirname(__FILE__) . "/inc/batch.inc");
-use function \EPFL\WS\run_every;
-use \EPFL\WS\BatchTask;
-
 /**
  * A taxonomy of courses obtained out of IS-Academia
  *

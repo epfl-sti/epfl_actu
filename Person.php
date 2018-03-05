@@ -27,6 +27,9 @@ require_once(__DIR__ . "/inc/auto-fields.inc");
 use \EPFL\WS\AutoFields;
 use \EPFL\WS\AutoFieldsController;
 
+require_once(dirname(__FILE__) . "/inc/batch.inc");
+use function \EPFL\WS\run_every;
+use \EPFL\WS\BatchTask;
 
 function ends_with($haystack, $needle)
 {
@@ -207,6 +210,21 @@ class Person
         }
     }
 
+    public static function foreach ($callback)
+    {
+        $all = new \WP_Query(array(
+            'post_type'      => Person::get_post_type(),
+            'posts_per_page' => -1
+        ));
+        while ($all->have_posts()) {
+            $all->next_post();
+            $person = static::get($all->post);
+            if ($person) {
+                call_user_func($callback, $person);
+            }
+        }
+    }
+
     function get_title ()
     {
         $title_code = get_post_meta($this->ID, "title_code", true);
@@ -253,16 +271,16 @@ class Person
         return get_post_meta($this->ID, self::UNIT_QUAD_META, true);
     }
 
-    public function update ()
+    public function sync ()
     {
-        if ($this->_updated_already) { return; }
+        if ($this->_synced_already) { return; }
         $this->update_from_ldap();
         $this->import_image_from_people();
         if (! $this->get_bio()) {
             $this->update_bio_from_people();
         }
 
-        $this->_updated_already = true;
+        $this->_synced_already = true;
         $more_meta = apply_filters('epfl_person_additional_meta', array(), $this);
         if ($more_meta) {
             $this->_update_meta($more_meta);
@@ -505,6 +523,8 @@ class PersonController
                 'epfl-persons', false,
                 basename(__DIR__) . '/languages');
         });
+
+        run_every(600, array(get_called_class(), "sync_all"));
     }
 
     /**
@@ -648,7 +668,7 @@ class PersonController
         try {
             Person::get($post_id)
                 ->set_sciper(intval($_REQUEST['sciper']))
-                ->update();
+                ->sync();
         } catch (LDAPException $e) {
             // Not fatal, we'll try again later
             error_log(sprintf("LDAPException: %s", $e->getMessage()));
@@ -681,7 +701,7 @@ class PersonController
         // Strictly speaking, this meta box has no state to change (for now).
         // Still, it sort of makes sense that here be the place where
         // we sync data from LDAP again.
-        Person::get($post_id)->update();
+        Person::get($post_id)->sync();
     }
 
     /**
@@ -923,7 +943,22 @@ class PersonController
         do_meta_boxes(get_current_screen(), 'after-editor', $post);
     }
 
-
+    /**
+     * Periodically refresh all Persons (and indirectly, Labs)
+     */
+    static function sync_all ()
+    {
+        (new BatchTask())
+            ->set_banner("Syncing all Persons and their Labs")
+            ->set_prometheus_labels(array(
+                'kind' => Person::get_post_type()
+            ))
+            ->run(function() {
+                Person::foreach(function($person) {
+                    $person->sync();
+                });
+            });
+    }
 }
 
 PersonController::hook();

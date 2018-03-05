@@ -85,8 +85,8 @@ class Lab extends TypedPost
             'post_type' => self::get_post_type(),
             'meta_query' => array(array(
                 'key'     => self::DN_META,
-                'value'   => "%,$dn_suffix",
-                'compare' => 'LIKE'
+                'compare' => 'RLIKE',
+                'value'   => '.*,' . $dn_suffix
             ))));
         $thisclass = get_called_class();
         return array_map(function($result) use ($thisclass) {
