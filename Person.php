@@ -98,7 +98,7 @@ class Person
     const THUMBNAIL_META          = 'epfl_person_external_thumbnail';
     // User-editable field
     const PUBLICATION_LINK_META   = 'publication_link';
- 
+
     static function get_post_type ()
     {
         return self::SLUG;
@@ -463,6 +463,16 @@ class Person
             update_post_meta($this->ID, $k, $v);
             $auto_fields->append(array($k));
         }
+    }
+
+    public function as_thumbnail () {
+      $alt = $this->get_title()->as_greeting() . " " . $this->get_full_name();
+      return get_the_post_thumbnail($this->wp_post(), 'post-thumbnail',
+        array(
+          'class' => 'card-img-top',
+          'alt'   =>$alt,
+          'title' => $alt
+        ));
     }
 }
 

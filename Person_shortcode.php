@@ -121,7 +121,7 @@ class PersonShortCode {
     if ($this->tmpl == 'default' || $this->tmpl == 'bootstrap') {
       echo "
       <div class=\"card bg-light\">".
-        get_the_post_thumbnail($this->person_post, 'post-thumbnail', array( 'class' => 'card-img-top', 'title' => $this->person->get_title()->as_greeting() . " " . $this->person->get_full_name() ) ) ."
+        $this->person->as_thumbnail() ."
         <div class=\"card-body\">
           <h5 class=\"card-title\">" .  $this->person->get_title()->as_short_greeting() . " " . $this->person->get_full_name() . "
             <div class=\"person-contact\" style=\"float:right\">
@@ -143,7 +143,7 @@ class PersonShortCode {
     if ($this->tmpl == 'dean') {
       ?>
       <div class="sti_decanat_portrait">
-        <?php echo get_the_post_thumbnail($this->person_post, 'post-thumbnail', array( 'class' => 'card-img-top', 'title' => $this->person->get_title()->as_greeting() . " " . $this->person->get_full_name() ) ); ?>
+        <?php echo $this->person->as_thumbnail(); ?>
       </div>
       <div class="sti_decanat_grey">
         <table>
