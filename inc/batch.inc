@@ -13,10 +13,8 @@ if (! defined('ABSPATH')) {
 
 require_once(dirname(__FILE__) . "/i18n.inc");
 
-const DEBUG_CRON = false;
-
-function run_every ($seconds, $callable) {
-    if (DEBUG_CRON) {
+function run_every ($seconds, $callable, $right_now_for_debug = false) {
+    if ($right_now_for_debug) {
         // Run it as soon as possible, but not sooner
         add_action("init", function () use ($callable) {
             call_user_func($callable);
