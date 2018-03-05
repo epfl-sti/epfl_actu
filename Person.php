@@ -213,7 +213,9 @@ class Person
     public static function foreach ($callback)
     {
         $all = new \WP_Query(array(
-            'post_type' => Person::get_post_type()));
+            'post_type'      => Person::get_post_type(),
+            'posts_per_page' => -1
+        ));
         while ($all->have_posts()) {
             $all->next_post();
             $person = static::get($all->post);
