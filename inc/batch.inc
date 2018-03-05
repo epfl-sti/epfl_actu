@@ -73,7 +73,10 @@ class BatchTask
         try {
             call_user_func($callable);
             $failed = null;
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
+            $failed = $e;
+        } catch (\Exception $e) {
+            // Sigh. http://php.net/manual/en/language.errors.php7.php#119652
             $failed = $e;
         }
         $duration = microtime(true) - $started;
