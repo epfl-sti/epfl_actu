@@ -457,7 +457,8 @@ class Person
         return $this->_bio_dom;
     }
 
-    private function _update_meta($meta_array) {
+    private function _update_meta($meta_array)
+    {
         $auto_fields = AutoFields::of(get_called_class());
         foreach ($meta_array as $k => $v) {
             update_post_meta($this->ID, $k, $v);
@@ -465,12 +466,38 @@ class Person
         }
     }
 
-    public function as_thumbnail () {
-      $alt = $this->get_title()->as_greeting() . " " . $this->get_full_name();
+    public function get_title_as_text ()
+    {
+        if ($this->get_title()) {
+            return $this->get_title()->localize();
+        }
+    }
+
+    public function get_title_and_full_name ()
+    {
+        if ($this->get_title()) {
+            return $this->get_title()->as_greeting() . " " . $this->get_full_name();
+        } else {
+            return $this->get_full_name();
+        }
+    }
+
+    public function get_short_title_and_full_name ()
+    {
+        if ($this->get_title()) {
+            return $this->get_title()->as_short_greeting() . " " . $this->get_full_name();
+        } else {
+            return $this->get_full_name();
+        }
+    }
+
+    public function as_thumbnail ()
+    {
+      $alt = $this->get_title_and_full_name();
       return get_the_post_thumbnail($this->wp_post(), 'post-thumbnail',
         array(
           'class' => 'card-img-top',
-          'alt'   =>$alt,
+          'alt'   => $alt,
           'title' => $alt
         ));
     }

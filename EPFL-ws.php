@@ -150,7 +150,6 @@ class EPFLWSmain {
 		echo '  <p>It\'s also (sort of for now), possible to include a course table <code>[isacademia url=https://isa.epfl.ch/pe/plan_etude_bama_cyclemaster_el_en.html]</code>. Get you URL from <a href="https://is-academia.epfl.ch/planfiche-html">here</a>.</p>';
 		echo '</div>';
 	}
-
 }
 
 // Initialize the plugin.
