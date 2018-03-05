@@ -84,16 +84,16 @@ class PersonCardShortCode {
       <div class=\"card bg-light\" style=\"width: 20rem;\">".
         $this->person->as_thumbnail() ."
         <div class=\"card-body\">
-          <h5 class=\"card-title\">" .  $this->person->get_short_title_and_full_name() . "
+          <h5 class=\"card-title\">" .  $this->person->get_short_title_and_full_name() . "</h5>
+          <div style=\"border-top:1px solid #5A5A5A !important; padding 0px !important; margin 0px !important;\">" .  $this->person->get_title_as_text() . "
             <div class=\"person-contact\" style=\"float:right\">
               <a href=\"tel:" . $this->person->get_phone() . "\" title=\"" .  $this->person->get_title_and_full_name() . "'s phone number\"><i class=\"fas fa-phone-square\" style=\"color:#5A5A5A;\"></i></a>
               <a href=\"mailto:" . $this->person->get_mail() . "\" title=\"" .  $this->person->get_title_and_full_name() . "'s email\"><i class=\"fas fa-envelope-square\" style=\"color:#5A5A5A;\"></i></a>
               <a href=\"https://infoscience.epfl.ch/search?f=author&action=Search&p=" . $this->person->get_full_name() . "\" title=\"" . $this->person->get_short_title_and_full_name() . "'s publications\"><i class=\"fas fa-newspaper\" style=\"color:#5A5A5A;\"></i></a>
               <a href=\"/epfl-person/" . $this->person->get_sciper() . "\" title=\"" .  $this->person->get_short_title_and_full_name() . " personal's page\"><i class=\"fas fa-user\" style=\"color:#5A5A5A;\"></i></a>
             </div>
-          </h5>
-          <div style=\"border-top:1px solid #5A5A5A !important; padding 0px !important; margin 0px !important;\">" .  $this->person->get_title_as_text() . "</div>
           </div>
+        </div>
         <div class=\"card-divider bg-warning\" style=\"border-top:2px solid #5A5A5A !important;border-bottom:4px solid #D0131B !important;\"></div>
         <div class=\"card-footer bg-light\" style=\"border-top:2px solid #5A5A5A !important;\">
           $content
