@@ -22,6 +22,8 @@
  *          [person-card sciper=162030]Adjunct to the Director[/person-card]
  *          [person-card sciper=229808]Secretary[/person-card]
  *       [/row]
+ *     - [row class='justify-content-md-center'] to center the content
+ *
  * ToDo:
  *   - Translations
  *   - Use schema.org for micro data
@@ -183,7 +185,7 @@ class PersonCardShortCode {
                             <a href=\"https://plan.epfl.ch/?q=" . $this->person->get_room() . "\" title=\"" .  $this->person->get_title_and_full_name() . "'s office\"><i class=\"far fa-map\" style=\"color:#5A5A5A;\"></i>
                           </td>
                           <td>
-                          <a href=\"/epfl-person/" . $this->person->get_sciper() . "\" title=\"" .  $this->person->get_short_title_and_full_name() . " personal's page\"><i class=\"fas fa-user\" style=\"color:#5A5A5A;\"></i></a>
+                            <a href=\"/epfl-person/" . $this->person->get_sciper() . "\" title=\"" .  $this->person->get_short_title_and_full_name() . " personal's page\"><i class=\"fas fa-user\" style=\"color:#5A5A5A;\"></i></a>
                           </td>
                         </tr>
                       </tbody>
