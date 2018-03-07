@@ -6,15 +6,21 @@
  *
  * Usage:
  *   - [person-card sciper=169419]
- *   - [card-group]
- *       [person-card sciper=283344]Lorem Ipsum[/person-card]
- *       [person-card sciper=169419]Lorem Ipsum[/person-card]
- *       [person-card sciper=123456]Lorem Ipsum[/person-card]
- *     [/card-group]
- *  - [person-card sciper=283344 tmpl=decanat function=Dean imgurl=https://stisrv13.epfl.ch/img/decanat/portrait/ali.sayed.jpg]
- *        Prof. Sayed is world-renowned for his pioneering research on adaptive filters and adaptive networks, and in particular for the energy conservation and diffusion learning approaches he developed for the analysis and design of adaptive structures. His research interests span several areas including adaptation and learning, network and data sciences, information-processing theories, statistical signal processing, and biologically-inspired designs.
- *    [/person-card]
- *
+ *   - [person-card sciper=162030 function='no']Adjunct to the Director[/person-card] # do not display the function title
+ *   - [person-card sciper=283344 tmpl=decanat function=Dean imgurl=https://stisrv13.epfl.ch/img/decanat/portrait/ali.sayed.jpg]
+ *       Prof. Sayed is world-renowned for his pioneering research on adaptive filters and adaptive networks, and in particular for the energy conservation and diffusion learning approaches he developed for the analysis and design of adaptive structures. His research interests span several areas including adaptation and learning, network and data sciences, information-processing theories, statistical signal processing, and biologically-inspired designs.
+ *     [/person-card]
+ *   - If you are using the Bootstrap-4-Shortcode plugin (https://github.com/MWDelaney/bootstrap-4-shortcodes), then
+ *     - [card-group]
+ *         [person-card sciper=283344]Lorem Ipsum[/person-card]
+ *         [person-card sciper=169419]Lorem Ipsum[/person-card]
+ *         [person-card sciper=123456]Lorem Ipsum[/person-card]
+ *       [/card-group]
+ *     - [row]
+ *          [person-card sciper=111182]Institute Director[/person-card]
+ *          [person-card sciper=162030]Adjunct to the Director[/person-card]
+ *          [person-card sciper=229808]Secretary[/person-card]
+ *       [/row]
  * ToDo:
  *   - Translations
  *   - Use schema.org for micro data
@@ -50,13 +56,16 @@ class PersonCardShortCode {
     $person_atts = shortcode_atts([ 'tmpl'      => 'default',
                                     'lang'      => 'en',       // en, fr
                                     'sciper'    => '',
-                                    'function'    => '',      // for tmpl decanat
+                                    'function'  => '',
+                                    'width'     => '20rem',   // card with, default 20rem
                                     'imgurl'    => '',        // for tmpl decanat
                                 ], $atts, $tag);
 
     $this->tmpl       = esc_attr($person_atts['tmpl']);
     $lang             = esc_attr($person_atts['lang']);
     $sciper           = esc_attr($person_atts['sciper']);
+    $this->function   = esc_attr($person_atts['function']);
+    $this->width      = esc_attr($person_atts['width']);
 
     #echo "<!-- epfl-person shortcode / tmpl : " . $this->tmpl . " / lang : " . $lang . " / sciper : " . $sciper . " / center : " . $this->center . "  -->" ;
 
@@ -80,7 +89,6 @@ class PersonCardShortCode {
     }
     $this->person_post = $this->person->wp_post();
     if ($this->tmpl == "decanat") {
-      $this->function = esc_attr($person_atts['function']);
       $this->imgurl = esc_attr($person_atts['imgurl']);
     }
     return $this->display($content);
@@ -88,31 +96,44 @@ class PersonCardShortCode {
 
   private function display($content) {
     if ($this->tmpl == 'default') {
-      return "
-      <div class=\"card bg-light\" style=\"width: 20rem;\">".
-        $this->person->as_thumbnail() ."
-        <div class=\"card-body\">
-          <h5 class=\"card-title\">" .  $this->person->get_short_title_and_full_name() . "</h5>
-          <div style=\"border-top:1px solid #5A5A5A !important; padding 0px !important; margin 0px !important;\">" .  $this->person->get_title_as_text() . "
-            <div class=\"person-contact\" style=\"float:right\">
-              <a href=\"tel:" . $this->person->get_phone() . "\" title=\"" .  $this->person->get_title_and_full_name() . "'s phone number\"><i class=\"fas fa-phone-square\" style=\"color:#5A5A5A;\"></i></a>
-              <a href=\"mailto:" . $this->person->get_mail() . "\" title=\"" .  $this->person->get_title_and_full_name() . "'s email\"><i class=\"fas fa-envelope-square\" style=\"color:#5A5A5A;\"></i></a>
-              <a href=\"https://infoscience.epfl.ch/search?f=author&action=Search&p=" . $this->person->get_full_name() . "\" title=\"" . $this->person->get_short_title_and_full_name() . "'s publications\"><i class=\"fas fa-newspaper\" style=\"color:#5A5A5A;\"></i></a>
-              <a href=\"/epfl-person/" . $this->person->get_sciper() . "\" title=\"" .  $this->person->get_short_title_and_full_name() . " personal's page\"><i class=\"fas fa-user\" style=\"color:#5A5A5A;\"></i></a>
-            </div>
-          </div>
-        </div>
-        <div class=\"card-divider bg-warning\" style=\"border-top:2px solid #5A5A5A !important;border-bottom:4px solid #D0131B !important;\"></div>
-        <div class=\"card-footer bg-light\" style=\"border-top:2px solid #5A5A5A !important;\">
-          $content
-        </div>
-      </div>";
+      $default = "";
+      $default .= "<div class=\"card bg-light\" style=\"width:" . $this->width . "\">\n";
+      $default .=    $this->person->as_thumbnail();
+      $default .= "  <div class=\"card-body\">\n";
+      $default .= "    <h5 class=\"card-title\">" .  $this->person->get_short_title_and_full_name() . "</h5>\n";
+      $default .= "    <div style=\"border-top:1px solid #5A5A5A !important; padding 0px !important; margin 0px !important;\">\n";
+      $default .=        ($this->function == 'no') ? '' : $this->person->get_title_as_text() . "\n";
+      $default .= "      <div class=\"person-contact\" style=\"float:right\">\n";
+      $default .= "        <a href=\"tel:" . $this->person->get_phone() . "\" title=\"" . $this->person->get_title_and_full_name() . "'s phone number\">\n";
+      $default .= "          <i class=\"fas fa-phone-square\" style=\"color:#5A5A5A;\"></i>\n";
+      $default .= "        </a>\n";
+      $default .= "        <a href=\"mailto:" . $this->person->get_mail() . "\" title=\"" . $this->person->get_title_and_full_name() . "'s email\">\n";
+      $default .= "          <i class=\"fas fa-envelope-square\" style=\"color:#5A5A5A;\"></i>\n";
+      $default .= "        </a>\n";
+      $default .= "        <a href=\"https://infoscience.epfl.ch/search?f=author&action=Search&p=" . $this->person->get_full_name() . "\" title=\"" . $this->person->get_short_title_and_full_name() . "'s publications\">\n";
+      $default .= "          <i class=\"fas fa-newspaper\" style=\"color:#5A5A5A;\"></i>\n";
+      $default .= "        </a>\n";
+      $default .= "        <a href=\"/epfl-person/" . $this->person->get_sciper() . "\" title=\"" . $this->person->get_short_title_and_full_name() . " personal's page\">\n";
+      $default .= "          <i class=\"fas fa-user\" style=\"color:#5A5A5A;\"></i>\n";
+      $default .= "        </a>\n";
+      $default .= "      </div>\n";
+      $default .= "    </div>\n";
+      $default .= "  </div>\n";
+      $default .= "  <div class=\"card-divider bg-warning\" style=\"border-top:2px solid #5A5A5A !important;border-bottom:4px solid #D0131B !important;\"></div>\n";
+      $default .= "  <div class=\"card-footer bg-light\" style=\"border-top:2px solid #5A5A5A !important;\">\n";
+      $default .=      $content;
+      $default .= "  </div>\n";
+      $default .= "</div>\n";
+
+      return $default;
     }
 
     if ($this->tmpl == 'decanat') {
       return "
       <div class=\"col-md-4 sti_decanat_box\">
-        <div class=\"sti_decanat_portrait\"><img src=\"" . $this->imgurl . "\"></div>
+        <div class=\"sti_decanat_portrait\">
+          <img src=\"" . $this->imgurl . "\">
+        </div>
         <div class=\"sti_decanat_grey\">
           <table>
             <tbody>
