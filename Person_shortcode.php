@@ -5,8 +5,9 @@
  * Allows to use a shortcode to display the information of the Person.php plugin.
  *
  * Usage:
- *   - [person-card sciper=169419]
+ *   - [person-card sciper=169419][/person-card]
  *   - [person-card sciper=162030 function='no']Adjunct to the Director[/person-card] # do not display the function title
+ *   - [person-card sciper=162030 icon='111111'][/person-card] # show all the font awesome icons (phone - mail - publication - room - internal people page - external people page)
  *   - [person-card sciper=283344 tmpl=decanat function=Dean imgurl=https://stisrv13.epfl.ch/img/decanat/portrait/ali.sayed.jpg]
  *       Prof. Sayed is world-renowned for his pioneering research on adaptive filters and adaptive networks, and in particular for the energy conservation and diffusion learning approaches he developed for the analysis and design of adaptive structures. His research interests span several areas including adaptation and learning, network and data sciences, information-processing theories, statistical signal processing, and biologically-inspired designs.
  *     [/person-card]
@@ -54,11 +55,12 @@ class PersonCardShortCode {
 
     // override default attributes with user attributes
     $person_atts = shortcode_atts([ 'tmpl'      => 'default',
-                                    'lang'      => 'en',       // en, fr
+                                    'lang'      => 'en',        // en, fr
                                     'sciper'    => '',
                                     'function'  => '',
-                                    'width'     => '20rem',   // card with, default 20rem
-                                    'imgurl'    => '',        // for tmpl decanat
+                                    'width'     => '20rem',     // card with, default 20rem
+                                    'icon'      => '110110',    // icons: phone - mail - publication - room - internal people page - external people page
+                                    'imgurl'    => '',          // for tmpl decanat
                                 ], $atts, $tag);
 
     $this->tmpl       = esc_attr($person_atts['tmpl']);
@@ -66,6 +68,7 @@ class PersonCardShortCode {
     $sciper           = esc_attr($person_atts['sciper']);
     $this->function   = esc_attr($person_atts['function']);
     $this->width      = esc_attr($person_atts['width']);
+    $this->icon       = esc_attr($person_atts['icon']);
 
     #echo "<!-- epfl-person shortcode / tmpl : " . $this->tmpl . " / lang : " . $lang . " / sciper : " . $sciper . " / center : " . $this->center . "  -->" ;
 
@@ -104,18 +107,36 @@ class PersonCardShortCode {
       $default .= "    <div style=\"border-top:1px solid #5A5A5A !important; padding 0px !important; margin 0px !important;\">\n";
       $default .=        ($this->function == 'no') ? '' : $this->person->get_title_as_text() . "\n";
       $default .= "      <div class=\"person-contact\" style=\"float:right\">\n";
-      $default .= "        <a href=\"tel:" . $this->person->get_phone() . "\" title=\"" . $this->person->get_title_and_full_name() . "'s phone number\">\n";
-      $default .= "          <i class=\"fas fa-phone-square\" style=\"color:#5A5A5A;\"></i>\n";
-      $default .= "        </a>\n";
-      $default .= "        <a href=\"mailto:" . $this->person->get_mail() . "\" title=\"" . $this->person->get_title_and_full_name() . "'s email\">\n";
-      $default .= "          <i class=\"fas fa-envelope-square\" style=\"color:#5A5A5A;\"></i>\n";
-      $default .= "        </a>\n";
-      $default .= "        <a href=\"https://infoscience.epfl.ch/search?f=author&action=Search&p=" . $this->person->get_full_name() . "\" title=\"" . $this->person->get_short_title_and_full_name() . "'s publications\">\n";
-      $default .= "          <i class=\"fas fa-newspaper\" style=\"color:#5A5A5A;\"></i>\n";
-      $default .= "        </a>\n";
-      $default .= "        <a href=\"/epfl-person/" . $this->person->get_sciper() . "\" title=\"" . $this->person->get_short_title_and_full_name() . " personal's page\">\n";
-      $default .= "          <i class=\"fas fa-user\" style=\"color:#5A5A5A;\"></i>\n";
-      $default .= "        </a>\n";
+      if ($this->icon[0]) {
+        $default .= "        <a href=\"tel:" . $this->person->get_phone() . "\" title=\"" . $this->person->get_title_and_full_name() . "'s phone number\">\n";
+        $default .= "          <i class=\"fas fa-phone-square\" style=\"color:#5A5A5A;\"></i>\n";
+        $default .= "        </a>\n";
+      }
+      if ($this->icon[1]) {
+        $default .= "        <a href=\"mailto:" . $this->person->get_mail() . "\" title=\"" . $this->person->get_title_and_full_name() . "'s email\">\n";
+        $default .= "          <i class=\"fas fa-envelope-square\" style=\"color:#5A5A5A;\"></i>\n";
+        $default .= "        </a>\n";
+      }
+      if ($this->icon[2]) {
+        $default .= "        <a href=\"https://plan.epfl.ch/?q=" . $this->person->get_room() . "\" title=\"" .  $this->person->get_title_and_full_name() . "'s office\">\n";
+        $default .= "          <i class=\"far fa-map\" style=\"color:#5A5A5A;\"></i>\n";
+        $default .= "        </a>\n";
+      }
+      if ($this->icon[3]) {
+        $default .= "        <a href=\"https://infoscience.epfl.ch/search?f=author&action=Search&p=" . $this->person->get_full_name() . "\" title=\"" . $this->person->get_short_title_and_full_name() . "'s publications\">\n";
+        $default .= "          <i class=\"fas fa-newspaper\" style=\"color:#5A5A5A;\"></i>\n";
+        $default .= "        </a>\n";
+      }
+      if ($this->icon[4]) {
+        $default .= "        <a href=\"/epfl-person/" . $this->person->get_sciper() . "\" title=\"" . $this->person->get_short_title_and_full_name() . " personal's page\">\n";
+        $default .= "          <i class=\"fas fa-user\" style=\"color:#5A5A5A;\"></i>\n";
+        $default .= "        </a>\n";
+      }
+      if ($this->icon[5]) {
+        $default .= "        <a href=\"https://people.epfl.ch/" . $this->person->get_sciper() . "\" title=\"EPFL " . $this->person->get_short_title_and_full_name() . " personal's page\">\n";
+        $default .= "          <i class=\"fas fa-user-circle\" style=\"color:#5A5A5A;\"></i>\n";
+        $default .= "        </a>\n";
+      }
       $default .= "      </div>\n";
       $default .= "    </div>\n";
       $default .= "  </div>\n";
