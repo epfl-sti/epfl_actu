@@ -82,6 +82,12 @@ class OrganizationalUnit extends Post
             return static::get($result);
         }, $query->get_posts());
     }
+
+    static function of_lab ($lab)
+    {
+        $parent_dn = preg_replace("@^.*?,@", "", $lab->get_dn());
+        return static::find_by_dn($parent_dn);
+    }
 }
 
 class OrganizationalUnitController

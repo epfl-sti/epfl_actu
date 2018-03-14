@@ -177,8 +177,7 @@ class Lab extends TypedPost
 
     public function get_organizational_unit ()
     {
-        $parent_dn = preg_replace("@^.*?,@", "", $this->get_dn());
-        return OrganizationalUnit::find_by_dn($parent_dn);
+        return OrganizationalUnit::of_lab($this);
     }
 
     public function get_postaladdress ()
