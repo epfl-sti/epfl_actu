@@ -38,6 +38,10 @@ use \EPFL\WS\Base\Post;
 require_once(__DIR__ . "/Lab.php");
 use \EPFL\WS\Labs\Lab;
 
+require_once(dirname(__FILE__) . "/inc/batch.inc");
+use function \EPFL\WS\run_every;
+use \EPFL\WS\BatchTask;
+
 use \WP_Screen;
 
 class OrganizationalUnit extends Post
@@ -104,6 +108,13 @@ class OrganizationalUnit extends Post
         $parent_dn = preg_replace("@^.*?,@", "", $lab->get_dn());
         return static::find_by_dn($parent_dn);
     }
+
+    /**
+     * Auto-create and/or `->sync()` all Labs under this OrganizationalUnit.
+     */
+    function sync ()
+    {
+    }
 }
 
 class OrganizationalUnitController
@@ -111,6 +122,7 @@ class OrganizationalUnitController
     static function hook ()
     {
         add_action("admin_menu", array(get_called_class(), "setup_admin_menu"));
+        run_every(600, array(get_called_class(), "sync_all"));
     }
 
     static function setup_admin_menu ()
@@ -176,6 +188,21 @@ class OrganizationalUnitController
 </div>
 
         <?php
+    }
+
+    static function sync_all ()
+    {
+        $thisclass = get_called_class();
+        (new BatchTask())
+            ->set_banner("Syncing all OrganizationalUnits and their Labs")
+            ->set_prometheus_labels(array(
+                'kind' => 'OrganizationalUnit'
+            ))
+            ->run(function() use ($thisclass) {
+                foreach ($thisclass->all() as $ou) {
+                    $ou->sync();
+                }
+            });
     }
 }
 
