@@ -3,10 +3,22 @@
 /**
  * Model and controller for an EPFL institute, section, DLL, platform etc.
  *
- * Unlike Persons and Labs, posts for these entities are *never* auto-created.
- * Instead, they are supposed to already exist as posts (or pages) with a custom
- * field to mark them as such.
+ * Unlike Persons and Labs, posts for these entities are *never*
+ * auto-created. Instead, an operator needs to create them manually as
+ * posts (or pages) with a custom field to mark them as such.
+ *
+ * The custom fields (a.k.a. "post meta") recognized by this class are
+ * as follows:
+ *
+ * - epfl_dn
+ *
+ *   The DN of this organizational unit. This field existing, is a
+ *   required condition for the code of this class to be used at all.
+ *   Additionally, all Lab instances that have a `->get_dn()` that
+ *   ends with this `epfl_dn`, are considered to belong in this
+ *   OrganizationalUnit.
  */
+
 namespace EPFL\WS\OrganizationalUnits;
 
 if (! defined('ABSPATH')) {
@@ -30,6 +42,10 @@ use \WP_Screen;
 
 class OrganizationalUnit extends Post
 {
+    /**
+     * Overridden to keep only the posts (or pages) that have
+     * an "epfl_dn" meta
+     */
     function _belongs ()
     {
         return $this->get_dn() !== null;
