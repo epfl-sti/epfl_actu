@@ -38,6 +38,9 @@ use \EPFL\WS\Base\Post;
 require_once(__DIR__ . "/Lab.php");
 use \EPFL\WS\Labs\Lab;
 
+require_once(__DIR__ . "/inc/ldap.inc");
+use \EPFL\WS\LDAPClient;
+
 require_once(dirname(__FILE__) . "/inc/batch.inc");
 use function \EPFL\WS\run_every;
 use \EPFL\WS\BatchTask;
@@ -114,6 +117,10 @@ class OrganizationalUnit extends Post
      */
     function sync ()
     {
+        foreach (LDAPClient::query_units_by_parent_dn($this->get_dn())
+                 as $entry) {
+            Lab::get_or_create_by_ldap_entry($entry)->sync();
+        }
     }
 }
 
@@ -198,9 +205,15 @@ class OrganizationalUnitController
             ->set_prometheus_labels(array(
                 'kind' => 'OrganizationalUnit'
             ))
-            ->run(function() use ($thisclass) {
-                foreach ($thisclass->all() as $ou) {
-                    $ou->sync();
+            ->run(function() {
+                $seen_dn = array();
+                foreach (OrganizationalUnit::all() as $ou) {
+                    $dn = $ou->get_dn();
+                    if (! $seen_dn[$dn]) {
+                        $ou->sync();
+                    } else {
+                        $seen_dn[$dn] = 1;
+                    }
                 }
             });
     }

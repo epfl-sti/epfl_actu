@@ -8,6 +8,7 @@ namespace EPFL\WS;
 
 require_once(dirname(__FILE__) . "/i18n.inc");
 
+use \Error;
 
 class LDAPException extends \Exception { }
 class LDAPUnsupportedException extends \Exception {
@@ -23,6 +24,7 @@ class LDAPClient
     const SEARCH_PERSON_BY_SCIPER  = "(&(objectClass=person)(uniqueIdentifier=%d))";
     const SEARCH_UNIT_BY_CN        = "(&(objectClass=EPFLorganizationalUnit)(cn=%s))";
     const SEARCH_UNIT_BY_UNIQUE_ID = "(&(objectClass=EPFLorganizationalUnit)(uniqueIdentifier=%d))";
+    const SEARCH_ALL_UNITS         = "(objectClass=EPFLorganizationalUnit)";
 
     static function query_by_sciper ($sciper)
     {
@@ -40,8 +42,14 @@ class LDAPClient
             sprintf(self::SEARCH_UNIT_BY_UNIQUE_ID, $unique_id));
     }
 
-    static private function _do_ldap_search ($query) {
+    static function query_units_by_parent_dn ($dn) {
+        return self::_do_ldap_search(self::SEARCH_ALL_UNITS, $dn, "one");
+    }
+
+    static private function _do_ldap_search ($query, $base_dn = null,
+                                             $scope = "subtree") {
         self::_require_ldap();
+        if (! $base_dn) { $base_dn = self::BASE_DN; }
         $ld = @ldap_connect(self::LDAP_SERVER);
         if (! ($ld && @ldap_bind($ld))) {
             throw new LDAPException(
@@ -50,7 +58,16 @@ class LDAPClient
                         ldap_error($ld)));
         }
 
-        $results = @ldap_search($ld, self::BASE_DN, $query);
+        switch ($scope) {
+        case "subtree":
+            $results = @ldap_search($ld, $base_dn, $query);
+            break;
+        case "one":
+            $results = @ldap_list($ld, $base_dn, $query);
+            break;
+        default:
+            throw new Error("Unknown or unimplemented scope: $scope");
+        }
         if (! $results) {
             throw new LDAPException(sprintf(
                 ___("ldap_search error: %s"), ldap_error($ld)));
@@ -60,7 +77,11 @@ class LDAPClient
             throw new LDAPException(sprintf(
                 ___("ldap_get_entries error: %s"), ldap_error($ld)));
         }
-        return $entries;
+        $entry_list = array();
+        for($i = 0; $i < $entries["count"]; $i++) {
+            array_push($entry_list, $entries[$i]);
+        }
+        return $entry_list;
     }
 
     static private function _require_ldap () {

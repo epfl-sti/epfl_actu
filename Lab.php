@@ -10,6 +10,8 @@ if (! defined('ABSPATH')) {
     die('Access denied.');
 }
 
+use \Error;
+
 require_once(__DIR__ . "/inc/ldap.inc");
 use \EPFL\WS\LDAPClient;
 
@@ -64,11 +66,19 @@ class Lab extends TypedPost
         if (!($unit_entries && $unit_entries["count"])) {
             throw new LabNotFoundException(sprintf("Unknown lab abbrev %s", $unit_name));
         }
+        return static::get_or_create_by_ldap_entry($unit_entries[0]);
+    }
 
+    static function get_or_create_by_ldap_entry ($entry)
+    {
+        $uid = $entry["uniqueidentifier"][0];
+        if (! $uid) {
+            throw new Error("get_or_create_by_ldap_entry(): bad entry: " . var_export($entry, true));
+        }
         $that = static::_get_or_create(array(
-            self::UNIQUE_ID_META => $unit_entries[0]["uniqueidentifier"][0]
+            self::UNIQUE_ID_META => $uid
         ));
-        $that->_ldap_result = $unit_entries[0];
+        $that->_ldap_result = $entry;
         return $that;
     }
 
