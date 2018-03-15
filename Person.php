@@ -641,11 +641,15 @@ class PersonController
     static function filter_post_thumbnail_html ($orig_html, $post_id, $unused_thumbnail_id,
                                                 $unused_size, $attr)
     {
+        if ($orig_html) {
+            # Person already has a thumbnail; use it
+            return $orig_html;
+        }
+        
         $person = Person::get($post_id);
-        if (! $person) return $orig_html;
-
+        if (! $person) return '';
         $src = $person->get_image_url();
-        if (! $src) return $orig_html;
+        if (! $src) return '';
 
         if (! $attr) $attr = array();
         if (! $attr["class"]) {
