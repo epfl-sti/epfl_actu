@@ -57,7 +57,7 @@ class MementoShortCode {
     $publics    = esc_attr($memento_atts['publics']);
     $themes     = esc_attr($memento_atts['themes']);
     $limit      = esc_attr($memento_atts['limit']);
-    $factulties = esc_attr($memento_atts['factulties']);
+    $faculties = esc_attr($memento_atts['faculties']);
     $offset     = esc_attr($memento_atts['offset']);
 
     // make the correct URL call
@@ -167,19 +167,64 @@ class MementoShortCode {
     require_once(dirname(__FILE__) . "/inc/epfl-ws.inc");
     $ws = new \EPFL\WS\epflws();
     //$ws->debug($events);
+    $memento.="
+     <div class='actu_news_box'>
+      <div class='actu_news_contenu'>";
     foreach ($events as $item) {
-      $memento .= '<div class="memento_item" id="' . $item->id . '">';
-      $memento .= '<h2>' . $item->title . '</h2>';
-      $memento .= '<p><img src="' . $item->event_visual_absolute_url . '" title="' . $item->image_description . '"></p>';
-      $memento .= '<p>Start date: ' . $item->event_start_date . ' ' . ($item->event_start_time ? $item->event_start_time : "") ;
-      if ($item->event_end_date) {
-        $memento .= ' End date: ' . $item->event_end_date . ' ' . ($item->event_end_time ? $item->event_end_time : "") ;
+      $startdate=$item->event_start_date; 
+      $enddate=$item->event_end_date;
+      if ($startdate == $enddate) {
+       $enddate="";
+      } 
+      else {
+       $enddate=date("l, jS F ", strtotime($enddate));	    
       }
-      $memento .= '</p>';
-      $memento .= '<p>' . $item->description . '</p>';
-      $memento .= '<p><a href="' . $item->absolute_slug . '">Read more</a></p>';
-      $memento .= '</div>';
+      $startdate=date("l, jS F", strtotime($startdate));	    
+      $starttime=$item->event_start_time;
+      $endtime=$item->event_end_time;
+      $starttime=date("H:i", strtotime($starttime));	    
+      $endtime=date("H:i", strtotime($endtime));	    
+      if ($starttime == "00:00") {
+       $starttime="";
+      }
+      if ($endtime == "00:00") {
+       $endtime="";
+      }
+
+      $outlinkstartdate=str_replace("-","",$item->event_start_date);
+      $outlinkenddate=str_replace(":","",$item->event_end_date);
+
+      $outlinkendtime=str_replace(":","",$item->event_end_time);
+      if (empty($outlinkendtime)) {
+       $outlinkendtime="000000";	
+      }
+      $outlinkstarttime=str_replace(":","",$item->event_start_time);
+      if (empty($outlinkstarttime)) {
+       $outlinkstarttime="000000";	
+      }
+      $outlinktitle=str_replace(" ","%20",$item->title);
+
+      $outlink="https://stisrv13.epfl.ch/outlink.php?enddate=$outlinkenddate"."T$outlinkendtime&datestring=$outlinkstartdate"."T$outlinkstarttime&speaker=&title=$outlinktitle&room=";
+
+      $description = str_replace("<strong>", "", $item->description);
+      $description = str_replace("</strong>", "", $description);
+
+      $memento .= '<div class="actu_news_box" id="' . $item->id . '">';
+      $memento .= '<div class="actu_titre_news"><a href="' . $item->absolute_slug . '">' . $item->title . '</a></div>';
+      $memento .= '<div class="container">';
+      $memento .= '<div class="row entry-body">';
+      $memento .= '<div class="col-md-2"><a href="' . $item->absolute_slug . '"><img class=actu_img_news src="' . $item->event_visual_absolute_url . '" title="' . $item->image_description . '"></a>';
+      $memento .= $startdate . ' ' . ($starttime ? $starttime : "") ;
+      if ($enddate) {
+        $memento .= '<br>to<br>' . $enddate . ' ' . ($endtime ? $endtime : "") ;
+      }
+      $memento .= '<br><a title="add to calendar" href='.$outlink.'><img src=https://stisrv13.epfl.ch/newsdesk/images/2018-03-15calendar.gif alt="add to calendar"></a> <br><br> </div>';
+      $memento .= '<div class="col-md-10">' . $description.'<a href="' . $item->absolute_slug . '">Read more</a> <br><br></div>';
+      $memento .= '</div><!-- row -->';
+      $memento .= '</div><!-- container -->';
+      $memento .= '</div><!-- actu_news_box -->';
     }
+    $memento.="</div></div><!-- box and contenu-->";
     return $memento;
   }
 
