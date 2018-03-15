@@ -8,7 +8,7 @@
  *   - [person-card sciper=169419][/person-card]
  *   - [person-card sciper=162030 function='no']Adjunct to the Director[/person-card] # do not display the function title
  *   - [person-card sciper=162030 icon='111111'][/person-card] # show all the font awesome icons (phone - mail - publication - room - internal people page - external people page)
- *   - [person-card sciper=283344 tmpl=decanat function=Dean imgurl=https://stisrv13.epfl.ch/img/decanat/portrait/ali.sayed.jpg]
+ *   - [person-card sciper=283344 function=Dean imgurl=https://stisrv13.epfl.ch/img/decanat/portrait/ali.sayed.jpg]
  *       Prof. Sayed is world-renowned for his pioneering research on adaptive filters and adaptive networks, and in particular for the energy conservation and diffusion learning approaches he developed for the analysis and design of adaptive structures. His research interests span several areas including adaptation and learning, network and data sciences, information-processing theories, statistical signal processing, and biologically-inspired designs.
  *     [/person-card]
  *   - If you are using the Bootstrap-4-Shortcode plugin (https://github.com/MWDelaney/bootstrap-4-shortcodes), then
@@ -56,28 +56,20 @@ class PersonCardShortCode {
     $atts = array_change_key_case((array)$atts, CASE_LOWER);
 
     // override default attributes with user attributes
-    $person_atts = shortcode_atts([ 'tmpl'      => 'default',
+    $person_atts = shortcode_atts([ 'tmpl'      => 'default',   // Unused, for compatibility
                                     'lang'      => 'en',        // en, fr
                                     'sciper'    => '',
                                     'function'  => '',
                                     'width'     => '20rem',     // card with, default 20rem
                                     'icon'      => '110110',    // icons: phone - mail - publication - room - internal people page - external people page
-                                    'imgurl'    => '',          // for tmpl decanat
                                 ], $atts, $tag);
 
-    $this->tmpl       = esc_attr($person_atts['tmpl']);
     $lang             = esc_attr($person_atts['lang']);
     $sciper           = esc_attr($person_atts['sciper']);
     $this->function   = esc_attr($person_atts['function']);
     $this->width      = esc_attr($person_atts['width']);
     $this->icon       = esc_attr($person_atts['icon']);
 
-    #echo "<!-- epfl-person shortcode / tmpl : " . $this->tmpl . " / lang : " . $lang . " / sciper : " . $sciper . " / center : " . $this->center . "  -->" ;
-
-    if (!(in_array($this->tmpl, array("default", "decanat", "bootstrap")))) {
-      $error = new WP_Error( 'epfl-ws-person-shortcode', 'Template error', 'Template: ' . $this->tmpl . ' returned an error' );
-      $this->ws->log( $error );
-    }
     if (!(in_array($lang, array("en", "fr")))) {
       $error = new WP_Error( 'epfl-ws-person-shortcode', 'Lang error', 'Lang: ' . $lang . ' returned an error' );
       $this->ws->log( $error );
@@ -93,14 +85,11 @@ class PersonCardShortCode {
       return;
     }
     $this->person_post = $this->person->wp_post();
-    if ($this->tmpl == "decanat") {
-      $this->imgurl = esc_attr($person_atts['imgurl']);
-    }
     return $this->display($content);
   }
 
-  private function display($content) {
-    if ($this->tmpl == 'default') {
+    private function display($content)
+    {
       $default = "";
       $default .= "<div class=\"card bg-light\" style=\"width:" . $this->width . "\">\n";
       $default .=    $this->person->as_thumbnail();
@@ -150,59 +139,6 @@ class PersonCardShortCode {
 
       return $default;
     }
-
-    if ($this->tmpl == 'decanat') {
-      return "
-      <div class=\"col-md-4 sti_decanat_box\">
-        <div class=\"sti_decanat_portrait\">
-          <img src=\"" . $this->imgurl . "\">
-        </div>
-        <div class=\"sti_decanat_grey\">
-          <table>
-            <tbody>
-              <tr>
-                <td width=\"70%\">
-                  <div class=\"sti_decanat_name\">
-                    " .  $this->person->get_short_title_and_full_name() . "<br>
-                    <strong>" .  $this->function . "</strong>
-                  </div>
-                </td>
-                <td align=\"right\">
-                  <div class=\"sti_decanat_buttons\"> <!-- buttons -->
-                    <table>
-                      <tbody>
-                        <tr>
-                          <td>
-                            <img src=\"/theme-epfl-sti/assets/left_decanat.png\" class=\"left-divider\" />
-                          </td>
-                          <td>
-                            <a href=\"tel:" . $this->person->get_phone() . "\" title=\"" .  $this->person->get_title_and_full_name() . "'s phone number\"><i class=\"fas fa-phone-square\" style=\"color:#5A5A5A;\"></i></a>
-                          </td>
-                          <td>
-                            <a href=\"mailto:" . $this->person->get_mail() . "\" title=\"" .  $this->person->get_title_and_full_name() . "'s email\"><i class=\"fas fa-envelope-square\" style=\"color:#5A5A5A;\"></i></a>
-                          </td>
-                          <td>
-                            <a href=\"https://plan.epfl.ch/?q=" . $this->person->get_room() . "\" title=\"" .  $this->person->get_title_and_full_name() . "'s office\"><i class=\"far fa-map\" style=\"color:#5A5A5A;\"></i>
-                          </td>
-                          <td>
-                            <a href=\"/epfl-person/" . $this->person->get_sciper() . "\" title=\"" .  $this->person->get_short_title_and_full_name() . " personal's page\"><i class=\"fas fa-user\" style=\"color:#5A5A5A;\"></i></a>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div> <!-- buttons -->
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class=\"sti_decanat_bar sti_textured_header_top\"></div>
-        <div class=\"sti_decanat_desc\">
-          $content
-        </div>
-      </div>";
-    }
-  }
 
 } # End class PersonCardShortCode
 
