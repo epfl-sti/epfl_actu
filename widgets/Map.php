@@ -39,11 +39,11 @@ class EPFLMap extends \WP_Widget
     print vsprintf("<p><label for=\"%s\">%s<input class=\"widefat\" id=\"%s\" name=\"%s\" type=\"text\" value=\"%s\" /></label><br><small>%s</small></p>",
                 array(
                   $this->get_field_id('lookup'),
-                  __x('Lookup:', 'epfl_sti'),
+                  __x('Lookup:', 'epfl-ws'),
                   $this->get_field_id('lookup'),
                   $this->get_field_name('lookup'),
                   $lookup,
-                  __x('e.g. office number ("MA A2 424") or a Sciper number ("133134").', 'epfl_sti'))
+                  __x('e.g. office number ("MA A2 424") or a Sciper number ("133134").', 'epfl-ws'))
                 );
   }
 
