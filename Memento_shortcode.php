@@ -11,6 +11,9 @@
 namespace EPFL\WS\Memento;
 use WP_Error;
 
+require_once(__DIR__ . "/inc/templated-shortcode.inc");
+use \EPFL\WS\ListTemplatedShortcodeView;
+
 class MementoShortCode {
 
   /*
@@ -31,7 +34,7 @@ class MementoShortCode {
     $atts = array_change_key_case((array)$atts, CASE_LOWER);
 
     // override default attributes with user attributes
-    $memento_atts = shortcode_atts([ 'tmpl'      => 'full', // full, short, widget
+    $memento_atts = shortcode_atts([ 'tmpl'      => 'full', // Ignored - Passed to theme as-is
                                   'channel'   => 'sti',   // http://actu.epfl.ch/api/v1/channels/ [10 = STI, search https://actu.epfl.ch/api/v1/channels/?name=sti]
                                   'category'  => '',     // https://actu.epfl.ch/api/v1/categories/ [1: EPFL, 2: EDUCATION, 3: RESEARCH, 4: INNOVATION, 5: CAMPUS LIFE]
                                   'lang'      => 'en',   // en, fr
@@ -57,7 +60,7 @@ class MementoShortCode {
     $publics    = esc_attr($memento_atts['publics']);
     $themes     = esc_attr($memento_atts['themes']);
     $limit      = esc_attr($memento_atts['limit']);
-    $factulties = esc_attr($memento_atts['factulties']);
+    $faculties = esc_attr($memento_atts['faculties']);
     $offset     = esc_attr($memento_atts['offset']);
 
     // make the correct URL call
@@ -104,19 +107,8 @@ class MementoShortCode {
 
     // Debug: $ws->debug( $events );
 
-    switch ($tmpl) {
-      default:
-      case 'full':
-        $display_html = $this->display_full($events);
-        break;
-      case 'short':
-        $display_html = $this->display_short($events);
-        break;
-      case 'widget':
-        $display_html = $this->display_widget($events);
-        break;
-    }
-    return $display_html;
+    $view = new MementoShortcodeView($memento_atts);
+    return $view->as_html($events);
   }
 
   /*
@@ -158,62 +150,22 @@ class MementoShortCode {
       }
     }
   }
+}
 
-  /*
-   * Default template
-   */
-  function display_full($events)
-  {
-    require_once(dirname(__FILE__) . "/inc/epfl-ws.inc");
-    $ws = new \EPFL\WS\epflws();
-    //$ws->debug($events);
-    foreach ($events as $item) {
-      $memento .= '<div class="memento_item" id="' . $item->id . '">';
-      $memento .= '<h2>' . $item->title . '</h2>';
-      $memento .= '<p><img src="' . $item->event_visual_absolute_url . '" title="' . $item->image_description . '"></p>';
-      $memento .= '<p>Start date: ' . $item->event_start_date . ' ' . ($item->event_start_time ? $item->event_start_time : "") ;
-      if ($item->event_end_date) {
-        $memento .= ' End date: ' . $item->event_end_date . ' ' . ($item->event_end_time ? $item->event_end_time : "") ;
-      }
-      $memento .= '</p>';
-      $memento .= '<p>' . $item->description . '</p>';
-      $memento .= '<p><a href="' . $item->absolute_slug . '">Read more</a></p>';
-      $memento .= '</div>';
+class MementoShortcodeView extends ListTemplatedShortcodeView
+{
+    function get_slug () {
+        return "memento";
     }
-    return $memento;
-  }
-
-  /*
-   * Medium sized template
-   */
-  function display_short($events)
-  {
-    foreach ($events as $item) {
-      $memento .= '<div class="actu_item" id="' . $item->id . '">';
-      $memento .= '<h2>' . $item->title . '</h2>';
-      $memento .= '<p>' . $item->subtitle . '</p>';
-      $memento .= '<img src="' . $item->visual_url . '" title="">'; // Image description + copyright not available
-      // $memento .= '<a href="' . $item->absolute_slug . '">Read more</a>'; // absolute_slug not available for now
-      $memento .= '</div>';
-    }
-    return $memento;
-  }
-
-  /*
-   * Minimal template (to be used in widget)
-   */
-  function display_widget($events)
-  {
-    foreach ($events as $item) {
-      $memento .= '<div class="actu_item" id="' . $item->id . '">';
+    function item_as_html ($item) {
+      $memento .= '<div class="epfl-ws-memento-item" id="' . $item->id . '">';
       $memento .= '<h2>' . $item->title . '</h2>';
       $memento .= '<a href="' . $item->visual_url . '"><img src="' . $item->visual_url . '" title=""></a>';
       $memento .= '</div>';
+      return $memento;
     }
-    return $memento;
-  }
-
 }
+
 //add_shortcode('memento', 'EPFL\\WS\\Memento\\wp_shortcode');
 new MementoShortCode();
 ?>

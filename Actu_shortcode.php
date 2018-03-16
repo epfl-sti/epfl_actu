@@ -240,17 +240,17 @@ class ActuShortCode {
   {
     //$this->ws->debug($actus);
     $actu.="
-     <div class='sti_news_box'>
-      <div class='sti_news_contenu'>
+     <div class='actu_news_box'>
+      <div class='actu_news_contenu'>
     ";
     foreach ($actus as $item) {
   
       $actu.=" <a href='https://actu.epfl.ch/news/".$this->ws->get_anchor($item->title)."'>
-       <div class='sti_news_box'>
-        <div class='sti_gris_news'></div>
-        <div class='sti_titre_news'>".strtoupper($item->title)."</div>
-        <div class='sti_news_body'>
-         <img class='sti_img_news' src='".$item->visual_url."' width='170' height='100'>
+       <div class='actu_news_box'>
+        <div class='actu_gris_news'></div>
+        <div class='actu_titre_news'>".strtoupper($item->title)."</div>
+        <div class='actu_news_body'>
+         <img class='actu_img_news' src='".$item->visual_url."' width='170' height='100'>
          <span>".$item->subtitle."</span>
         </div>
        </div>
