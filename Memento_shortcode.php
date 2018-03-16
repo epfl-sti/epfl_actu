@@ -11,6 +11,9 @@
 namespace EPFL\WS\Memento;
 use WP_Error;
 
+require_once(__DIR__ . "/inc/templated-shortcode.inc");
+use \EPFL\WS\ListTemplatedShortcodeView;
+
 class MementoShortCode {
 
   /*
@@ -31,7 +34,7 @@ class MementoShortCode {
     $atts = array_change_key_case((array)$atts, CASE_LOWER);
 
     // override default attributes with user attributes
-    $memento_atts = shortcode_atts([ 'tmpl'      => 'full', // full, short, widget
+    $memento_atts = shortcode_atts([ 'tmpl'      => 'full', // Ignored - Passed to theme as-is
                                   'channel'   => 'sti',   // http://actu.epfl.ch/api/v1/channels/ [10 = STI, search https://actu.epfl.ch/api/v1/channels/?name=sti]
                                   'category'  => '',     // https://actu.epfl.ch/api/v1/categories/ [1: EPFL, 2: EDUCATION, 3: RESEARCH, 4: INNOVATION, 5: CAMPUS LIFE]
                                   'lang'      => 'en',   // en, fr
@@ -104,19 +107,8 @@ class MementoShortCode {
 
     // Debug: $ws->debug( $events );
 
-    switch ($tmpl) {
-      default:
-      case 'full':
-        $display_html = $this->display_full($events);
-        break;
-      case 'short':
-        $display_html = $this->display_short($events);
-        break;
-      case 'widget':
-        $display_html = $this->display_widget($events);
-        break;
-    }
-    return $display_html;
+    $view = new MementoShortcodeView($memento_atts);
+    return $view->as_html($events);
   }
 
   /*
@@ -158,107 +150,22 @@ class MementoShortCode {
       }
     }
   }
+}
 
-  /*
-   * Default template
-   */
-  function display_full($events)
-  {
-    require_once(dirname(__FILE__) . "/inc/epfl-ws.inc");
-    $ws = new \EPFL\WS\epflws();
-    //$ws->debug($events);
-    $memento.="
-     <div class='actu_news_box'>
-      <div class='actu_news_contenu'>";
-    foreach ($events as $item) {
-      $startdate=$item->event_start_date; 
-      $enddate=$item->event_end_date;
-      if ($startdate == $enddate) {
-       $enddate="";
-      } 
-      else {
-       $enddate=date("l, jS F ", strtotime($enddate));	    
-      }
-      $startdate=date("l, jS F", strtotime($startdate));	    
-      $starttime=$item->event_start_time;
-      $endtime=$item->event_end_time;
-      $starttime=date("H:i", strtotime($starttime));	    
-      $endtime=date("H:i", strtotime($endtime));	    
-      if ($starttime == "00:00") {
-       $starttime="";
-      }
-      if ($endtime == "00:00") {
-       $endtime="";
-      }
-
-      $outlinkstartdate=str_replace("-","",$item->event_start_date);
-      $outlinkenddate=str_replace(":","",$item->event_end_date);
-
-      $outlinkendtime=str_replace(":","",$item->event_end_time);
-      if (empty($outlinkendtime)) {
-       $outlinkendtime="000000";	
-      }
-      $outlinkstarttime=str_replace(":","",$item->event_start_time);
-      if (empty($outlinkstarttime)) {
-       $outlinkstarttime="000000";	
-      }
-      $outlinktitle=str_replace(" ","%20",$item->title);
-
-      $outlink="https://stisrv13.epfl.ch/outlink.php?enddate=$outlinkenddate"."T$outlinkendtime&datestring=$outlinkstartdate"."T$outlinkstarttime&speaker=&title=$outlinktitle&room=";
-
-      $description = str_replace("<strong>", "", $item->description);
-      $description = str_replace("</strong>", "", $description);
-
-      $memento .= '<div class="actu_news_box" id="' . $item->id . '">';
-      $memento .= '<div class="actu_titre_news"><a href="' . $item->absolute_slug . '">' . $item->title . '</a></div>';
-      $memento .= '<div class="container">';
-      $memento .= '<div class="row entry-body">';
-      $memento .= '<div class="col-md-2"><a href="' . $item->absolute_slug . '"><img class=actu_img_news src="' . $item->event_visual_absolute_url . '" title="' . $item->image_description . '"></a>';
-      $memento .= $startdate . ' ' . ($starttime ? $starttime : "") ;
-      if ($enddate) {
-        $memento .= '<br>to<br>' . $enddate . ' ' . ($endtime ? $endtime : "") ;
-      }
-      $memento .= '<br><a title="add to calendar" href='.$outlink.'><img src=https://stisrv13.epfl.ch/newsdesk/images/2018-03-15calendar.gif alt="add to calendar"></a> <br><br> </div>';
-      $memento .= '<div class="col-md-10">' . $description.'<a href="' . $item->absolute_slug . '">Read more</a> <br><br></div>';
-      $memento .= '</div><!-- row -->';
-      $memento .= '</div><!-- container -->';
-      $memento .= '</div><!-- actu_news_box -->';
+class MementoShortcodeView extends ListTemplatedShortcodeView
+{
+    function get_slug () {
+        return "memento";
     }
-    $memento.="</div></div><!-- box and contenu-->";
-    return $memento;
-  }
-
-  /*
-   * Medium sized template
-   */
-  function display_short($events)
-  {
-    foreach ($events as $item) {
-      $memento .= '<div class="actu_item" id="' . $item->id . '">';
-      $memento .= '<h2>' . $item->title . '</h2>';
-      $memento .= '<p>' . $item->subtitle . '</p>';
-      $memento .= '<img src="' . $item->visual_url . '" title="">'; // Image description + copyright not available
-      // $memento .= '<a href="' . $item->absolute_slug . '">Read more</a>'; // absolute_slug not available for now
-      $memento .= '</div>';
-    }
-    return $memento;
-  }
-
-  /*
-   * Minimal template (to be used in widget)
-   */
-  function display_widget($events)
-  {
-    foreach ($events as $item) {
-      $memento .= '<div class="actu_item" id="' . $item->id . '">';
+    function item_as_html ($item) {
+      $memento .= '<div class="epfl-ws-memento-item" id="' . $item->id . '">';
       $memento .= '<h2>' . $item->title . '</h2>';
       $memento .= '<a href="' . $item->visual_url . '"><img src="' . $item->visual_url . '" title=""></a>';
       $memento .= '</div>';
+      return $memento;
     }
-    return $memento;
-  }
-
 }
+
 //add_shortcode('memento', 'EPFL\\WS\\Memento\\wp_shortcode');
 new MementoShortCode();
 ?>
