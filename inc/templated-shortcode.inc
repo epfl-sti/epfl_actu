@@ -56,7 +56,7 @@ abstract class ListTemplatedShortcodeView
             $this->shortcode_attrs);
         foreach ($items_list as $item) {
             $html .= apply_filters(
-                "epfl_shortcode_${slug}_list_element",
+                "epfl_shortcode_${slug}_list_html_item",
                 $this->item_as_html($item), $this->shortcode_attrs);
         }
         $html .= apply_filters("epfl_shortcode_${slug}_list_html_end", "</div>",
