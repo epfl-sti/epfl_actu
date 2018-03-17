@@ -15,6 +15,12 @@ namespace EPFL\WS\Actu;
 
 use WP_Error;
 
+// include function from /inc/epfl-ws.inc
+require_once(dirname(__FILE__) . "/inc/epfl-ws.inc");
+
+require_once(__DIR__ . "/inc/templated-shortcode.inc");
+use \EPFL\WS\ListTemplatedShortcodeView;
+
 class ActuShortCode {
 
   /*
@@ -23,8 +29,6 @@ class ActuShortCode {
   function __construct() {
     add_shortcode('actu', array($this, 'wp_shortcode'));
     add_action("admin_print_footer_scripts", array($this, 'actu_shortcode_button_script'));
-    // include function from /inc/epfl-ws.inc
-    require_once(dirname(__FILE__) . "/inc/epfl-ws.inc");
     $this->ws = new \EPFL\WS\epflws();
   }
 
@@ -50,6 +54,7 @@ class ActuShortCode {
                                   'faculties' => '',     // http://actu.epfl.ch/api/v1/faculties/ [1: CDH, 2: CDM, 3: ENAC, 4: IC, 5: SB, 6: STI, 7: SV]
                                   'offset'    => '',     // specify a offset for returned news
                                 ], $atts, $tag);
+    $this->actu_atts = $actu_atts;
 
     $tmpl       = esc_attr($actu_atts['tmpl']);
     $channel    = esc_attr($actu_atts['channel']);
@@ -238,14 +243,18 @@ class ActuShortCode {
    */
   function display_list($actus)
   {
-    //$this->ws->debug($actus);
-    $actu.="
-     <div class='actu_news_box'>
-      <div class='actu_news_contenu'>
-    ";
-    foreach ($actus as $item) {
-  
-      $actu.=" <a href='https://actu.epfl.ch/news/".$this->ws->get_anchor($item->title)."'>
+    $view = new ActuShortcodeView($this->actu_atts);
+    return $view->as_html($actus);
+  }
+}
+
+class ActuShortcodeView extends ListTemplatedShortcodeView
+{
+    function get_slug () {
+        return "actu";
+    }
+    function item_as_html ($item) {
+        return " <a href='https://actu.epfl.ch/news/".$this->ws->get_anchor($item->title)."'>
        <div class='actu_news_box'>
         <div class='actu_gris_news'></div>
         <div class='actu_titre_news'>".strtoupper($item->title)."</div>
@@ -256,12 +265,8 @@ class ActuShortCode {
        </div>
       </a>";
     }
-    $actu .= '</div></div>';
-     
-    return $actu;
-  }
-
 }
+
 //add_shortcode('actu', 'EPFL\\WS\\Actu\\wp_shortcode');
 new ActuShortCode();
 ?>
