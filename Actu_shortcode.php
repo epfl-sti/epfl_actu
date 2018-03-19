@@ -255,19 +255,16 @@ class ActuShortcodeView extends ListTemplatedShortcodeView
         return "actu";
     }
     function item_as_html ($item) {
-        return " <a href='https://actu.epfl.ch/news/".$this->ws->get_anchor($item->title)."'>
-       <div class='actu_news_box'>
-        <div class='actu_gris_news'></div>
-        <div class='actu_titre_news'>".strtoupper($item->title)."</div>
-        <div class='actu_news_body'>
-         <img class='actu_img_news' src='".$item->visual_url."' width='170' height='100'>
+        return "
+       <div class=\"actu-news-box\">
+        <div class=\"actu-news-title\"><a href=\"https://actu.epfl.ch/news/".$this->ws->get_anchor($item->title)."\">".strtoupper($item->title)."</a></div>
+        <div class=\"actu-news-body\">
+         <img src=\"".$item->visual_url."\" width=\"170\" height=\"100\">
          <span>".$item->subtitle."</span>
         </div>
-       </div>
-      </a>";
+       </div>";
     }
 }
 
-//add_shortcode('actu', 'EPFL\\WS\\Actu\\wp_shortcode');
 new ActuShortCode();
 ?>
