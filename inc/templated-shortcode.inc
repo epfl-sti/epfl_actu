@@ -43,6 +43,7 @@ abstract class ListTemplatedShortcodeView
 
         if (has_filter("epfl_shortcode_${slug}_list_html")) {
             return apply_filters("epfl_shortcode_${slug}_list_html",
+                                 "",
                                  $items_list, $this->shortcode_attrs);
         }
         if (! count($items_list)) {
@@ -57,7 +58,7 @@ abstract class ListTemplatedShortcodeView
         foreach ($items_list as $item) {
             $html .= apply_filters(
                 "epfl_shortcode_${slug}_list_html_item",
-                $this->item_as_html($item), $this->shortcode_attrs);
+                $this->item_as_html($item), $this->shortcode_attrs, $item);
         }
         $html .= apply_filters("epfl_shortcode_${slug}_list_html_end", "</div>",
                                $this->shortcode_attrs);
