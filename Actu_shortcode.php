@@ -244,6 +244,7 @@ class ActuShortCode {
   function display_list($actus)
   {
     $view = new ActuShortcodeView($this->actu_atts);
+    $view->ws = $this->ws;
     return $view->as_html($actus);
   }
 }
