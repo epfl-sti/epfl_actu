@@ -40,7 +40,7 @@ class ActuShortCode {
     $atts = array_change_key_case((array)$atts, CASE_LOWER);
 
     // override default attributes with user attributes
-    $actu_atts = shortcode_atts([ 'tmpl'      => 'full', // full, short, widget
+    $actu_atts = shortcode_atts([ 'tmpl'      => 'full', // UNUSED - For backward compatibility
                                   'channel'   => '',   // http://actu.epfl.ch/api/v1/channels/ [10 = STI, search https://actu.epfl.ch/api/v1/channels/?name=sti]
                                   'category'  => '',     // https://actu.epfl.ch/api/v1/categories/ [1: EPFL, 2: EDUCATION, 3: RESEARCH, 4: INNOVATION, 5: CAMPUS LIFE]
                                   'lang'      => 'en',   // en, fr
@@ -111,21 +111,7 @@ class ActuShortCode {
       $this->ws->log( $error );
     }
 
-    switch ($tmpl) {
-      default:
-      case 'full':
-        $display_html = $this->display_full($actus->results);
-        break;
-      case 'short':
-        $display_html = $this->display_short($actus->results);
-        break;
-      case 'widget':
-        $display_html = $this->display_widget($actus->results);
-        break;
-      case 'list':
-        $display_html = $this->display_list($actus->results);
-        break;
-    }
+    $display_html = $this->display_templated($actus->results);
 
     // This print out the queryed url, useful for now
     echo "<!-- epfl-actu url: " . $url . " -->";
@@ -178,70 +164,7 @@ class ActuShortCode {
     }
   }
 
-  /*
-   * Default template
-   */
-  function display_full($actus)
-  {
-    //$this->ws->debug($actus);
-    $actu .= '<div class="actu_template_full">';
-    foreach ($actus as $item) {
-      $actu .= '  <a name="' . $this->ws->get_anchor($item->title) . '"></a>';
-      $actu .= '  <div class="actu_item" id="' . $item->id . '">';
-      $actu .= '    <h2>' . $item->title . '</h2>';
-      $actu .= '    <p><img src="' . $item->visual_url . '" title=""></p>'; // Image description + copyright not available
-      $actu .= '    <p>Created: ' . $item->publish_date . '</p>';
-      $actu .= '    <p>' . $item->subtitle . '</p>';
-      $actu .= '    <p>' . $item->text . '</p>';
-      $actu .= '    <p><a href="https://actu.epfl.ch/news/' . $this->ws->get_anchor($item->title) . '">Read more</a></p>';
-      $actu .= '  </div>';
-    }
-    $actu .= '</div>';
-    return $actu;
-  }
-
-  /*
-   * Medium sized template
-   */
-  function display_short($actus)
-  {
-    //$this->ws->debug($actus);
-    $actu .= '<div class="actu_template_short">';
-    foreach ($actus as $item) {
-      $actu .= '  <a name="' . $this->ws->get_anchor($item->title) . '"></a>';
-      $actu .= '  <div class="actu_item" id="' . $item->id . '">';
-      $actu .= '    <h2>' . $item->title . '</h2>';
-      $actu .= '    <p>' . $item->subtitle . '</p>';
-      $actu .= '    <img src="' . $item->visual_url . '" title="">'; // Image description + copyright not available
-      $actu .= '    <p><a href="https://actu.epfl.ch/news/' . $this->ws->get_anchor($item->title) . '">Read more</a></p>';
-      $actu .= '  </div>';
-    }
-    $actu .= '</div>';
-    return $actu;
-  }
-
-  /*
-   * Minimal template (to be used in widget)
-   */
-  function display_widget($actus)
-  {
-    //$this->ws->debug($actus);
-    $actu .= '<div class="actu_template_widget">';
-    foreach ($actus as $item) {
-      $actu .= '  <a name="' . $this->ws->get_anchor($item->title) . '"></a>';
-      $actu .= '  <div class="actu_item" id="' . $item->id . '">';
-      $actu .= '    <h2>' . $item->title . '</h2>';
-      $actu .= '    <a href="https://actu.epfl.ch/news/' . $this->ws->get_anchor($item->title) . '"><img src="' . $item->visual_url . '" title=""></a>';
-      $actu .= '  </div>';
-    }
-    $actu .= '</div>';
-    return $actu;
-  }
-
-  /*
-   * List template
-   */
-  function display_list($actus)
+  function display_templated($actus)
   {
     $view = new ActuShortcodeView($this->actu_atts);
     $view->ws = $this->ws;
