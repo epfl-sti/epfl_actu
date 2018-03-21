@@ -126,7 +126,19 @@ class Lab extends TypedPost
         ));
         AutoFields::of(get_called_class())->append(array_keys($meta_input));
 
-        do_action("epfl_ws_sync_lab", $this);
+        $more_meta = apply_filters('epfl_lab_additional_meta', array(), $this);
+        if ($more_meta) {
+            $this->_update_meta($more_meta);
+        }
+    }
+
+    private function _update_meta($meta_array)
+    {
+        $auto_fields = AutoFields::of(get_called_class());
+        foreach ($meta_array as $k => $v) {
+            update_post_meta($this->ID, $k, $v);
+            $auto_fields->append(array($k));
+        }
     }
 
     public function _get_ldap_result ()

@@ -296,8 +296,6 @@ class Person
             $this->_update_meta($more_meta);
         }
 
-        do_action("epfl_ws_sync_person", $this);
-
         return $this;  // Chainable
     }
 
