@@ -81,7 +81,7 @@ class ISAcademiaShortCode {
       $this->ws->log( $error );
     }
 
-    return $isacademia;
+    return "<div class=\"isacademia-transcluded\">" . $isacademia . "</div>";
   }
 
 
