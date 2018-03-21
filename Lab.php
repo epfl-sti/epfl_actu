@@ -63,7 +63,7 @@ class Lab extends TypedPost
     static function get_or_create_by_name ($unit_name)
     {
         $unit_entries = LDAPClient::query_by_unit_name($unit_name);
-        if (!($unit_entries && $unit_entries["count"])) {
+        if (!($unit_entries && count($unit_entries))) {
             throw new LabNotFoundException(sprintf("Unknown lab abbrev %s", $unit_name));
         }
         return static::get_or_create_by_ldap_entry($unit_entries[0]);
@@ -140,7 +140,7 @@ class Lab extends TypedPost
             } else if (1 !== count($unit_entries)) {
                 throw new LabUnicityException(sprintf(
                     "Found %d results for lab's (supposedly) uniqueIdentifier %d",
-                    $unit_entries["count"], $this->get_unique_id()));
+                    count($unit_entries), $this->get_unique_id()));
             } else {
                 $this->_ldap_result = $unit_entries[0];
             }
