@@ -134,10 +134,10 @@ class Lab extends TypedPost
         if (! $this->_ldap_result) {
             $unit_entries = LDAPClient::query_by_unit_unique_id(
                 $this->get_unique_id());
-            if ((! $unit_entries) || (0 === $unit_entries["count"])) {
+            if ((! $unit_entries) || (0 === count($unit_entries))) {
                 throw new LabNotFoundException(sprintf("Unknown unique identifier %d",
                                                        $this->get_unique_id()));
-            } else if (1 !== $unit_entries["count"]) {
+            } else if (1 !== count($unit_entries)) {
                 throw new LabUnicityException(sprintf(
                     "Found %d results for lab's (supposedly) uniqueIdentifier %d",
                     $unit_entries["count"], $this->get_unique_id()));
