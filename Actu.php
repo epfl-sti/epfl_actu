@@ -248,13 +248,13 @@ class ActuController extends \EPFL\WS\Base\APIChannelPostController
     /**
      * Overloaded to show an actual embedded video in the admin area, yow!
      */
-    static function render_thumbnail_column ($actu, $img)
+    static function render_thumbnail_column ($actu)
     {
         if ($actu->get_youtube_id()) {
             echo '<object style="width:160px;height:89px;float: none; clear: both; margin: 2px auto;" data="https://www.youtube.com/embed/'.$actu->get_youtube_id().'"></object>';
             printf("<p><a href=\"https://youtu.be/%s\">YouTube link</a></p>", $actu->get_youtube_id());
         } else {
-            parent::render_thumbnail_column ($actu, $img);
+            parent::render_thumbnail_column ($actu);
         }
     }
 }
