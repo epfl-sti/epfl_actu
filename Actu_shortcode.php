@@ -244,14 +244,14 @@ class ActuShortCode {
       <div class='actu_news_contenu'>
     ";
     foreach ($actus as $item) {
-  
+      $showdate=date("jS F, Y", strtotime($item->publish_date));
       $actu.=" <a href='https://actu.epfl.ch/news/".$this->ws->get_anchor($item->title)."'>
        <div class='actu_news_box'>
         <div class='actu_gris_news'></div>
         <div class='actu_titre_news'>".strtoupper($item->title)."</div>
         <div class='actu_news_body'>
          <img class='actu_img_news' src='".$item->visual_url."' width='170' height='100'>
-         <span>".$item->subtitle."</span>
+         <span>".$item->subtitle."$showdate</span>
         </div>
        </div>
       </a>";
