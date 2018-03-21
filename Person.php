@@ -256,9 +256,19 @@ class Person
         return get_post_meta($this->ID, self::ROOM_META, true);
     }
 
+    public function set_room ($room)
+    {
+        return update_post_meta($this->ID, self::ROOM_META, $room);
+    }
+
     public function get_phone ()
     {
         return get_post_meta($this->ID, self::PHONE_META, true);
+    }
+
+    public function set_phone ($phone)
+    {
+        return update_post_meta($this->ID, self::PHONE_META, $phone);
     }
 
     public function get_unit ()
@@ -285,6 +295,8 @@ class Person
         if ($more_meta) {
             $this->_update_meta($more_meta);
         }
+
+        do_action("epfl_ws_sync_person", $this);
 
         return $this;  // Chainable
     }
@@ -419,6 +431,11 @@ class Person
 
         $biography = apply_filters("epfl_person_bio", $biography, $this);
 
+        $this->set_bio($biography);
+    }
+
+    function set_bio ($biography)
+    {
         $update = array(
             'ID'           => $this->ID,
             'post_content' => $biography

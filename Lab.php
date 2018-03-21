@@ -125,6 +125,8 @@ class Lab extends TypedPost
             "meta_input"    => $meta_input
         ));
         AutoFields::of(get_called_class())->append(array_keys($meta_input));
+
+        do_action("epfl_ws_sync_lab", $this);
     }
 
     public function _get_ldap_result ()
