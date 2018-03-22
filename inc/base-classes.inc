@@ -773,6 +773,7 @@ abstract class CustomPostTypeController
      */
     abstract static function get_model_class ();
 
+    static $_css_for_thumbnail_column_sent;
     /**
      * Add a column in the list view that shows thumbnails
      */
@@ -799,6 +800,18 @@ abstract class CustomPostTypeController
 
                 $this_class::render_thumbnail_column($epfl_post);
             }, 10, 2);
+        add_action('admin_head', function() {
+            if (self::$_css_for_thumbnail_column_sent) return;
+            self::$_css_for_thumbnail_column_sent = true;
+            ?>
+<style>
+td.column-thumbnail img {
+    max-width: 100%;
+    height: auto;
+}
+</style>
+<?php
+        });
     }
 
     /**

@@ -1028,6 +1028,7 @@ class PersonController
 <style>
 #epfl-person-nonce-meta_box_show_person_details img {
         max-width: 40%;
+        height: auto;
 }
 </style>
         <?php
