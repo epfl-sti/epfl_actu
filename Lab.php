@@ -230,7 +230,12 @@ class Lab extends TypedPost
 
     public function get_member_count ()
     {
-        return get_post_meta($this->ID, self::MEMBER_COUNT_META, true);
+        $count_txt = get_post_meta($this->ID, self::MEMBER_COUNT_META, true);
+        if (is_string($count_txt) && (strlen($count_txt) > 0)) {
+            return $count_txt + 0;
+        } else {
+            return null;
+        }
     }
 
     public function is_active ()
@@ -254,6 +259,7 @@ class LabController extends CustomPostTypeController
         static::add_thumbnail_column();
         static::call_sync_on_save();
         static::add_abbrev_and_people_count_columns();
+        static::strikethrough_inactive_labs();
     }
 
     /**
@@ -361,6 +367,33 @@ class LabController extends CustomPostTypeController
     {
         // TODO: we could link to a suitable search query in EPFL People
         echo $lab->get_member_count();
+    }
+
+    static $_css_strikethrough_inactive_labs_sent;
+    /**
+     * Arrange for the wp-admin list to show inactive labs stricken through
+     */
+    static function strikethrough_inactive_labs ()
+    {
+        add_filter('post_class', function($classes, $class, $post_id) {
+            if (! is_admin()) { return; }
+            if (! ($lab = Lab::get($post_id))) { return; }
+            if ($lab->is_active()) { return; }
+            array_push($classes, "lab-inactive");
+            return $classes;
+        }, 10, 3);
+
+        if (self::$_css_strikethrough_inactive_labs_sent) { return; }
+        $_css_strikethrough_inactive_labs_sent = true;
+        add_action('admin_head', function() {
+            ?>
+<style>
+tr.lab-inactive {
+    text-decoration: line-through;
+}
+</style>
+<?php
+        });
     }
 }
 
