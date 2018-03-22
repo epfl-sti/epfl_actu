@@ -245,6 +245,17 @@ class OrganizationalUnitTable extends \WP_List_Table
             $post_types[self::SLUG_PLURAL] = self::SLUG_PLURAL;
             return $post_types;
         });
+
+        add_action('admin_head', function() {
+            /* Work around https://core.trac.wordpress.org/ticket/35764 */
+        ?>
+<style>
+#wpfooter {
+  position: relative !important;
+}
+</style>
+        <?php
+        });
     }
 
     function __construct ()
