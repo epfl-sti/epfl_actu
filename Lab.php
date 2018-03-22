@@ -235,6 +235,7 @@ class LabController extends CustomPostTypeController
 
         static::auto_fields_controller()->hook();
         static::add_thumbnail_column();
+        static::add_abbrev_column();
     }
 
     /**
@@ -291,6 +292,47 @@ class LabController extends CustomPostTypeController
     private static function auto_fields_controller ()
     {
         return new AutoFieldsController(Lab::class);
+    }
+
+    /**
+     * Add a column in the list view that shows lab abbrevs
+     */
+    static function add_abbrev_column ()
+    {
+        $this_class = get_called_class();
+        $model_class = $this_class::get_model_class();
+        $post_type = $model_class::get_post_type();
+        add_action( sprintf('manage_%s_posts_columns', $post_type),
+                    function ($columns) {
+                        $newcolumns = array();
+                        foreach ($columns as $col_slug => $descr) {
+                            $newcolumns[$col_slug] = $descr;
+                            if ($col_slug === "title") {
+                                $newcolumns["abbrev"] =
+                                    ___('Lab abbreviation');
+                            }
+                        }
+                        return $newcolumns;
+                    });
+        add_action(
+            sprintf('manage_epfl-lab_posts_custom_column', $post_type),
+            function ($column, $post_id) use ($this_class, $model_class) {
+                if ($column !== 'abbrev') return;
+
+                $lab = $model_class::get($post_id);
+                if (! $lab) return;
+
+                $this_class::render_abbrev_column($lab);
+            }, 10, 2);
+    }
+
+    static function render_abbrev_column ($lab) {
+        $abbrev = $lab->get_abbrev();
+        if ($url = $lab->get_website_url()) {
+            echo sprintf('<a href="%s">%s</a>', $url, $abbrev);
+        } else {
+            echo $abbrev;
+        }
     }
 }
 
