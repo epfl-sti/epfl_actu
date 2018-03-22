@@ -131,10 +131,8 @@ class Lab extends TypedPost
             self::LAB_POSTAL_ADDRESS_META => $ldap_result["postaladdress"][0],
         );
 
-        if ($ldap_result["dn"] &&
-            $members = LDAPClient::query_people_in_unit($ldap_result["dn"])) {
-            $meta_input[self::MEMBER_COUNT_META] = count($members);
-        }
+        $members = LDAPClient::query_people_in_unit($ldap_result["dn"]);
+        $meta_input[self::MEMBER_COUNT_META] = count($members);
 
         wp_update_post(array(
             "ID"            => $this->ID,
