@@ -90,7 +90,9 @@ class OrganizationalUnit extends Post
 
     function get_all_labs ()
     {
-        return Lab::find_all_by_dn_suffix($this->get_dn());
+        return array_filter(
+            Lab::find_all_by_dn_suffix($this->get_dn()),
+            function ($lab) { return $lab->is_active(); });
     }
 
     static function all ()

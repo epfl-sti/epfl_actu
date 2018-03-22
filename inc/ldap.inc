@@ -25,6 +25,7 @@ class LDAPClient
     const SEARCH_UNIT_BY_CN        = "(&(objectClass=EPFLorganizationalUnit)(cn=%s))";
     const SEARCH_UNIT_BY_UNIQUE_ID = "(&(objectClass=EPFLorganizationalUnit)(uniqueIdentifier=%d))";
     const SEARCH_ALL_UNITS         = "(objectClass=EPFLorganizationalUnit)";
+    const SEARCH_ALL_PEOPLE        = "(objectClass=Person)";
 
     static function query_by_sciper ($sciper)
     {
@@ -44,6 +45,10 @@ class LDAPClient
 
     static function query_units_by_parent_dn ($dn) {
         return self::_do_ldap_search(self::SEARCH_ALL_UNITS, $dn, "one");
+    }
+
+    static function query_people_in_unit ($dn) {
+        return self::_do_ldap_search(self::SEARCH_ALL_PEOPLE, $dn, "subtree");
     }
 
     static private function _do_ldap_search ($query, $base_dn = null,

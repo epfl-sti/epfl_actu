@@ -54,6 +54,7 @@ class Lab extends TypedPost
     const LAB_DESCRIPTION_FR_META = "epfl_lab_description_fr";
     const LAB_DESCRIPTION_EN_META = "epfl_lab_description_en";
     const LAB_MANAGER_META        = "epfl_lab_manager";
+    const MEMBER_COUNT_META      = "epfl_lab_member_count";
     const LAB_POSTAL_ADDRESS_META = "epfl_lab_postal_address";
 
     static function get_post_type ()
@@ -129,6 +130,13 @@ class Lab extends TypedPost
             self::LAB_MANAGER_META        => $ldap_result["unitmanager"][0],
             self::LAB_POSTAL_ADDRESS_META => $ldap_result["postaladdress"][0],
         );
+
+        if ($ldap_result["dn"] &&
+            $members = LDAPClient::query_people_in_unit($ldap_result["dn"])) {
+            $meta_input[self::MEMBER_COUNT_META] = count($members);
+        } else {
+            $meta_input[self::MEMBER_COUNT_META] = 0;
+        }
 
         wp_update_post(array(
             "ID"            => $this->ID,
@@ -222,6 +230,11 @@ class Lab extends TypedPost
     public function get_postaladdress ()
     {
         return get_post_meta($this->ID, self::LAB_POSTAL_ADDRESS_META, true);
+    }
+
+    public function is_active ()
+    {
+        return get_post_meta($this->ID, self::MEMBER_COUNT_META, true) > 0;
     }
 }
 
