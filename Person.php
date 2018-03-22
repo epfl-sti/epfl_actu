@@ -308,6 +308,7 @@ class Person
                 sprintf(___('Person with SCIPER %d not found'),
                         $this->get_sciper()));
         }
+        $entry = $entries[0];
 
         $meta = array();
 
@@ -315,34 +316,34 @@ class Person
             $meta[self::TITLE_CODE_META] = $title->code;
         }
 
-        if ($mail = $entries[0]["mail"][0]) {
+        if ($mail = $entry["mail"][0]) {
             $meta[self::EMAIL_META] = $mail;
         }
 
-        if ($profile = $entries[0]["labeleduri"][0]) {
+        if ($profile = $entry["labeleduri"][0]) {
             $meta[self::PROFILE_URL_META] = explode(" ", $profile)[0];
         }
 
-        if ($postaladdress = $entries[0]["postaladdress"][0]) {
+        if ($postaladdress = $entry["postaladdress"][0]) {
             $meta[self::POSTAL_ADDRESS_META] = $postaladdress;
         }
 
-        if ($roomnumber = $entries[0]["roomnumber"][0]) {
+        if ($roomnumber = $entry["roomnumber"][0]) {
           $meta[self::ROOM_META] = $roomnumber;
         }
 
-        if ($telephonenumber = $entries[0]["telephonenumber"][0]) {
+        if ($telephonenumber = $entry["telephonenumber"][0]) {
             $meta[self::PHONE_META] = $telephonenumber;
         }
 
-        if ($dn = $entries[0]["dn"]) {
+        if ($dn = $entry["dn"]) {
             $meta[self::DN_META] = $dn;
             $bricks = explode(',', $dn);
             // construct a unit string, e.g. EPFL / STI / STI-SG / STI-IT
             $meta[self::UNIT_QUAD_META] = strtoupper(explode('=', $bricks[4])[1]) . " / " . strtoupper(explode('=', $bricks[3])[1]) . " / " . strtoupper(explode('=', $bricks[2])[1]) . " / " . strtoupper(explode('=', $bricks[1])[1]);
         }
 
-        $unit = $entries[0]["ou"][0];
+        $unit = $entry["ou"][0];
         $lab = $this->get_lab();
         if ($lab) {
             $lab->sync();
@@ -360,7 +361,7 @@ class Person
             'ID'         => $this->ID,
             // We want a language-neutral post_title so we can't
             // work in the greeting - Filters will be used for that instead.
-            'post_title' => $entries[0]['cn'][0],
+            'post_title' => $entry['cn'][0],
         );
         wp_update_post($update);
         $this->_update_meta($meta);
