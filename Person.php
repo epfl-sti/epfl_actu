@@ -567,6 +567,8 @@ class PersonController
                    array(get_called_class(), 'meta_boxes_above_editor'));
         add_action( 'edit_form_after_editor',
                    array(get_called_class(), 'meta_boxes_after_editor'));
+        add_action('admin_head',
+                   array(get_called_class(), 'render_css_for_meta_boxes'));
 
         add_action( sprintf('save_post_%s', Person::get_post_type()),
                    array(get_called_class(), 'save_meta_boxes'), 10, 3);
@@ -1019,6 +1021,17 @@ class PersonController
     {
         if ($post->post_type !== Person::get_post_type()) return;
         do_meta_boxes(get_current_screen(), 'after-editor', $post);
+    }
+
+    static function render_css_for_meta_boxes ()
+    {
+        ?>
+<style>
+#epfl-person-nonce-meta_box_show_person_details img {
+        max-width: 40%;
+}
+</style>
+        <?php
     }
 
     /**
