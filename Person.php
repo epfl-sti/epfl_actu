@@ -492,6 +492,12 @@ class Person
     {
         $auto_fields = AutoFields::of(get_called_class());
         foreach ($meta_array as $k => $v) {
+            if (is_array($v)) {
+                delete_post_meta($this->ID, $k);
+                foreach ($v as $vitem) {
+                    add_post_meta($this->ID, $k, $vitem);
+                }
+            }
             update_post_meta($this->ID, $k, $v);
             $auto_fields->append(array($k));
         }
