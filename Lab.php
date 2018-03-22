@@ -134,8 +134,6 @@ class Lab extends TypedPost
         if ($ldap_result["dn"] &&
             $members = LDAPClient::query_people_in_unit($ldap_result["dn"])) {
             $meta_input[self::MEMBER_COUNT_META] = count($members);
-        } else {
-            $meta_input[self::MEMBER_COUNT_META] = 0;
         }
 
         wp_update_post(array(
