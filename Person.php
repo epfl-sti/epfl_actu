@@ -769,9 +769,9 @@ class PersonController
         $greeting = $title ? sprintf("%s ", $title->as_greeting()) : "";
         $title_str = $title ? sprintf("%s, ", $title->localize()) : "";
         ?><h1><?php echo $greeting; the_title(); ?></h1>
-          <h2><?php echo $title_str; ?><a href="https://people.epfl.ch/<?php echo $sciper; ?>">SCIPER <?php echo $sciper; ?></a></h2>
+          <h2><?php echo $title_str; ?><a href="/epfl-person/<?php echo $sciper; ?>">SCIPER <?php echo $sciper; ?></a> (<a href="https://people.epfl.ch/<?php echo $sciper; ?>">school directory</a>)</h2>
         <?php the_post_thumbnail(); ?>
-       <?php
+<?php
     }
 
     static function save_meta_box_show_person_details ($post_id, $post, $is_update)
