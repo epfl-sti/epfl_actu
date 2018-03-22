@@ -17,6 +17,7 @@ use \EPFL\WS\LDAPClient;
 
 require_once(__DIR__ . "/inc/base-classes.inc");
 use \EPFL\WS\Base\TypedPost;
+use \EPFL\WS\Base\CustomPostTypeController;
 
 require_once(__DIR__ . "/inc/auto-fields.inc");
 use \EPFL\WS\AutoFields;
@@ -210,13 +211,19 @@ class Lab extends TypedPost
     }
 }
 
-class LabController
+class LabController extends CustomPostTypeController
 {
+    static function get_model_class ()
+    {
+        return Lab::class;
+    }
+
     static function hook ()
     {
         add_action('init', array(get_called_class(), 'register_post_type'));
 
         static::auto_fields_controller()->hook();
+        static::add_thumbnail_column();
     }
 
     /**
