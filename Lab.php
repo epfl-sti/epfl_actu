@@ -106,6 +106,7 @@ class Lab extends TypedPost
     {
         $query = new \WP_Query(array(
             'post_type' => self::get_post_type(),
+            'posts_per_page' => -1,
             'meta_query' => array(array(
                 'key'     => self::DN_META,
                 'compare' => 'RLIKE',
