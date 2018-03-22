@@ -228,9 +228,14 @@ class Lab extends TypedPost
         return get_post_meta($this->ID, self::LAB_POSTAL_ADDRESS_META, true);
     }
 
+    public function get_member_count ()
+    {
+        return get_post_meta($this->ID, self::MEMBER_COUNT_META, true);
+    }
+
     public function is_active ()
     {
-        return get_post_meta($this->ID, self::MEMBER_COUNT_META, true) > 0;
+        return ($this->get_member_count() !== 0);
     }
 }
 
@@ -248,7 +253,7 @@ class LabController extends CustomPostTypeController
         static::auto_fields_controller()->hook();
         static::add_thumbnail_column();
         static::call_sync_on_save();
-        static::add_abbrev_column();
+        static::add_abbrev_and_people_count_columns();
     }
 
     /**
@@ -308,9 +313,9 @@ class LabController extends CustomPostTypeController
     }
 
     /**
-     * Add a column in the list view that shows lab abbrevs
+     * Add the relevant columns in the Lab list view in wp-admin
      */
-    static function add_abbrev_column ()
+    static function add_abbrev_and_people_count_columns ()
     {
         $this_class = get_called_class();
         $model_class = $this_class::get_model_class();
@@ -323,6 +328,8 @@ class LabController extends CustomPostTypeController
                             if ($col_slug === "title") {
                                 $newcolumns["abbrev"] =
                                     ___('Lab abbreviation');
+                                $newcolumns["member_count"] =
+                                    ___('Members');
                             }
                         }
                         return $newcolumns;
@@ -330,22 +337,30 @@ class LabController extends CustomPostTypeController
         add_action(
             sprintf('manage_epfl-lab_posts_custom_column', $post_type),
             function ($column, $post_id) use ($this_class, $model_class) {
-                if ($column !== 'abbrev') return;
-
                 $lab = $model_class::get($post_id);
                 if (! $lab) return;
-
-                $this_class::render_abbrev_column($lab);
+                if ($column === 'abbrev') {
+                    $this_class::render_abbrev_column($lab);
+                } elseif ($column === 'member_count') {
+                    $this_class::render_member_count_column($lab);
+                }
             }, 10, 2);
     }
 
-    static function render_abbrev_column ($lab) {
+    static function render_abbrev_column ($lab)
+    {
         $abbrev = $lab->get_abbrev();
         if ($url = $lab->get_website_url()) {
             echo sprintf('<a href="%s">%s</a>', $url, $abbrev);
         } else {
             echo $abbrev;
         }
+    }
+
+    static function render_member_count_column ($lab)
+    {
+        // TODO: we could link to a suitable search query in EPFL People
+        echo $lab->get_member_count();
     }
 }
 
