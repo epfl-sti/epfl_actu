@@ -235,6 +235,7 @@ class LabController extends CustomPostTypeController
 
         static::auto_fields_controller()->hook();
         static::add_thumbnail_column();
+        static::call_sync_on_save();
         static::add_abbrev_column();
     }
 

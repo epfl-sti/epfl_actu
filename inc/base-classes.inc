@@ -829,6 +829,30 @@ td.column-thumbnail img {
         if (! $img) return;
         echo $img;
     }
+
+    static $_syncing_on_save = null;
+    /**
+     * Call ->sync() upon saving a Lab object.
+     */
+    static function call_sync_on_save ()
+    {
+        $model_class = static::get_model_class();
+        add_action(
+            sprintf('save_post_%s', $model_class::get_post_type()),
+            function ($post_id, $post, $is_update) use ($model_class) {
+                if (CustomPostTypeController::$_syncing_on_save === $post_id) {
+                    return;  // Break out of possible recursion
+                }
+                $syncing_on_save_orig = CustomPostTypeController::$_syncing_on_save;
+                try {
+                    CustomPostTypeController::$_syncing_on_save = $post_id;
+                    $model_obj = $model_class::get($post);
+                    if ($model_obj) { $model_obj->sync(); }
+                } finally {
+                    CustomPostTypeController::$_syncing_on_save = $syncing_on_save_orig;
+                };
+            }, 10, 3);
+    }
 }
 
 
