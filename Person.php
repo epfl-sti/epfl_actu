@@ -87,6 +87,8 @@ class Person
     // Auto fields
     const SCIPER_META             = 'sciper';
     const DN_META                 = 'dn';
+    const GIVEN_NAME_META         = 'givenName';
+    const SURNAME_META            = 'surname';
     const EMAIL_META              = 'mail';
     const PROFILE_URL_META        = 'profile';
     const POSTAL_ADDRESS_META     = 'postaladdress';
@@ -146,6 +148,16 @@ class Person
     public function get_full_name ()
     {
         return $this->wp_post()->post_title;
+    }
+
+    public function get_given_name ()
+    {
+        return get_post_meta($this->ID, self::GIVEN_NAME_META, true);
+    }
+
+    public function get_surname ()
+    {
+        return get_post_meta($this->ID, self::SURNAME_META, true);
     }
 
     public function get_publication_link ()
@@ -314,6 +326,14 @@ class Person
 
         if ($title = Title::from_ldap($entries)) {
             $meta[self::TITLE_CODE_META] = $title->code;
+        }
+
+        if ($given_name = $entry["givenname"][0]) {
+            $meta[self::GIVEN_NAME_META] = $given_name;
+        }
+
+        if ($surname = $entry["sn"][0]) {
+            $meta[self::SURNAME_META] = $surname;
         }
 
         if ($mail = $entry["mail"][0]) {
