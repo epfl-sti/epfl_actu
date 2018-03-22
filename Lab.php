@@ -61,11 +61,11 @@ class Lab extends TypedPost
         return self::SLUG;
     }
 
-    static function get_or_create_by_name ($unit_name)
+    static function get_or_create_by_abbrev ($abbrev)
     {
-        $unit_entries = LDAPClient::query_by_unit_name($unit_name);
+        $unit_entries = LDAPClient::query_by_unit_name($abbrev);
         if (!($unit_entries && count($unit_entries))) {
-            throw new LabNotFoundException(sprintf("Unknown lab abbrev %s", $unit_name));
+            throw new LabNotFoundException(sprintf("Unknown lab abbrev %s", $abbrev));
         }
         return static::get_or_create_by_ldap_entry($unit_entries[0]);
     }
@@ -88,6 +88,17 @@ class Lab extends TypedPost
         return static::_get_by_primary_key(array(
             self::UNIQUE_ID_META => $unique_id
         ));
+    }
+
+    /**
+     * This is for shortcodes - DO NOT use this in deeply embedded code;
+     * the abbrev is NOT a good unique ID for labs.
+     */
+    static function get_by_abbrev ($abbrev)
+    {
+        $unit_entries = LDAPClient::query_by_unit_name($abbrev);
+        if (count($unit_entries) != 1) return null;
+        return static::get_by_unique_id($unit_entries[0]["uniqueidentifier"][0]);
     }
 
     public static function find_all_by_dn_suffix ($dn_suffix)

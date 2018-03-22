@@ -372,7 +372,7 @@ class Person
             }
         }
         if (! $lab) {
-            $lab = Lab::get_or_create_by_name($unit);
+            $lab = Lab::get_or_create_by_abbrev($unit);
             $meta[self::LAB_UNIQUE_ID_META] = $lab->get_unique_id();
             $lab->sync();
         }
@@ -803,9 +803,8 @@ class PersonController
 
     static function save_meta_box_show_publication_link ($post_id, $post, $is_update)
     {
-        if (array_key_exists('publication_link', $_POST)) {
-            Person::get($post_id)->set_publication_link($_POST['publication_link']);
-        }
+        if (! ($infoscience_link = $_POST['publication_link'])) { return; }
+        Person::get($post_id)->set_publication_link($infoscience_link);
     }
 
     /**
