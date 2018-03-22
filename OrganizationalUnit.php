@@ -88,6 +88,16 @@ class OrganizationalUnit extends Post
         return static::get($results[0]);
     }
 
+    function find_by_abbrev ($abbrev)
+    {
+        $entries = LDAPClient::query_by_unit_abbrev($abbrev);
+        if (count($entries) === 1) {
+            return static::find_by_dn($entries[0]["dn"]);
+        } else {
+            return null;
+        }
+    }
+
     function get_all_labs ()
     {
         return array_filter(

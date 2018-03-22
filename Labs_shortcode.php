@@ -30,9 +30,10 @@ class LabsShortcode
     function __construct ($attrs, $content=null, $tag="")
     {
         $this->shortcode_attrs = $attrs;
-        $ou_id = $attrs["organizationalunitpostid"];
-        if ($ou_id) {
+        if ($ou_id = $attrs["organizationalunitpostid"]) {
             $this->ou = OrganizationalUnit::get($ou_id);
+        } elseif ($ou_abbrev = $attrs["under"]) {
+            $this->ou = OrganizationalUnit::find_by_abbrev($ou_abbrev);
         }
     }
 
