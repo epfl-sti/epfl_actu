@@ -85,6 +85,7 @@ class Person
     const SLUG = "epfl-person";
 
     // Auto fields
+    const SCIPER_META             = 'sciper';
     const DN_META                 = 'dn';
     const EMAIL_META              = 'mail';
     const PROFILE_URL_META        = 'profile';
@@ -139,7 +140,7 @@ class Person
 
     public function get_sciper ()
     {
-        return get_post_meta($this->ID, 'sciper', true);  // Cached by WP
+        return get_post_meta($this->ID, self::SCIPER_META, true);  // Cached by WP
     }
 
     public function get_full_name ()
@@ -174,10 +175,10 @@ class Person
             'ID'         => $this->ID,
             'post_name'  => $sciper,
             'meta_input' => array(
-                'sciper' => $sciper,
+                self::SCIPER_META => $sciper,
             )
         );
-        AutoFields::of(get_called_class())->append(array('sciper'));
+        AutoFields::of(get_called_class())->append(array(self::SCIPER_META));
 
         $title = $this->wp_post()->post_title;
         if (! $title ||
@@ -194,7 +195,7 @@ class Person
         $search_query = new \WP_Query(array(
             'post_type' => Person::get_post_type(),
             'meta_query' => array(array(
-                'key'     => 'sciper',
+                'key'     => self::SCIPER_META,
                 'value'   => $sciper,
                 'compare' => '='
             ))));
