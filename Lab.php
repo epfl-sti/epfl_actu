@@ -196,8 +196,11 @@ class Lab extends TypedPost
     public function get_unique_id ()
     {
         $unique_id_meta = self::UNIQUE_ID_META;
-        return $this->$unique_id_meta;  // Set by ->_get_by_primary_key() or
-                                        // ->_get_or_create()
+        if (! $this->$unique_id_meta) {
+            $this->$unique_id_meta = get_post_meta(
+                $this->ID, self::UNIQUE_ID_META, true);
+        }
+        return $this->$unique_id_meta;
     }
 
     public function get_lab_manager ()
