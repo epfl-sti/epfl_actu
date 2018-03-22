@@ -310,38 +310,32 @@ class Person
         }
 
         $meta = array();
-        $title = Title::from_ldap($entries);
-        if ($title) {
+
+        if ($title = Title::from_ldap($entries)) {
             $meta[self::TITLE_CODE_META] = $title->code;
         }
 
-        $mail = $entries[0]["mail"][0];
-        if ($mail) {
+        if ($mail = $entries[0]["mail"][0]) {
             $meta[self::EMAIL_META] = $mail;
         }
 
-        $profile = $entries[0]["labeleduri"][0];
-        if ($profile) {
+        if ($profile = $entries[0]["labeleduri"][0]) {
             $meta[self::PROFILE_URL_META] = explode(" ", $profile)[0];
         }
 
-        $postaladdress = $entries[0]["postaladdress"][0];
-        if ($postaladdress) {
+        if ($postaladdress = $entries[0]["postaladdress"][0]) {
             $meta[self::POSTAL_ADDRESS_META] = $postaladdress;
         }
 
-        $roomnumber = $entries[0]["roomnumber"][0];
-        if ($roomnumber) {
+        if ($roomnumber = $entries[0]["roomnumber"][0]) {
           $meta[self::ROOM_META] = $roomnumber;
         }
 
-        $telephonenumber = $entries[0]["telephonenumber"][0];
-        if ($telephonenumber) {
+        if ($telephonenumber = $entries[0]["telephonenumber"][0]) {
             $meta[self::PHONE_META] = $telephonenumber;
         }
 
-        $dn = $entries[0]["dn"];
-        if ($dn) {
+        if ($dn = $entries[0]["dn"]) {
             $meta[self::DN_META] = $dn;
             $bricks = explode(',', $dn);
             // construct a unit string, e.g. EPFL / STI / STI-SG / STI-IT
