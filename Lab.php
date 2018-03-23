@@ -54,8 +54,10 @@ class Lab extends TypedPost
     const LAB_DESCRIPTION_FR_META = "epfl_lab_description_fr";
     const LAB_DESCRIPTION_EN_META = "epfl_lab_description_en";
     const LAB_MANAGER_META        = "epfl_lab_manager";
-    const MEMBER_COUNT_META      = "epfl_lab_member_count";
+    const MEMBER_COUNT_META       = "epfl_lab_member_count";
     const LAB_POSTAL_ADDRESS_META = "epfl_lab_postal_address";
+    // Set this to a truthy value to make ->is_real() return false:
+    const NOT_A_LAB_META          = "not_a_lab";
 
     static function get_post_type ()
     {
@@ -242,6 +244,12 @@ class Lab extends TypedPost
     public function is_active ()
     {
         return ($this->get_member_count() !== 0);
+    }
+
+    public function is_real ()
+    {
+        return ($this->is_active() &&
+                ! get_post_meta($this->ID, self::NOT_A_LAB_META, true));
     }
 }
 

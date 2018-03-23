@@ -102,7 +102,7 @@ class OrganizationalUnit extends Post
     {
         return array_filter(
             Lab::find_all_by_dn_suffix($this->get_dn()),
-            function ($lab) { return $lab->is_active(); });
+            function ($lab) { return $lab->is_real(); });
     }
 
     static function all ()
