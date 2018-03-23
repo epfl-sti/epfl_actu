@@ -740,7 +740,10 @@ class PersonController
 
     static function render_meta_box_find_by_sciper ($unused_post)
     {
-        ?><input type="text" id="sciper" name="sciper" placeholder="<?php echo ___("SCIPER"); ?>"><?php
+        echo sprintf(
+            '<input type="text" id="sciper" name="sciper" placeholder="%s"%s>',
+            ___("SCIPER"),
+            $_GET["SCIPER"] ? sprintf('value="%d"', $_GET["SCIPER"]) : '');
     }
 
     static function save_meta_box_find_by_sciper ($post_id, $post, $is_update)
