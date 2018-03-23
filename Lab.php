@@ -113,7 +113,11 @@ class Lab extends TypedPost
                 'key'     => self::DN_META,
                 'compare' => 'RLIKE',
                 'value'   => '.*,' . $dn_suffix
-            ))));
+            )),
+            'order'       => 'asc',
+            'orderby'     => 'meta_value',
+            'meta_key'    => self::OU_META
+        ));
         $thisclass = get_called_class();
         return array_map(function($result) use ($thisclass) {
             return $thisclass::get($result);
