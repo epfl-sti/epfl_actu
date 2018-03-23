@@ -86,6 +86,7 @@ class ISAcademiaShortCode {
     }
 
     return "<div class=\"isacademia-transcluded\">" . $isacademia . "</div>";
+
   }
 
 
