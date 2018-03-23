@@ -759,6 +759,104 @@ abstract class APIChannelPost extends TypedPost
 }
 
 /**
+ * Abstract base class for the controller of a model class that
+ * consists of a custom post type that itself derives from abstract
+ * class @link TypedPost.
+ *
+ * This is a "pure static" class; no instances are ever constructed.
+ *
+ */
+abstract class CustomPostTypeController
+{
+    /**
+     * @return The model class for this controller (subclass of APIAutoCategory)
+     */
+    abstract static function get_model_class ();
+
+    static $_css_for_thumbnail_column_sent;
+    /**
+     * Add a column in the list view that shows thumbnails
+     */
+    static function add_thumbnail_column ()
+    {
+        $this_class = get_called_class();
+        $model_class = $this_class::get_model_class();
+        $post_type = $model_class::get_post_type();
+        add_action( sprintf('manage_%s_posts_columns', $post_type),
+                    function ($columns) {
+                        // https://stackoverflow.com/a/3354804/435004
+                        return array_merge(
+                            array_slice($columns, 0, 1, true),
+                            array('thumbnail' => ___( 'Thumbnail' )),
+                            array_slice($columns, 1, count($columns) - 1, true));
+                    });
+        add_action(
+            sprintf('manage_%s_posts_custom_column', $post_type),
+            function ($column, $post_id) use ($this_class, $model_class) {
+                if ($column !== 'thumbnail') return;
+
+                $epfl_post = $model_class::get($post_id);
+                if (! $epfl_post) return;
+
+                $this_class::render_thumbnail_column($epfl_post);
+            }, 10, 2);
+        add_action('admin_head', function() {
+            if (self::$_css_for_thumbnail_column_sent) return;
+            self::$_css_for_thumbnail_column_sent = true;
+            ?>
+<style>
+td.column-thumbnail img {
+    max-width: 100%;
+    height: auto;
+}
+</style>
+<?php
+        });
+    }
+
+    /**
+     * Echo what should be in the relevant <td> in the thumbnail column.
+     *
+     * The base class echoes a single <img> tag. Subclasses might want
+     * to echo something instead of, or in addition to that.
+     *
+     * @param $epfl_post An instance of the class returned by @link
+     * get_model_class
+     */
+    static function render_thumbnail_column ($epfl_post)
+    {
+        $img = get_the_post_thumbnail($epfl_post);
+        if (! $img) return;
+        echo $img;
+    }
+
+    static $_syncing_on_save = null;
+    /**
+     * Call ->sync() upon saving a Lab object.
+     */
+    static function call_sync_on_save ()
+    {
+        $model_class = static::get_model_class();
+        add_action(
+            sprintf('save_post_%s', $model_class::get_post_type()),
+            function ($post_id, $post, $is_update) use ($model_class) {
+                if (CustomPostTypeController::$_syncing_on_save === $post_id) {
+                    return;  // Break out of possible recursion
+                }
+                $syncing_on_save_orig = CustomPostTypeController::$_syncing_on_save;
+                try {
+                    CustomPostTypeController::$_syncing_on_save = $post_id;
+                    $model_obj = $model_class::get($post);
+                    if ($model_obj) { $model_obj->sync(); }
+                } finally {
+                    CustomPostTypeController::$_syncing_on_save = $syncing_on_save_orig;
+                };
+            }, 10, 3);
+    }
+}
+
+
+/**
  * Abstract base class for the controller of a model class whose
  * instances are streamed from an API (as opposed to typed in manually
  * from wp-admin).
@@ -771,7 +869,7 @@ abstract class APIChannelPost extends TypedPost
  * `get_permalink` method in the class returned by @link
  * get_model_class).
  */
-abstract class StreamPostController
+abstract class StreamPostController extends CustomPostTypeController
 {
     /**
      * Get the labels to display in various places in the UI.
@@ -1134,54 +1232,18 @@ abstract class APIChannelPostController extends StreamPostController
         return sprintf("<img src=\"%s\" %s/>", $src, $attrs);
     }
 
-
     /**
-     * Make room for a column that shows the thumbnails and some
-     * details
-     */
-    static function add_thumbnail_column ()
-    {
-        $this_class = get_called_class();
-        $model_class = $this_class::get_model_class();
-        $post_type = $model_class::get_post_type();
-        add_action( sprintf('manage_%s_posts_columns', $post_type),
-                    function ($columns) {
-                        // https://stackoverflow.com/a/3354804/435004
-                        return array_merge(
-                            array_slice($columns, 0, 1, true),
-                            array('thumbnail' => ___( 'Thumbnail' )),
-                            array_slice($columns, 1, count($columns) - 1, true));
-                    });
-        add_action(
-            sprintf('manage_%s_posts_custom_column', $post_type),
-            function ($column, $post_id) use ($this_class, $model_class) {
-                if ($column !== 'thumbnail') return;
-                $img = get_the_post_thumbnail($post_id);
-                if (! $img) return;
-
-                $epfl_post = $model_class::get($post_id);
-                if (! $epfl_post) return;
-
-                $this_class::render_thumbnail_column($epfl_post, $img);
-            }, 10, 2);
-    }
-
-    /**
-     * Render an EPFL post as a thumbnail in an additional column in
-     * the wp-admin list view
+     * Overridden to show image metadata in the thumbnail column.
      *
-     * The base class appends size informations below $img. Subclasses
+     * This class appends size informations below $img. Subclasses
      * may override this to render the thumbnail differently.
      *
      * @param $epfl_post An instance of the class returned by @link
      * get_model_class
-     *
-     * @param $img HTML code for the thumbnail (as returned by
-     * Wordpress' @link get_the_post_thumbnail)
      */
-    static function render_thumbnail_column ($epfl_post, $img)
+    static function render_thumbnail_column ($epfl_post)
     {
-        echo $img;
+        parent::render_thumbnail_column($epfl_post);
         if ($orig_size = $epfl_post->get_max_size()) {
             printf("<p>Size: %dx%d</p>", $orig_size["width"], $orig_size["height"]);
         }

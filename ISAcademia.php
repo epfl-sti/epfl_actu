@@ -161,7 +161,7 @@ class CourseController extends StreamPostController
     }
 
     static function filter_register_post_type (&$settings) {
-        $settings["menu_icon"] = 'dashicons-welcome-write-blog';
+        $settings["menu_icon"] = 'dashicons-book';
         $settings["menu_position"] = 46;
     }
 

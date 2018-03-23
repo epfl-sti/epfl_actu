@@ -85,7 +85,10 @@ class Person
     const SLUG = "epfl-person";
 
     // Auto fields
+    const SCIPER_META             = 'sciper';
     const DN_META                 = 'dn';
+    const GIVEN_NAME_META         = 'givenName';
+    const SURNAME_META            = 'surname';
     const EMAIL_META              = 'mail';
     const PROFILE_URL_META        = 'profile';
     const POSTAL_ADDRESS_META     = 'postaladdress';
@@ -139,12 +142,22 @@ class Person
 
     public function get_sciper ()
     {
-        return get_post_meta($this->ID, 'sciper', true);  // Cached by WP
+        return get_post_meta($this->ID, self::SCIPER_META, true);  // Cached by WP
     }
 
     public function get_full_name ()
     {
         return $this->wp_post()->post_title;
+    }
+
+    public function get_given_name ()
+    {
+        return get_post_meta($this->ID, self::GIVEN_NAME_META, true);
+    }
+
+    public function get_surname ()
+    {
+        return get_post_meta($this->ID, self::SURNAME_META, true);
     }
 
     public function get_publication_link ()
@@ -174,10 +187,10 @@ class Person
             'ID'         => $this->ID,
             'post_name'  => $sciper,
             'meta_input' => array(
-                'sciper' => $sciper,
+                self::SCIPER_META => $sciper,
             )
         );
-        AutoFields::of(get_called_class())->append(array('sciper'));
+        AutoFields::of(get_called_class())->append(array(self::SCIPER_META));
 
         $title = $this->wp_post()->post_title;
         if (! $title ||
@@ -194,7 +207,7 @@ class Person
         $search_query = new \WP_Query(array(
             'post_type' => Person::get_post_type(),
             'meta_query' => array(array(
-                'key'     => 'sciper',
+                'key'     => self::SCIPER_META,
                 'value'   => $sciper,
                 'compare' => '='
             ))));
@@ -256,9 +269,19 @@ class Person
         return get_post_meta($this->ID, self::ROOM_META, true);
     }
 
+    public function set_room ($room)
+    {
+        return update_post_meta($this->ID, self::ROOM_META, $room);
+    }
+
     public function get_phone ()
     {
         return get_post_meta($this->ID, self::PHONE_META, true);
+    }
+
+    public function set_phone ($phone)
+    {
+        return update_post_meta($this->ID, self::PHONE_META, $phone);
     }
 
     public function get_unit ()
@@ -297,47 +320,50 @@ class Person
                 sprintf(___('Person with SCIPER %d not found'),
                         $this->get_sciper()));
         }
+        $entry = $entries[0];
 
         $meta = array();
-        $title = Title::from_ldap($entries);
-        if ($title) {
+
+        if ($title = Title::from_ldap($entries)) {
             $meta[self::TITLE_CODE_META] = $title->code;
         }
 
-        $mail = $entries[0]["mail"][0];
-        if ($mail) {
+        if ($given_name = $entry["givenname"][0]) {
+            $meta[self::GIVEN_NAME_META] = $given_name;
+        }
+
+        if ($surname = $entry["sn"][0]) {
+            $meta[self::SURNAME_META] = $surname;
+        }
+
+        if ($mail = $entry["mail"][0]) {
             $meta[self::EMAIL_META] = $mail;
         }
 
-        $profile = $entries[0]["labeleduri"][0];
-        if ($profile) {
+        if ($profile = $entry["labeleduri"][0]) {
             $meta[self::PROFILE_URL_META] = explode(" ", $profile)[0];
         }
 
-        $postaladdress = $entries[0]["postaladdress"][0];
-        if ($postaladdress) {
+        if ($postaladdress = $entry["postaladdress"][0]) {
             $meta[self::POSTAL_ADDRESS_META] = $postaladdress;
         }
 
-        $roomnumber = $entries[0]["roomnumber"][0];
-        if ($roomnumber) {
+        if ($roomnumber = $entry["roomnumber"][0]) {
           $meta[self::ROOM_META] = $roomnumber;
         }
 
-        $telephonenumber = $entries[0]["telephonenumber"][0];
-        if ($telephonenumber) {
+        if ($telephonenumber = $entry["telephonenumber"][0]) {
             $meta[self::PHONE_META] = $telephonenumber;
         }
 
-        $dn = $entries[0]["dn"];
-        if ($dn) {
+        if ($dn = $entry["dn"]) {
             $meta[self::DN_META] = $dn;
             $bricks = explode(',', $dn);
             // construct a unit string, e.g. EPFL / STI / STI-SG / STI-IT
             $meta[self::UNIT_QUAD_META] = strtoupper(explode('=', $bricks[4])[1]) . " / " . strtoupper(explode('=', $bricks[3])[1]) . " / " . strtoupper(explode('=', $bricks[2])[1]) . " / " . strtoupper(explode('=', $bricks[1])[1]);
         }
 
-        $unit = $entries[0]["ou"][0];
+        $unit = $entry["ou"][0];
         $lab = $this->get_lab();
         if ($lab) {
             $lab->sync();
@@ -346,7 +372,7 @@ class Person
             }
         }
         if (! $lab) {
-            $lab = Lab::get_or_create_by_name($unit);
+            $lab = Lab::get_or_create_by_abbrev($unit);
             $meta[self::LAB_UNIQUE_ID_META] = $lab->get_unique_id();
             $lab->sync();
         }
@@ -355,7 +381,7 @@ class Person
             'ID'         => $this->ID,
             // We want a language-neutral post_title so we can't
             // work in the greeting - Filters will be used for that instead.
-            'post_title' => $entries[0]['cn'][0],
+            'post_title' => $entry['cn'][0],
         );
         wp_update_post($update);
         $this->_update_meta($meta);
@@ -419,6 +445,11 @@ class Person
 
         $biography = apply_filters("epfl_person_bio", $biography, $this);
 
+        $this->set_bio($biography);
+    }
+
+    function set_bio ($biography)
+    {
         $update = array(
             'ID'           => $this->ID,
             'post_content' => $biography
@@ -461,6 +492,12 @@ class Person
     {
         $auto_fields = AutoFields::of(get_called_class());
         foreach ($meta_array as $k => $v) {
+            if (is_array($v)) {
+                delete_post_meta($this->ID, $k);
+                foreach ($v as $vitem) {
+                    add_post_meta($this->ID, $k, $vitem);
+                }
+            }
             update_post_meta($this->ID, $k, $v);
             $auto_fields->append(array($k));
         }
@@ -530,6 +567,8 @@ class PersonController
                    array(get_called_class(), 'meta_boxes_above_editor'));
         add_action( 'edit_form_after_editor',
                    array(get_called_class(), 'meta_boxes_after_editor'));
+        add_action('admin_head',
+                   array(get_called_class(), 'render_css_for_meta_boxes'));
 
         add_action( sprintf('save_post_%s', Person::get_post_type()),
                    array(get_called_class(), 'save_meta_boxes'), 10, 3);
@@ -732,9 +771,9 @@ class PersonController
         $greeting = $title ? sprintf("%s ", $title->as_greeting()) : "";
         $title_str = $title ? sprintf("%s, ", $title->localize()) : "";
         ?><h1><?php echo $greeting; the_title(); ?></h1>
-          <h2><?php echo $title_str; ?><a href="https://people.epfl.ch/<?php echo $sciper; ?>">SCIPER <?php echo $sciper; ?></a></h2>
+          <h2><?php echo $title_str; ?><a href="/epfl-person/<?php echo $sciper; ?>">SCIPER <?php echo $sciper; ?></a> (<a href="https://people.epfl.ch/<?php echo $sciper; ?>">school directory</a>)</h2>
         <?php the_post_thumbnail(); ?>
-       <?php
+<?php
     }
 
     static function save_meta_box_show_person_details ($post_id, $post, $is_update)
@@ -764,9 +803,8 @@ class PersonController
 
     static function save_meta_box_show_publication_link ($post_id, $post, $is_update)
     {
-        if (array_key_exists('publication_link', $_POST)) {
-            Person::get($post_id)->set_publication_link($_POST['publication_link']);
-        }
+        if (! ($infoscience_link = $_POST['publication_link'])) { return; }
+        Person::get($post_id)->set_publication_link($infoscience_link);
     }
 
     /**
@@ -982,6 +1020,18 @@ class PersonController
     {
         if ($post->post_type !== Person::get_post_type()) return;
         do_meta_boxes(get_current_screen(), 'after-editor', $post);
+    }
+
+    static function render_css_for_meta_boxes ()
+    {
+        ?>
+<style>
+#epfl-person-nonce-meta_box_show_person_details img {
+        max-width: 40%;
+        height: auto;
+}
+</style>
+        <?php
     }
 
     /**
