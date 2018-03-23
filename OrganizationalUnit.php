@@ -88,16 +88,27 @@ class OrganizationalUnit extends Post
         return static::get($results[0]);
     }
 
+    function find_by_abbrev ($abbrev)
+    {
+        $entries = LDAPClient::query_by_unit_abbrev($abbrev);
+        if (count($entries) === 1) {
+            return static::find_by_dn($entries[0]["dn"]);
+        } else {
+            return null;
+        }
+    }
+
     function get_all_labs ()
     {
         return array_filter(
             Lab::find_all_by_dn_suffix($this->get_dn()),
-            function ($lab) { return $lab->is_active(); });
+            function ($lab) { return $lab->is_real(); });
     }
 
     static function all ()
     {
         $query = new \WP_Query(array(
+            'posts_per_page' => -1,
             'post_type' => ['post', 'page'],
             'meta_query' => array(array(
                 'key'     => self::DN_META,
@@ -233,6 +244,17 @@ class OrganizationalUnitTable extends \WP_List_Table
         add_filter('pll_get_post_types', function($post_types) {
             $post_types[self::SLUG_PLURAL] = self::SLUG_PLURAL;
             return $post_types;
+        });
+
+        add_action('admin_head', function() {
+            /* Work around https://core.trac.wordpress.org/ticket/35764 */
+        ?>
+<style>
+#wpfooter {
+  position: relative !important;
+}
+</style>
+        <?php
         });
     }
 

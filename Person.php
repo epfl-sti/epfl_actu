@@ -394,6 +394,23 @@ class Person
         return Lab::get_by_unique_id($unique_id);
     }
 
+    /**
+     * @return a Lab object if this person is the owner of their lab,
+     * false if not, and null if the data is incomplete.
+     */
+    public function is_lab_owner ()
+    {
+        $lab = $this->get_lab();
+        if (! $lab) { return null; }
+        $mgr = $lab->get_lab_manager();
+        if (! $mgr) { return null; }
+        if ($mgr->ID + 0 === $this->ID + 0) {
+            return $lab;
+        } else {
+            return false;
+        }
+    }
+
     public function get_image_url ($size = null)
     {
         return get_post_meta($this->ID, self::THUMBNAIL_META, true);
@@ -740,7 +757,10 @@ class PersonController
 
     static function render_meta_box_find_by_sciper ($unused_post)
     {
-        ?><input type="text" id="sciper" name="sciper" placeholder="<?php echo ___("SCIPER"); ?>"><?php
+        echo sprintf(
+            '<input type="text" id="sciper" name="sciper" placeholder="%s"%s>',
+            ___("SCIPER"),
+            $_GET["SCIPER"] ? sprintf('value="%d"', $_GET["SCIPER"]) : '');
     }
 
     static function save_meta_box_find_by_sciper ($post_id, $post, $is_update)
@@ -769,11 +789,21 @@ class PersonController
         $sciper = $person->get_sciper();
         $title = $person->get_title();
         $greeting = $title ? sprintf("%s ", $title->as_greeting()) : "";
-        $title_str = $title ? sprintf("%s, ", $title->localize()) : "";
-        ?><h1><?php echo $greeting; the_title(); ?></h1>
-          <h2><?php echo $title_str; ?><a href="/epfl-person/<?php echo $sciper; ?>">SCIPER <?php echo $sciper; ?></a> (<a href="https://people.epfl.ch/<?php echo $sciper; ?>">school directory</a>)</h2>
-        <?php the_post_thumbnail(); ?>
-<?php
+        ?><h1><?php echo $greeting; the_title(); ?></h1><?php
+        if ($lab = $person->is_lab_owner()) {
+          printf(
+              '<h2>%s, <a href="/wp-admin/post.php?post=%d&action=edit">%s</a></h2>',
+              $title->localize(),
+              $lab->ID,
+              $lab->get_abbrev()
+          );
+        } else {
+          printf('<h2>%s</h2>', $title_str);
+        }
+        printf(
+            '<h2><a href="/epfl-person/%d">SCIPER %d</a> (<a href="https://people.epfl.ch/%d">school directory</a>)</h2>',
+            $sciper, $sciper, $sciper);
+        the_post_thumbnail();
     }
 
     static function save_meta_box_show_person_details ($post_id, $post, $is_update)

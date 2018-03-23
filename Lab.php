@@ -54,8 +54,10 @@ class Lab extends TypedPost
     const LAB_DESCRIPTION_FR_META = "epfl_lab_description_fr";
     const LAB_DESCRIPTION_EN_META = "epfl_lab_description_en";
     const LAB_MANAGER_META        = "epfl_lab_manager";
-    const MEMBER_COUNT_META      = "epfl_lab_member_count";
+    const MEMBER_COUNT_META       = "epfl_lab_member_count";
     const LAB_POSTAL_ADDRESS_META = "epfl_lab_postal_address";
+    // Set this to a truthy value to make ->is_real() return false:
+    const NOT_A_LAB_META          = "not_a_lab";
 
     static function get_post_type ()
     {
@@ -106,11 +108,16 @@ class Lab extends TypedPost
     {
         $query = new \WP_Query(array(
             'post_type' => self::get_post_type(),
+            'posts_per_page' => -1,
             'meta_query' => array(array(
                 'key'     => self::DN_META,
                 'compare' => 'RLIKE',
                 'value'   => '.*,' . $dn_suffix
-            ))));
+            )),
+            'order'       => 'asc',
+            'orderby'     => 'meta_value',
+            'meta_key'    => self::OU_META
+        ));
         $thisclass = get_called_class();
         return array_map(function($result) use ($thisclass) {
             return $thisclass::get($result);
@@ -131,10 +138,8 @@ class Lab extends TypedPost
             self::LAB_POSTAL_ADDRESS_META => $ldap_result["postaladdress"][0],
         );
 
-        if ($ldap_result["dn"] &&
-            $members = LDAPClient::query_people_in_unit($ldap_result["dn"])) {
-            $meta_input[self::MEMBER_COUNT_META] = count($members);
-        }
+        $members = LDAPClient::query_people_in_unit($ldap_result["dn"]);
+        $meta_input[self::MEMBER_COUNT_META] = count($members);
 
         wp_update_post(array(
             "ID"            => $this->ID,
@@ -230,9 +235,25 @@ class Lab extends TypedPost
         return get_post_meta($this->ID, self::LAB_POSTAL_ADDRESS_META, true);
     }
 
+    public function get_member_count ()
+    {
+        $count_txt = get_post_meta($this->ID, self::MEMBER_COUNT_META, true);
+        if (is_string($count_txt) && (strlen($count_txt) > 0)) {
+            return $count_txt + 0;
+        } else {
+            return null;
+        }
+    }
+
     public function is_active ()
     {
-        return get_post_meta($this->ID, self::MEMBER_COUNT_META, true) > 0;
+        return ($this->get_member_count() !== 0);
+    }
+
+    public function is_real ()
+    {
+        return ($this->is_active() &&
+                ! get_post_meta($this->ID, self::NOT_A_LAB_META, true));
     }
 }
 
@@ -250,7 +271,8 @@ class LabController extends CustomPostTypeController
         static::auto_fields_controller()->hook();
         static::add_thumbnail_column();
         static::call_sync_on_save();
-        static::add_abbrev_column();
+        static::add_abbrev_and_people_count_columns();
+        static::strikethrough_inactive_labs();
     }
 
     /**
@@ -310,9 +332,9 @@ class LabController extends CustomPostTypeController
     }
 
     /**
-     * Add a column in the list view that shows lab abbrevs
+     * Add the relevant columns in the Lab list view in wp-admin
      */
-    static function add_abbrev_column ()
+    static function add_abbrev_and_people_count_columns ()
     {
         $this_class = get_called_class();
         $model_class = $this_class::get_model_class();
@@ -325,6 +347,8 @@ class LabController extends CustomPostTypeController
                             if ($col_slug === "title") {
                                 $newcolumns["abbrev"] =
                                     ___('Lab abbreviation');
+                                $newcolumns["member_count"] =
+                                    ___('Members');
                             }
                         }
                         return $newcolumns;
@@ -332,22 +356,57 @@ class LabController extends CustomPostTypeController
         add_action(
             sprintf('manage_epfl-lab_posts_custom_column', $post_type),
             function ($column, $post_id) use ($this_class, $model_class) {
-                if ($column !== 'abbrev') return;
-
                 $lab = $model_class::get($post_id);
                 if (! $lab) return;
-
-                $this_class::render_abbrev_column($lab);
+                if ($column === 'abbrev') {
+                    $this_class::render_abbrev_column($lab);
+                } elseif ($column === 'member_count') {
+                    $this_class::render_member_count_column($lab);
+                }
             }, 10, 2);
     }
 
-    static function render_abbrev_column ($lab) {
+    static function render_abbrev_column ($lab)
+    {
         $abbrev = $lab->get_abbrev();
         if ($url = $lab->get_website_url()) {
             echo sprintf('<a href="%s">%s</a>', $url, $abbrev);
         } else {
             echo $abbrev;
         }
+    }
+
+    static function render_member_count_column ($lab)
+    {
+        // TODO: we could link to a suitable search query in EPFL People
+        echo $lab->get_member_count();
+    }
+
+    static $_css_strikethrough_inactive_labs_sent;
+    /**
+     * Arrange for the wp-admin list to show inactive labs stricken through
+     */
+    static function strikethrough_inactive_labs ()
+    {
+        add_filter('post_class', function($classes, $class, $post_id) {
+            if (! is_admin()) { return; }
+            if (! ($lab = Lab::get($post_id))) { return; }
+            if ($lab->is_active()) { return; }
+            array_push($classes, "lab-inactive");
+            return $classes;
+        }, 10, 3);
+
+        if (self::$_css_strikethrough_inactive_labs_sent) { return; }
+        $_css_strikethrough_inactive_labs_sent = true;
+        add_action('admin_head', function() {
+            ?>
+<style>
+tr.lab-inactive {
+    text-decoration: line-through;
+}
+</style>
+<?php
+        });
     }
 }
 

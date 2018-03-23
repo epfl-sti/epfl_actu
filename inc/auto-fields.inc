@@ -4,8 +4,11 @@
  */
 namespace EPFL\WS;
 
-require_once(dirname(__FILE__) . "/activation.inc");
+require_once(__DIR__ . "/activation.inc");
 use function \EPFL\WS\plugin_deactivation_hook;
+
+require_once(dirname(__DIR__) . "/Person.php");
+use \EPFL\WS\Persons\Person;
 
 /**
  * Auto fields of a model class.
@@ -140,17 +143,39 @@ class AutoFieldsController {
             // All meta keys are single-valued
             $value = $meta[$key][0];
             if (gettype($value) != "string") {
-                $value = "<pre>" . gettype($value) . "</pre>";
+                $value_html = "<pre>" . gettype($value) . "</pre>";
+            } elseif ($this->_is_sciper_type($key)) {
+                $value_html = $this->sciper_link($value);
             } else {
                 $max_length = 120;
                 if (strlen($value) > $max_length) {
                     $value = substr($value, 0, $max_length) . "...";
                 }
+                $value_html = htmlspecialchars($value);
             }
-            $value = htmlspecialchars($value);
-            echo "<tr><td>$key</td><td>$value</td></tr>\n";
+            echo "<tr><td>$key</td><td>$value_html</td></tr>\n";
         }
         echo "</table>\n";
+    }
+
+    function _is_sciper_type ($field_name)
+    {
+        return (($field_name === "epfl_lab_manager") ||
+                ($field_name === "epfl_work_by"));
+    }
+
+    function sciper_link ($sciper)
+    {
+        $person = Person::find_by_sciper($sciper);
+        if ($person) {
+            return sprintf(
+                '<a href="/wp-admin/post.php?post=%d&action=edit">%s</a>',
+                $person->ID, $sciper);
+        } else {
+            return sprintf(
+                '%d <a href="/wp-admin/post-new.php?post_type=epfl-person&SCIPER=%d">(Create)</a>',
+                $sciper, $sciper);
+        }
     }
 
     function clear_auto_fields ()
