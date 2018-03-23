@@ -52,7 +52,8 @@ class ISAcademiaShortCode {
 
     $isacademiaws = false;
 
-    if (!$url) {
+    // construct the correct URL with the param
+    if ($url == '') {
       $url = 'https://people.epfl.ch/cgi-bin/getCours?lang='.$lang;
       if ($unit)
         $url .= '&unit='.$unit;
@@ -66,17 +67,18 @@ class ISAcademiaShortCode {
         $url .= '&display=' . $display;
       if ($detail)
         $url .= '&detail=' . $detail;
-    } else { $isacademiaws = true; }
+    }
+    // if user set the isaurl, he wants a "plan d'étude"
+    if  ($isaurl)  {
+      $isacademiaws = true;
+      $url = $isacademiaurl;
+    }
 
-    echo "<!-- epfl-isacademia shortcode / url : " . $url . " -->" ;
     // fetch isacademia's html
     if ( (!$isacademiaws && $isacademiaurl = $this->ws->validate_url( $url, "people.epfl.ch" )) ||
-      ($isacademiaws && $isacademiaurl = $this->ws->validate_url( $url, "isa.epfl.ch" )) ) {
-        // DO YOU FEEL MY PAIN ?
-      $isacademia = '<style>';
-      $isacademia .= $this->ws->get_items( 'https://sti.epfl.ch/templates/epfl/css/legacy.css' );
-      //$isacademia .= $this->ws->get_items( 'https://sti.epfl.ch/templates/epfl/css/epfl.css' );
-      $isacademia .= '</style>';
+      ($isacademiaws && $isacademiaurl = $this->ws->validate_url( $isaurl, "isa.epfl.ch" )) )
+    {
+      $isacademia = "<!-- epfl-isacademia src URL: " . $isacademiaurl . " -->\n" ;
       $isacademia .= $this->ws->get_items( $isacademiaurl ); // add , array('timeout' => 10) in case of timeout
     } else {
       $error = new WP_Error( 'epfl-ws-isacademia-shortcode', 'URL not validated', 'URL: ' . $url . ' returned an error' );
