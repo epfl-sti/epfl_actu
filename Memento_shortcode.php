@@ -40,6 +40,7 @@ class MementoShortCode {
                                   'lang'      => 'en',   // en, fr
                                   'search'    => '',     // ??? search somewhere ???
                                   'title'     => '',     // search in title (insensitive)
+                                  'filters'     => '',     // search in title (insensitive)
                                   'subtitle'  => '',     // search in subtitle (insensitive)
                                   'text'      => '',     // search in text (insensitive)
                                   'publics'   => '',     // http://actu.epfl.ch/api/v1/publics/ [1: Prospective Students, 2: Students, 3: Collaborators, 4: Industries/partners, 5: Public, 6: Média]
@@ -55,6 +56,7 @@ class MementoShortCode {
     $lang       = esc_attr($memento_atts['lang']);
     $search     = esc_attr($memento_atts['search']);
     $title      = esc_attr($memento_atts['title']);
+    $filters	= esc_attr($memento_atts['filters']);
     $subtitle   = esc_attr($memento_atts['subtitle']);
     $text       = esc_attr($memento_atts['text']);
     $publics    = esc_attr($memento_atts['publics']);
@@ -82,6 +84,8 @@ class MementoShortCode {
       $url .= '&publics=' . $publics;
     if ($title)
       $url .= '&title=' . $title;
+    if ($filters)
+      $url .= '&filters=' . $filters;
     if ($text)
       $url .= '&text=' . $text;
     if ($themes)
