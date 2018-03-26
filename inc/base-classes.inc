@@ -598,6 +598,10 @@ abstract class APIChannelPost extends TypedPost
      */
     static function sync ($api_result)
     {
+        if (! (array_key_exists($api_result, static::get_api_id_key()) &&
+               array_key_exists($api_result, "translation_id"))) {
+            throw new Exception("Invalid API result: $api_result");
+        }
         $that = static::_get_or_create(array(
             "api_id"         => $api_result[static::get_api_id_key()],
             "translation_id" => $api_result["translation_id"]));
