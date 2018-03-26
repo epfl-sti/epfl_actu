@@ -34,9 +34,14 @@ class ActuAPIClient {
             $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $error = curl_error($ch);
             curl_close($ch);
-            throw new APIException("CURL error at " . $this->stream->get_url() . " (HTTP code $http_code): $error");
-        } else {
-            return json_decode($result, true);
+            throw new APIException("CURL error at $url (HTTP code $http_code): $error");
         }
+
+        if (! preg_match('/^\s*\[/', $result)) {
+            throw new APIException(
+                "Unexpected result type (expected: non-associative array) - " .
+                substr($result, 0, 100));
+        }
+        return $decoded = json_decode($result, true);
     }
 }
