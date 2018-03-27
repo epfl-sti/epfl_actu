@@ -96,7 +96,10 @@ class PersonCardShortCode {
       $default .= "  <div class=\"card-body\">\n";
       $default .= "    <h5 class=\"card-title\">" .  $this->person->get_short_title_and_full_name() . "</h5>\n";
       $default .= "    <div style=\"border-top:1px solid #5A5A5A !important; padding 0px !important; margin 0px !important;\">\n";
-      $default .=        ($this->function == 'no') ? '' : $this->person->get_title_as_text() . "\n";
+      $default .=        ($this->function == 'no') ? ''              :
+                         $this->function           ? $this->function :
+                         $this->person->get_title_as_text();
+      $default .=        "\n";
       $default .= "      <div class=\"person-contact\" style=\"float:right\">\n";
       if ($this->icon[0]) {
         $default .= "        <a href=\"tel:" . $this->person->get_phone() . "\" title=\"" . $this->person->get_title_and_full_name() . "'s phone number\">\n";
