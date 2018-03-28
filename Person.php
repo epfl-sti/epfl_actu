@@ -142,7 +142,7 @@ class Person
 
     public function get_sciper ()
     {
-        return get_post_meta($this->ID, self::SCIPER_META, true);  // Cached by WP
+        return 0 + get_post_meta($this->ID, self::SCIPER_META, true);  // Cached by WP
     }
 
     public function get_full_name ()
