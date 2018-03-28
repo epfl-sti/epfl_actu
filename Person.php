@@ -9,6 +9,9 @@ if (! defined('ABSPATH')) {
 require_once(__DIR__ . "/Lab.php");
 use \EPFL\WS\Labs\Lab;
 
+require_once(__DIR__ . "/inc/base-classes.inc");
+use \EPFL\WS\Base\TypedPost;
+
 require_once(__DIR__ . "/inc/ldap.inc");
 use \EPFL\WS\LDAPClient;
 
@@ -80,7 +83,7 @@ class DuplicatePersonException  extends SCIPERException
     }
 }
 
-class Person
+class Person extends TypedPost
 {
     const SLUG = "epfl-person";
 
@@ -105,39 +108,6 @@ class Person
     static function get_post_type ()
     {
         return self::SLUG;
-    }
-
-    /**
-     * Private constructor — Call @link get_or_create instead
-     */
-    private function __construct ($id)
-    {
-        $this->ID = $id;
-    }
-
-    public static function get ($post_or_post_id)
-    {
-        if (is_object($post_or_post_id)) {
-            if ($post_or_post_id->post_type !== Person::get_post_type()) return;
-            $post_id = $post_or_post_id->ID;
-        } else {
-            $post_id = $post_or_post_id;
-            if (get_post_type($post_id) !== Person::get_post_type()) return;
-        }
-        $theclass = get_called_class();
-        $that = new $theclass($post_id);
-        if (is_object($post_or_post_id)) {
-            $that->_wp_post = $post_or_post_id;
-        }
-        return $that;
-    }
-
-    function wp_post ()
-    {
-        if (! $this->_wp_post) {
-            $this->_wp_post = get_post($this->ID);
-        }
-        return $this->_wp_post;
     }
 
     public function get_sciper ()
