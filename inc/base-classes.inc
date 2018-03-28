@@ -851,6 +851,13 @@ td.column-thumbnail img {
                 };
             }, 10, 3);
     }
+
+    static function add_editor_css ($css)
+    {
+        add_action('admin_head', function () use ($css) {
+            echo "<style>$css</style>";
+        });
+    }
 }
 
 /**

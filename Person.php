@@ -569,17 +569,18 @@ class PersonController extends CustomPostTypeController
         static::column('unit')
               ->set_title(__('Unit'))
               ->make_sortable(array('meta_key' => 'unit_quad'))
-              ->add_css("
-#after-editor-sortables {
-  padding-top: 1em;
-}
-")
               ->hook_after('title');
 
         static::column('publication')
               ->set_title(__('Pub.'))
               ->make_sortable(array('meta_key' => 'publication_link'))
               ->hook_after('unit');
+
+        static::add_editor_css("
+#after-editor-sortables {
+  padding-top: 1em;
+}
+");
 
         /* Make permalinks work - See doc for flush_rewrite_rules() */
         register_deactivation_hook(__FILE__, 'flush_rewrite_rules' );
