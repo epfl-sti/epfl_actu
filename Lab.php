@@ -271,8 +271,15 @@ class LabController extends CustomPostTypeController
         static::auto_fields_controller()->hook();
         static::add_thumbnail_column();
         static::call_sync_on_save();
-        static::add_abbrev_and_people_count_columns();
         static::strikethrough_inactive_labs();
+
+        // Both supplemental columns use the default render_%s_column methods
+        static::column('abbrev')
+              ->set_title(___('Lab abbreviation'))
+              ->hook_after('title');
+        static::column('member_count')
+              ->set_title(___('Members'))
+              ->hook_after('abbrev');
     }
 
     /**
@@ -329,41 +336,6 @@ class LabController extends CustomPostTypeController
     private static function auto_fields_controller ()
     {
         return new AutoFieldsController(Lab::class);
-    }
-
-    /**
-     * Add the relevant columns in the Lab list view in wp-admin
-     */
-    static function add_abbrev_and_people_count_columns ()
-    {
-        $this_class = get_called_class();
-        $model_class = $this_class::get_model_class();
-        $post_type = $model_class::get_post_type();
-        add_action( sprintf('manage_%s_posts_columns', $post_type),
-                    function ($columns) {
-                        $newcolumns = array();
-                        foreach ($columns as $col_slug => $descr) {
-                            $newcolumns[$col_slug] = $descr;
-                            if ($col_slug === "title") {
-                                $newcolumns["abbrev"] =
-                                    ___('Lab abbreviation');
-                                $newcolumns["member_count"] =
-                                    ___('Members');
-                            }
-                        }
-                        return $newcolumns;
-                    });
-        add_action(
-            sprintf('manage_epfl-lab_posts_custom_column', $post_type),
-            function ($column, $post_id) use ($this_class, $model_class) {
-                $lab = $model_class::get($post_id);
-                if (! $lab) return;
-                if ($column === 'abbrev') {
-                    $this_class::render_abbrev_column($lab);
-                } elseif ($column === 'member_count') {
-                    $this_class::render_member_count_column($lab);
-                }
-            }, 10, 2);
     }
 
     static function render_abbrev_column ($lab)

@@ -11,6 +11,7 @@ use \EPFL\WS\Labs\Lab;
 
 require_once(__DIR__ . "/inc/base-classes.inc");
 use \EPFL\WS\Base\TypedPost;
+use \EPFL\WS\Base\CustomPostTypeController;
 
 require_once(__DIR__ . "/inc/ldap.inc");
 use \EPFL\WS\LDAPClient;
@@ -73,7 +74,7 @@ class PersonAlreadyExistsException extends SCIPERException
     }
 }
 
-class DuplicatePersonException  extends SCIPERException
+class DuplicatePersonException extends SCIPERException
 {
     function as_text ()
     {
@@ -531,23 +532,25 @@ class Person extends TypedPost
  * Instance-less class for the controller code (the C of MVC) that manages
  * persons, both on the main site and in wp-admin/
  */
-class PersonController
+class PersonController extends CustomPostTypeController
 {
+    static function get_model_class ()
+    {
+        return Person::class;
+    }
+
     static function hook ()
     {
         add_action( 'init', array(get_called_class(), 'register_post_type'));
 
         /* Behavior of Persons on the main site */
-        add_filter( 'post_thumbnail_html',
+        add_filter('post_thumbnail_html',
                    array(get_called_class(), 'filter_post_thumbnail_html'), 10, 5);
-        add_filter( 'single_template',
+        add_filter('single_template',
                    array(get_called_class(), 'maybe_use_default_template'), 99);
 
         /* Behavior of Persons in the admin aera */
         (new AutoFieldsController(Person::class))->hook();
-        // Add you column name here to make it sortable
-        add_filter( sprintf('manage_edit-%s_sortable_columns', Person::get_post_type()),
-                   array(get_called_class(), 'make_people_columns_sortable'));
 
         /* Customize the edit form */
         add_action( 'edit_form_after_title',
@@ -562,16 +565,21 @@ class PersonController
         add_action( 'admin_notices',
                    array(get_called_class(), 'maybe_show_admin_error'));
 
-        add_action( 'admin_enqueue_scripts', array(get_called_class(), 'init_styles'));
-        add_action( sprintf('manage_%s_posts_columns', Person::get_post_type()) , array(get_called_class(), 'alter_columns'));
-        add_action( sprintf('manage_%s_posts_custom_column', Person::get_post_type()),
-                    array(get_called_class(), 'render_people_thumbnail_column'), 10, 2);
-        add_action( sprintf('manage_%s_posts_custom_column', Person::get_post_type()),
-                    array(get_called_class(), 'render_people_unit_column'), 10, 2);
-        add_action( 'pre_get_posts', array(get_called_class(), 'sort_people_unit_column') );
-        add_action( sprintf('manage_%s_posts_custom_column', Person::get_post_type()),
-                    array(get_called_class(), 'render_people_publication_column'), 10, 2);
-        add_action( 'pre_get_posts', array(get_called_class(), 'sort_people_publication_column') );
+        static::add_thumbnail_column();
+        static::column('unit')
+              ->set_title(__('Unit'))
+              ->make_sortable(array('meta_key' => 'unit_quad'))
+              ->add_css("
+#after-editor-sortables {
+  padding-top: 1em;
+}
+")
+              ->hook_after('title');
+
+        static::column('publication')
+              ->set_title(__('Pub.'))
+              ->make_sortable(array('meta_key' => 'publication_link'))
+              ->hook_after('unit');
 
         /* Make permalinks work - See doc for flush_rewrite_rules() */
         register_deactivation_hook(__FILE__, 'flush_rewrite_rules' );
@@ -631,16 +639,6 @@ class PersonController
                 'supports'           => array( 'editor', 'thumbnail' ),
                 'register_meta_box_cb' => array(get_called_class(), 'add_meta_boxes')
             ));
-    }
-
-    /**
-     * Style for admin page.
-     */
-    function init_styles () {
-        if (is_admin()) {
-            wp_register_style('person', plugins_url( 'css/person.css', __FILE__ ) );
-            wp_enqueue_style('person');
-        }
     }
 
     /**
@@ -808,90 +806,32 @@ class PersonController
     }
 
     /**
-     * Alter the columns shown in the Actu list admin page
-     * (Add the thumbnail column between the checkbox and the title)
+     * Called automatically by the ::columns() mechanism to render
+     * the unit column.
+     *
+     * Based on @link Person::get_unit_long
      */
-    static function alter_columns ($columns)
-    {
-        // https://stackoverflow.com/a/3354804/435004
-        return array_merge(
-            array_slice($columns, 0, 1, true),
-            array('thumbnail' => __( 'Thumbnail' )),
-            array_slice($columns, 1, 1, true),
-            array('unit' => __( 'Unit' )),
-            array('publication' => __( 'Pub.' )),
-            array_slice($columns, 2, count($columns) - 1, true));
-    }
-
-    static function render_people_thumbnail_column ($column, $post_id)
-    {
-        if ($column !== 'thumbnail') return;
-        $person = Person::get($post_id);
-        if (! $person) return;
-
-        $src = $person->get_image_url();
-        if (! $src) return;
-
-        $attrs = 'width="100px" ';
-        echo sprintf("<img src=\"%s\" %s/>", $src, $attrs);
-    }
-
-    static function render_people_unit_column ($column, $post_id) {
-        if ($column !== 'unit') return;
-        $person = Person::get($post_id);
-        if (! $person) return;
-
+    static function render_unit_column ($person) {
         $unit = $person->get_unit_long();
         if (! $unit) return;
 
         echo $unit;
     }
 
-    static function sort_people_unit_column ($query) {
-        if ( ! is_admin() ) return;
-
-        $orderby = $query->get( 'orderby' );
-
-        if ( 'unit' == $orderby ) {
-            $query->set( 'meta_key', 'unit_quad' );
-            $query->set( 'orderby', 'meta_value' );
-        }
-
-    }
-
-    static function render_people_publication_column ($column, $post_id) {
-
-        if ($column !== 'publication') return;
-        $person = Person::get($post_id);
-        if (! $person) return;
-
+    /**
+     * Called automatically by the ::columns() mechanism to render
+     * the "Pub." column.
+     *
+     * Render an empty or checked checkbox, depending on whether this
+     * Person has an infoscience link set up.
+     */
+    static function render_publication_column ($person) {
         $pl = $person->get_publication_link();
         if (! $pl) {
             echo '<input type="checkbox" id="publication_' . $post_id . '" disabled="true" />';
         } else {
             echo '<input type="checkbox" id="publication_' . $post_id . '" checked="checked" disabled="true" title="'. $pl .'"/>';
         }
-    }
-
-    // Help: https://www.ractoon.com/2016/11/wordpress-custom-sortable-admin-columns-for-custom-posts/
-    // https://code.tutsplus.com/articles/quick-tip-make-your-custom-column-sortable--wp-25095
-    static function sort_people_publication_column ($query) {
-        if ( ! is_admin() ) return;
-
-        $orderby = $query->get( 'orderby' );
-
-        if ( 'publication' == $orderby ) {
-            $query->set( 'meta_key', 'publication_link' );
-            $query->set( 'orderby', 'meta_value' );
-        }
-
-    }
-
-    // https://codex.wordpress.org/Plugin_API/Filter_Reference/manage_edit-post_type_columns
-    static function make_people_columns_sortable  ($columns) {
-        $columns['publication'] = 'publication';
-        $columns['unit'] = 'unit';
-        return $columns;
     }
 
     /**

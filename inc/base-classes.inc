@@ -777,45 +777,35 @@ abstract class CustomPostTypeController
      */
     abstract static function get_model_class ();
 
-    static $_css_for_thumbnail_column_sent;
+    static $_columns;
+    /**
+     * Add or mutate a column in the WP_List_Table list view in wp-admin
+     *
+     * @return an instance of @link _CustomPostTypeControllerColumn
+     */
+    static function column ($slug) {
+        if (! static::$_columns[$slug]) {
+            $_columns[$slug] = new _CustomPostTypeControllerColumn
+                             (get_called_class(), $slug);
+        }
+        return $_columns[$slug];
+    }
+
     /**
      * Add a column in the list view that shows thumbnails
      */
     static function add_thumbnail_column ()
     {
-        $this_class = get_called_class();
-        $model_class = $this_class::get_model_class();
-        $post_type = $model_class::get_post_type();
-        add_action( sprintf('manage_%s_posts_columns', $post_type),
-                    function ($columns) {
-                        // https://stackoverflow.com/a/3354804/435004
-                        return array_merge(
-                            array_slice($columns, 0, 1, true),
-                            array('thumbnail' => ___( 'Thumbnail' )),
-                            array_slice($columns, 1, count($columns) - 1, true));
-                    });
-        add_action(
-            sprintf('manage_%s_posts_custom_column', $post_type),
-            function ($column, $post_id) use ($this_class, $model_class) {
-                if ($column !== 'thumbnail') return;
-
-                $epfl_post = $model_class::get($post_id);
-                if (! $epfl_post) return;
-
-                $this_class::render_thumbnail_column($epfl_post);
-            }, 10, 2);
-        add_action('admin_head', function() {
-            if (self::$_css_for_thumbnail_column_sent) return;
-            self::$_css_for_thumbnail_column_sent = true;
-            ?>
-<style>
+        static::column("thumbnail")
+            ->set_title(___( 'Thumbnail' ))
+            // Use of static::render_thumbnail_column() is the default
+            ->add_css("
 td.column-thumbnail img {
     max-width: 100%;
     height: auto;
 }
-</style>
-<?php
-        });
+")
+            ->hook_after(1);
     }
 
     /**
@@ -863,6 +853,150 @@ td.column-thumbnail img {
     }
 }
 
+/**
+ * A custom column in the WP_List_Table view
+ */
+class _CustomPostTypeControllerColumn
+{
+    /**
+     * "private" constructor, call ::column() in your
+     * @link CustomPostTypeController subclass instead.
+     */
+    function __construct ($owner_controller, $slug)
+    {
+        $this->owner = $owner_controller;
+        $this->slug  = $slug;
+
+        // Default settings:
+        $this->set_title($slug);
+        $this->set_renderer(array($owner_controller, "render_${slug}_column"));
+    }
+
+    function set_title ($translated_title)
+    {
+        $this->title = $translated_title;
+        return $this;  // Chainable
+    }
+
+    function add_css ($css)
+    {
+        $this->css .= $css;
+        return $this;
+    }
+
+    function set_renderer ($callable)
+    {
+        $this->render = $callable;
+        return $this;
+    }
+
+    function make_sortable ($sort_opts)
+    {
+        $this->sort_opts = $sort_opts;
+        return $this;
+    }
+
+    function hook_after ($after)
+    {
+        $post_type = $this->get_post_type();
+        $this->insert_after = $after;
+        add_action(
+            sprintf('manage_%s_posts_columns', $post_type),
+            array($this, '_filter_posts_columns'));
+
+        add_action(
+            sprintf('manage_%s_posts_custom_column', $post_type),
+            array($this, '_filter_manage_custom_column'),
+            10, 2);
+
+        add_action('admin_head', array($this, '_render_css'));
+
+        // Sorting
+        add_action('pre_get_posts', array($this, '_action_pre_get_posts'));
+        add_filter(
+            sprintf('manage_edit-%s_sortable_columns', $post_type),
+            array($this, '_filter_manage_sortable_columns'));
+
+        return $this;   // Chainable, because why not?
+    }
+
+    protected function get_model_class ()
+    {
+        $controller_class = $this->owner;
+        return $controller_class::get_model_class();
+    }
+
+    protected function get_post_type ()
+    {
+        $model_class = $this->get_model_class();
+        return $model_class::get_post_type();
+    }
+
+    function _filter_posts_columns ($columns)
+    {
+        if (is_int($this->insert_after)) {
+            // https://stackoverflow.com/a/3354804/435004
+            $newcolumns = array_merge(
+                array_slice($columns, 0, $this->insert_after, true),
+                array($this->slug => $this->title),
+                array_slice($columns, $this->insert_after,
+                            count($columns) - $this->insert_after, true));
+            return $newcolumns;
+        } elseif (is_string($this->insert_after)) {
+            $newcolumns = array();
+            foreach ($columns as $col_slug => $descr) {
+                $newcolumns[$col_slug] = $descr;
+                if ($col_slug === $this->insert_after) {
+                    $newcolumns[$this->slug] = $this->title;
+                }
+            }
+            return $newcolumns;
+        } else {
+            wp_die("Unsupported value for ->hook(): " . var_export($this->insert_after, true));
+        }
+    }
+
+    function _filter_manage_custom_column ($column, $post_id)
+    {
+        if ($column !== $this->slug) return;
+
+        $model_class = $this->get_model_class();
+        $epfl_post = $model_class::get($post_id);
+        if (! $epfl_post) return;
+
+        call_user_func($this->render, $epfl_post);
+    }
+
+    function _filter_manage_sortable_columns ($columns)
+    {
+        if ($this->sort_opts) {
+            $columns[$this->slug] = $this->slug;
+        }
+        return $columns;
+    }
+
+    /**
+     * Honor requests to sort by this column
+     */
+    function _action_pre_get_posts ($query)
+    {
+        if ( ! is_admin() ) return;
+        if (! $this->sort_opts) return;
+        if ($query->get( 'orderby' ) !== $this->slug) return;
+
+        // Here we could examine $this->sort_opts to support sorting
+        // by something other than a meta_key.
+        $query->set('orderby', 'meta_value');
+        $query->set('meta_key', $this->sort_opts['meta_key']);
+    }
+
+    function _render_css ()
+    {
+        if (! $this->css) return;
+        echo '<style>' . $this->css . '</style>';
+        $this->css = null;
+    }
+}
 
 /**
  * Abstract base class for the controller of a model class whose
