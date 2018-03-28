@@ -443,6 +443,27 @@ abstract class TypedPost extends Post
         }
         return $that;
     }
+
+    /**
+     * Iterate with $callback over all instances of this class.
+     *
+     * @param $callback A callable that will be called with each
+     * instance of this class in turn. The WordPress global variables
+     * will be updated as if within "The loop".
+     */
+    public static function foreach ($callback)
+    {
+        $all = new \WP_Query(array(
+            'post_type'      => static::get_post_type(),
+            'posts_per_page' => -1
+        ));
+        while ($all->have_posts()) {
+            $all->next_post();
+            if ($epfl_post = static::get($all->post)) {
+                call_user_func($callback, $epfl_post);
+            }
+        }
+    }
 }
 
 /**
