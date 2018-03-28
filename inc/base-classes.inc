@@ -457,12 +457,80 @@ abstract class TypedPost extends Post
             'post_type'      => static::get_post_type(),
             'posts_per_page' => -1
         ));
-        while ($all->have_posts()) {
-            $all->next_post();
-            if ($epfl_post = static::get($all->post)) {
-                call_user_func($callback, $epfl_post);
+
+        $in_the_loop = new _InTheLoopHelper($all);
+        try {
+            $in_the_loop->enter();
+
+            while ($all->have_posts()) {
+                $all->next_post();
+                if ($epfl_post = static::get($all->post)) {
+                    call_user_func($callback, $epfl_post);
+                }
             }
+        } finally {
+            $in_the_loop->leave();
         }
+    }
+}
+
+/**
+ * A helper to help us pretend that we are @link in_the_loop .
+ *
+ * While there is telling whether being "in the loop" will help us in
+ * any way whatsoever with procuring sex and/or drugs, it does help
+ * with WordPress avoiding a so-called "N+1 query problem" with
+ * thumbnails.
+ *
+ * To wit, post-thumbnail-template.php has code that goes like
+ *
+ * 		if ( in_the_loop() )
+ *			update_post_thumbnail_cache();
+ *
+ * This means a contrario that when not in_the_loop(), each and every
+ * call to get_the_post_thumbnail() and friends, results in a new
+ * query to the database.
+ *
+ * @see https://secure.phabricator.com/book/phabcontrib/article/n_plus_one/
+ * @see https://www.reddit.com/r/OutOfTheLoop/
+ */
+class _InTheLoopHelper
+{
+    /**
+     * Prepare to pretend that $wp_query is the main query (which is what
+     * in_the_loop() checks).
+     */
+    function __construct ($wp_query)
+    {
+        $this->wp_query = $wp_query;
+    }
+
+    /**
+     * Start pretending to be in the loop.
+     */
+    function enter ()
+    {
+        $this->_in_the_loop_orig = $this->wp_query->in_the_loop;
+        $this->wp_query->in_the_loop = true;
+
+        global $wp_query;
+        $this->_wp_query_orig = $wp_query;
+        $wp_query = $this->wp_query;
+    }
+
+    /**
+     * Stop pretending to be in the loop and restore all state (both
+     * global and in the $wp_query object passed to the constructor)
+     * as it was before @link enter.
+     *
+     * Should be called from a "finally" block.
+     */
+    function leave ()
+    {
+        $this->wp_query->in_the_loop = $this->_in_the_loop_orig;
+
+        global $wp_query;
+        $wp_query = $this->_wp_query_orig;
     }
 }
 
