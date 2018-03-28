@@ -15,6 +15,7 @@ use \EPFL\WS\Base\CustomPostTypeController;
 
 require_once(__DIR__ . "/inc/ldap.inc");
 use \EPFL\WS\LDAPClient;
+use \EPFL\WS\LDAPException;
 
 require_once(__DIR__ . "/inc/scrape.inc");
 use function \EPFL\WS\scrape;
@@ -560,10 +561,8 @@ class PersonController extends CustomPostTypeController
         add_action('admin_head',
                    array(get_called_class(), 'render_css_for_meta_boxes'));
 
-        add_action( sprintf('save_post_%s', Person::get_post_type()),
+        add_action(sprintf('save_post_%s', Person::get_post_type()),
                    array(get_called_class(), 'save_meta_boxes'), 10, 3);
-        add_action( 'admin_notices',
-                   array(get_called_class(), 'maybe_show_admin_error'));
 
         static::add_thumbnail_column();
         static::column('unit')
@@ -741,7 +740,7 @@ class PersonController extends CustomPostTypeController
         } catch (LDAPException $e) {
             // Not fatal, we'll try again later
             error_log(sprintf("LDAPException: %s", $e->getMessage()));
-            self::admin_error($post_id, $e->getMessage());
+            static::admin_error($post_id, $e->getMessage());
         } catch (\Exception $e) {
             // Fatal - Undo save
             wp_delete_post($post_id, true);
@@ -833,39 +832,6 @@ class PersonController extends CustomPostTypeController
         } else {
             echo '<input type="checkbox" id="publication_' . $post_id . '" checked="checked" disabled="true" title="'. $pl .'"/>';
         }
-    }
-
-    /**
-     * Arrange for a nonfatal error to be shown in a so-called "admin notice."
-     */
-    static private function admin_error ($post_id, $text)
-    {
-        // Use "Saving It in a Transient" technique from
-        // https://www.sitepoint.com/displaying-errors-from-the-save_post-hook-in-wordpress/
-
-        set_transient(
-            self::get_error_transient_key($post_id),
-            $text,
-            45);  // Seconds before it self-destructs
-    }
-
-    static function maybe_show_admin_error ()
-    {
-        global $post_id;
-        $key = self::get_error_transient_key ($post_id);
-        if ($error = get_transient($key)) {
-            delete_transient($key);
-            ?>
-    <div class="notice notice-error is-dismissible">
-        <p><?php echo $error; ?></p>
-    </div><?php
-        }
-    }
-
-    static private function get_error_transient_key ($post_id)
-    {
-        return sprintf("%s-save_post_errors_%d_%d",
-                       Person::SLUG, $post_id, get_current_user_id());
     }
 
     /**

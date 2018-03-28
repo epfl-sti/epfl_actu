@@ -763,6 +763,52 @@ abstract class APIChannelPost extends TypedPost
 }
 
 /**
+ * Abstract base class for all controller classes
+ */
+abstract class Controller
+{
+    /**
+     * @return The model class for this controller
+     */
+    abstract static function get_model_class ();
+
+    /**
+     * Arrange for a nonfatal error to be shown in a so-called "admin notice."
+     */
+    static protected function admin_error ($post_id, $text)
+    {
+        // Use "Saving It in a Transient" technique from
+        // https://www.sitepoint.com/displaying-errors-from-the-save_post-hook-in-wordpress/
+        set_transient(
+            self::get_error_transient_key($post_id),
+            $text,
+            45);  // Seconds before it self-destructs
+    }
+
+    static private function get_error_transient_key ($post_id)
+    {
+        return sprintf("epfl-admin-notices_%d_%d",
+                       $post_id, get_current_user_id());
+    }
+
+    static function _render_admin_errors_if_any ()
+    {
+        global $post_id;
+        $key = Controller::get_error_transient_key ($post_id);
+        if ($error = get_transient($key)) {
+            delete_transient($key);
+            ?>
+    <div class="notice notice-error is-dismissible">
+        <p><?php echo $error; ?></p>
+    </div><?php
+        }
+    }
+}
+
+add_action('admin_notices',
+           array(Controller::class, '_render_admin_errors_if_any'));
+    
+/**
  * Abstract base class for the controller of a model class that
  * consists of a custom post type that itself derives from abstract
  * class @link TypedPost.
@@ -770,13 +816,8 @@ abstract class APIChannelPost extends TypedPost
  * This is a "pure static" class; no instances are ever constructed.
  *
  */
-abstract class CustomPostTypeController
+abstract class CustomPostTypeController extends Controller
 {
-    /**
-     * @return The model class for this controller (subclass of APIAutoCategory)
-     */
-    abstract static function get_model_class ();
-
     static $_columns;
     /**
      * Add or mutate a column in the WP_List_Table list view in wp-admin
