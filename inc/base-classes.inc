@@ -836,7 +836,11 @@ td.column-thumbnail img {
 
     static $_syncing_on_save = null;
     /**
-     * Call ->sync() upon saving a Lab object.
+     * Call ->sync() upon saving a TypedPost object.
+     *
+     * Call this method from the initialization code (e.g. a `hook`
+     * method) in order to enable this functionality for all instances
+     * of the @link get_model_class.
      */
     static function call_sync_on_save ()
     {
