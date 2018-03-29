@@ -38,14 +38,20 @@ require_once(__DIR__ . "/Person.php");
 use \EPFL\WS\Persons\Person;
 
 class PersonCardShortCode {
+  function hook() {
+    add_shortcode('person-card', function($atts, $content=null, $tag='') {
+        $shortcode = new PersonCardShortCode();
+        return $shortcode->wp_shortcode($atts, $content, $tag);
+    }, 10, 3);
+  }
 
-  /**
-   * Init
-   */
-  function __construct() {
-    add_shortcode('person-card', array($this, 'wp_shortcode'));
-    require_once(dirname(__FILE__) . "/inc/epfl-ws.inc");
-    $this->ws = new \EPFL\WS\epflws();
+  static function log ($msg)
+  {
+      if ( is_array( $msg ) || is_object( $msg ) ) {
+        error_log( print_r( $msg, true ) );
+      } else {
+        error_log( $msg );
+      }
   }
 
   /**
@@ -64,70 +70,69 @@ class PersonCardShortCode {
                                     'icon'      => '110110',    // icons: phone - mail - publication - room - internal people page - external people page
                                 ], $atts, $tag);
 
-    $lang             = esc_attr($person_atts['lang']);
-    $sciper           = esc_attr($person_atts['sciper']);
-    $this->function   = esc_attr($person_atts['function']);
-    $this->width      = esc_attr($person_atts['width']);
-    $this->icon       = esc_attr($person_atts['icon']);
+    $lang       = esc_attr($person_atts['lang']);
+    $sciper     = esc_attr($person_atts['sciper']);
+    $function   = esc_attr($person_atts['function']);
+    $width      = esc_attr($person_atts['width']);
+    $icon       = esc_attr($person_atts['icon']);
 
     if (!(in_array($lang, array("en", "fr")))) {
       $error = new WP_Error( 'epfl-ws-person-shortcode', 'Lang error', 'Lang: ' . $lang . ' returned an error' );
-      $this->ws->log( $error );
+      $this->log($error);
+      return;
     }
     if ($sciper == '') {
       $error = new WP_Error( 'epfl-ws-person-shortcode', 'Sciper error', 'Sciper: ' . $sciper . ' returned an error' );
-      $this->ws->log( $error );
+      $this->log($error);
+      return;
     }
 
-    $this->person = Person::find_by_sciper($sciper);
-    if (!$this->person) {
+    $person = Person::find_by_sciper($sciper);
+    if (!$person) {
       error_log("This person not found: " . $sciper);
       return;
     }
-    $this->person_post = $this->person->wp_post();
-    return $this->display($content);
-  }
 
-    private function display($content)
-    {
+      $person_post = $person->wp_post();
+
       $default = "";
-      $default .= "<div class=\"card bg-light\" style=\"width:" . $this->width . "\">\n";
-      $default .=    $this->person->as_thumbnail();
+      $default .= "<div class=\"card bg-light\" style=\"width:" . $width . "\">\n";
+      $default .=    $person->as_thumbnail();
       $default .= "  <div class=\"card-body\">\n";
-      $default .= "    <h5 class=\"card-title\">" .  $this->person->get_short_title_and_full_name() . "</h5>\n";
+      $default .= "    <h5 class=\"card-title\">" .  $person->get_short_title_and_full_name() . "</h5>\n";
       $default .= "    <div style=\"border-top:1px solid #5A5A5A !important; padding 0px !important; margin 0px !important;\">\n";
-      $default .=        ($this->function == 'no') ? ''              :
-                         $this->function           ? $this->function :
-                         $this->person->get_title_as_text();
+      $default .=        ($function == 'no') ? ''        :
+                         $function           ? $function :
+                         $person->get_title_as_text();
       $default .=        "\n";
       $default .= "      <div class=\"person-contact\" style=\"float:right\">\n";
-      if ($this->icon[0]) {
-        $default .= "        <a href=\"tel:" . $this->person->get_phone() . "\" title=\"" . $this->person->get_title_and_full_name() . "'s phone number\">\n";
+      if ($icon[0]) {
+        $default .= "        <a href=\"tel:" . $person->get_phone() . "\" title=\"" . $person->get_title_and_full_name() . "'s phone number\">\n";
         $default .= "          <i class=\"fas fa-phone-square\" style=\"color:#5A5A5A;\"></i>\n";
         $default .= "        </a>\n";
       }
-      if ($this->icon[1]) {
-        $default .= "        <a href=\"mailto:" . $this->person->get_mail() . "\" title=\"" . $this->person->get_title_and_full_name() . "'s email\">\n";
+      if ($icon[1]) {
+        $default .= "        <a href=\"mailto:" . $person->get_mail() . "\" title=\"" . $person->get_title_and_full_name() . "'s email\">\n";
         $default .= "          <i class=\"fas fa-envelope-square\" style=\"color:#5A5A5A;\"></i>\n";
         $default .= "        </a>\n";
       }
-      if ($this->icon[2]) {
-        $default .= "        <a href=\"https://plan.epfl.ch/?q=" . $this->person->get_room() . "\" title=\"" .  $this->person->get_title_and_full_name() . "'s office\">\n";
+      if ($icon[2]) {
+        $default .= "        <a href=\"https://plan.epfl.ch/?q=" . $person->get_room() . "\" title=\"" .  $person->get_title_and_full_name() . "'s office\">\n";
         $default .= "          <i class=\"far fa-map\" style=\"color:#5A5A5A;\"></i>\n";
         $default .= "        </a>\n";
       }
-      if ($this->icon[3]) {
-        $default .= "        <a href=\"https://infoscience.epfl.ch/search?f=author&action=Search&p=" . $this->person->get_full_name() . "\" title=\"" . $this->person->get_short_title_and_full_name() . "'s publications\">\n";
+      if ($icon[3]) {
+        $default .= "        <a href=\"https://infoscience.epfl.ch/search?f=author&action=Search&p=" . $person->get_full_name() . "\" title=\"" . $person->get_short_title_and_full_name() . "'s publications\">\n";
         $default .= "          <i class=\"fas fa-newspaper\" style=\"color:#5A5A5A;\"></i>\n";
         $default .= "        </a>\n";
       }
-      if ($this->icon[4]) {
-        $default .= "        <a href=\"/epfl-person/" . $this->person->get_sciper() . "\" title=\"" . $this->person->get_short_title_and_full_name() . " personal's page\">\n";
+      if ($icon[4]) {
+        $default .= "        <a href=\"/epfl-person/" . $person->get_sciper() . "\" title=\"" . $person->get_short_title_and_full_name() . " personal's page\">\n";
         $default .= "          <i class=\"fas fa-user\" style=\"color:#5A5A5A;\"></i>\n";
         $default .= "        </a>\n";
       }
-      if ($this->icon[5]) {
-        $default .= "        <a href=\"https://people.epfl.ch/" . $this->person->get_sciper() . "\" title=\"EPFL " . $this->person->get_short_title_and_full_name() . " personal's page\">\n";
+      if ($icon[5]) {
+        $default .= "        <a href=\"https://people.epfl.ch/" . $person->get_sciper() . "\" title=\"EPFL " . $person->get_short_title_and_full_name() . " personal's page\">\n";
         $default .= "          <i class=\"fas fa-user-circle\" style=\"color:#5A5A5A;\"></i>\n";
         $default .= "        </a>\n";
       }
@@ -145,5 +150,4 @@ class PersonCardShortCode {
 
 } # End class PersonCardShortCode
 
-new PersonCardShortCode();
-?>
+PersonCardShortCode::hook();
