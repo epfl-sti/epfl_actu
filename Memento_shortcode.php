@@ -11,8 +11,8 @@
 namespace EPFL\WS\Memento;
 use WP_Error;
 
-require_once(__DIR__ . "/inc/templated-shortcode.inc");
-use \EPFL\WS\ListTemplatedShortcodeView;
+require_once(__DIR__ . "/inc/base-classes.inc");
+use \EPFL\WS\Base\ListTemplatedShortcodeView;
 
 class MementoShortCode {
 

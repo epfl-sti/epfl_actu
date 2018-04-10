@@ -10,8 +10,8 @@ use \EPFL\WS\OrganizationalUnits\OrganizationalUnit;
 require_once(__DIR__ . "/Lab.php");
 use \EPFL\WS\EPFL\WS\Labs\Lab;
 
-require_once(__DIR__ . "/inc/templated-shortcode.inc");
-use \EPFL\WS\ListTemplatedShortcodeView;
+require_once(__DIR__ . "/inc/base-classes.inc");
+use \EPFL\WS\Base\ListTemplatedShortcodeView;
 
 class LabsShortcode
 {

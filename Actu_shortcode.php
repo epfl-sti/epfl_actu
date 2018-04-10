@@ -18,8 +18,8 @@ use WP_Error;
 // include function from /inc/epfl-ws.inc
 require_once(dirname(__FILE__) . "/inc/epfl-ws.inc");
 
-require_once(__DIR__ . "/inc/templated-shortcode.inc");
-use \EPFL\WS\ListTemplatedShortcodeView;
+require_once(__DIR__ . "/inc/base-classes.inc");
+use \EPFL\WS\Base\ListTemplatedShortcodeView;
 
 class ActuShortCode {
 
