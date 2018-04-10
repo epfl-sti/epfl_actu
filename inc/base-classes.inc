@@ -1744,6 +1744,62 @@ abstract class APIAutoCategoryController
 }
 
 /**
+ * A shortcode occurrence.
+ *
+ * A subclass represents one shortcode. Instances are created for each
+ * occurrence of the shortcode.
+ */
+abstract class Shortcode
+{
+    function hook ()
+    {
+        add_shortcode(static::get_name(), function ($atts, $content = null) {
+            $thisclass = get_called_class();
+           $that = new $thisclass($atts, $content);
+            return $that->render();
+        });
+        if (is_admin()) {
+            add_action("admin_print_footer_scripts",
+                       array(get_called_class(), '_button_script'));
+        }
+    }
+
+    static abstract function get_name ();
+
+    function __construct ($attrs, $content = null)
+    {
+        $this->attrs = $this->_normalize_attrs($attrs);
+        $this->content = $content;
+    }
+
+    abstract function render ();
+
+    function _button_script ()
+    {
+        if(! wp_script_is("quicktags")) { return; }
+        static::render_button_script();
+    }
+
+    /**
+     * Render the JS script that calls QTags.addButton() so as to
+     * show a helper button in TinyMCE for this shortcode.
+     *
+     * The base class does nothing.
+     */
+    function render_button_script ()
+    {
+    }
+
+    function _normalize_attrs ($attrs)
+    {
+        // normalize attribute keys, lowercase
+        $atts = array_change_key_case((array)$atts, CASE_LOWER);
+        return shortcode_atts(static::get_attr_defaults(), $attrs,
+                              static::get_name());
+    }
+}
+
+/**
  * A shortcode whose rendering consists of a list of results.
  */
 abstract class ListTemplatedShortcodeView
