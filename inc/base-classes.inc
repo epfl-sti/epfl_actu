@@ -1829,18 +1829,23 @@ abstract class ListTemplatedShortcodeView
 
     function get_no_results_msg ()
     {
-        return __x("No results", "ListShortcode");
 
     }
+
     function no_results_as_html ()
     {
-        $classes = implode(" ", $this->get_outer_div_classes());
-        $msg = $this->get_no_results_msg();
         $slug = $this->get_slug();
         return apply_filters(
             "epfl_shortcode_${slug}_list_html_no_results",
-            "<div class=\"$classes no-results\">$msg</div>",
+            $this->_no_results_as_html_default(),
             $this->shortcode_attrs);
+    }
+
+    protected function _no_results_as_html_default ()
+    {
+        $classes = implode(" ", $this->get_outer_div_classes());
+        $msg = __x("No results", "ListShortcode");
+        return "<div class=\"$classes no-results\">$msg</div>";
     }
 
     public function as_html ($items_list)
@@ -1983,6 +1988,47 @@ abstract class WPQueryShortcodeView extends PostListShortcodeView
         return $post;
     }
 
-    // TODO: Override no_results_as_html(), item_as_html() to rummage in
-    // get_template_part( 'loop-templates/content', $SOMETHING )
+    const UNDERSTRAP_LOOP_TEMPLATE_SLUG = "loop-templates/content";
+
+    protected function has_template ($short_name) {
+        if (! $short_name) return;
+        return locate_template(
+            self::UNDERSTRAP_LOOP_TEMPLATE_SLUG . "-" . $short_name . ".php");
+    }
+
+    protected function render_template ($short_name) {
+        try {
+            ob_start();
+            get_template_part(
+                self::UNDERSTRAP_LOOP_TEMPLATE_SLUG, $short_name);
+            return ob_get_contents();  // NOT ob_get_clean(), lest the finally
+                                       // block close one ob too many
+        } finally {
+            ob_end_clean();
+        }
+    }
+
+    protected function _no_results_as_html_default ()
+    {
+        if ($this->has_template("none")) {
+            return $this->render_template("none");
+        } else {
+            return parent::_no_results_as_html_default();
+        }
+    }
+
+    public function item_as_html ($wp_post)
+    {
+        // ->_next_result() already took care of setting WordPress'
+        // global loop variables
+        foreach (array(
+            get_post_format($wp_post),
+            $wp_post->post_type,
+        ) as $maybe_template) {
+            if ($this->has_template($maybe_template)) {
+                return $this->render_template($maybe_template);
+            }
+        }
+        return parent::item_as_html($wp_post);
+    }
 }
