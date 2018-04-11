@@ -33,7 +33,9 @@ class WPQueryShortcode extends Shortcode
         return array(
             'type'       => null,
             'format'     => null,
+            'tag'        => null,
             'tags'       => null,
+            'category'   => null,
             'categories' => null
         );
     }
@@ -71,12 +73,16 @@ class WPQueryShortcode extends Shortcode
                     explode(',', $types));
             }
 
-            if ($tags = $this->attrs['tags']) {
+            $tags = $this->attrs['tags'];
+            if (! $tags) $tags = $this->attrs['tag'];
+            if ($tags) {
                 // Passthrough "+" and "," semantics
                 $query_args['tag'] = $tags;
             }
 
-            if ($categories = $this->attrs['categories']) {
+            $categories = $this->attrs['categories'];
+            if (! $categories) $categories = $this->attrs['category'];
+            if ($categories) {
                 // Passthrough "+" and "," semantics
                 $query_args['category_name'] = $categories;
             }
