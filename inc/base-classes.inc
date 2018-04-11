@@ -1800,7 +1800,7 @@ abstract class Shortcode
 }
 
 /**
- * A shortcode whose rendering consists of a list of results.
+ * The rendering helper for a shortcode that returns a list of results.
  */
 abstract class ListTemplatedShortcodeView
 {
