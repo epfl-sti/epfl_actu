@@ -173,3 +173,4 @@ require_once(dirname(__FILE__) . "/Organigramme_shortcode.php");
 require_once(dirname(__FILE__) . "/People_shortcode.php");
 require_once(dirname(__FILE__) . "/Person.php");
 require_once(dirname(__FILE__) . "/Person_shortcode.php");
+require_once(dirname(__FILE__) . "/WPQuery_shortcode.php");

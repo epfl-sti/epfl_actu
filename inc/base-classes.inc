@@ -1801,6 +1801,20 @@ abstract class Shortcode
 
 /**
  * The rendering helper for a shortcode that returns a list of results.
+ *
+ * Themes can customize that rendering either by calling @link
+ * add_filter on "epfl_shortcode_${slug}_list_html" (which overrides
+ * the entire class' behavior), or by calling @link add_filter one or
+ * more of the following:
+ *
+ * - epfl_shortcode_${slug}_list_html_no_results
+ *
+ * - epfl_shortcode_${slug}_list_html_start
+ *
+ * - epfl_shortcode_${slug}_list_html_item
+ *
+ * - epfl_shortcode_${slug}_list_html_end
+ *
  */
 abstract class ListTemplatedShortcodeView
 {
@@ -1838,7 +1852,8 @@ abstract class ListTemplatedShortcodeView
                                  "",
                                  $items_list, $this->shortcode_attrs);
         }
-        if (! count($items_list)) {
+        $this->_set_results($items_list);
+        if (! $this->_has_results()) {
             return $this->no_results_as_html();
         }
 
@@ -1847,7 +1862,8 @@ abstract class ListTemplatedShortcodeView
             "epfl_shortcode_${slug}_list_html_start",
             "<div class=\"$classes has-results\">",
             $this->shortcode_attrs);
-        foreach ($items_list as $item) {
+        while($this->_has_results()) {
+            $item = $this->_next_result();
             $html .= apply_filters(
                 "epfl_shortcode_${slug}_list_html_item",
                 $this->item_as_html($item), $this->shortcode_attrs, $item);
@@ -1857,8 +1873,116 @@ abstract class ListTemplatedShortcodeView
         return $html;
     }
 
-    protected function get_outer_div_classes () {
+    protected function _set_results ($item_list)
+    {
+        $this->_items = $item_list;
+    }
+
+    protected function _has_results ()
+    {
+        return count($this->_items) > 0;
+    }
+
+    protected function _next_result ()
+    {
+        return array_pop($this->_items);
+    }
+
+    protected function get_outer_div_classes ()
+    {
         $slug = $this->get_slug();
         return array("epfl-shortcode-list", "epfl-shortcode-$slug");
     }
+}
+
+/**
+ * The rendering helper for a shortcode that returns a list of posts.
+ */
+abstract class PostListShortcodeView extends ListTemplatedShortcodeView
+{
+    public function item_as_html ($wp_post)
+    {
+        $post_type = $wp_post->post_type;
+        $html .= '<div class="epfl-ws-shortcode $post_type" id="' . $wp_post->ID . '">';
+
+        if ($url = get_the_permalink($wp_post)) {
+            $linkpre = sprintf('<a href="%s">', $url);
+            $linkpost = "</a>";
+        } else {
+            $linkpre = $linkpost = "";
+        }
+
+        if ($wp_post->post_title) {
+            $html .= '<h2>' . $linkpre . $wp_post->post_title . $linkpost . '</h2>';
+        }
+        if (function_exists("get_the_subtitle") and
+            ($subtitle = get_the_subtitle($wp_post, "", "", false))) {
+            $html .= '<p class=\"subtitle\">' . $linkpre . $subtitle . $linkpost . '</p>';
+        }
+        
+        if ($img = get_the_post_thumbnail($wp_post)) {
+            $html .= $linkpre . $img . $linkpost;
+        }
+
+        if ($excerpt = get_the_excerpt($wp_post)) {
+            $html .= sprintf('<p class="excerpt">%s</p>', $excerpt);
+        }
+        $html .= '</div>';
+        return $html;
+    }
+}
+
+/**
+ * The view code for a shortcode whose output consists of the elements
+ * returned by a WP_Query object.
+ *
+ * The rendering is compatible with the WordPress loop and
+ * Understrap-style partial templates in the loop-templates/
+ * subdirectory of the theme. This means that, in addition to the
+ * filter-based customization proposed by the grandparent class @link
+ * ListTemplatedShortcodeView, the rendering of a shortcode that uses
+ * a subclass of WPQueryShortcodeView can be customized using files
+ * whose names are like `loop-templates/content-none.php`,
+ * `loop-templates/content-${post_format}.php`,
+ * `loop-templates/content-${post_type}.php` and
+ * `loop-templates/content.php` as a fallback for the latter two.
+ *
+ * @see https://understrap.com/
+ */
+abstract class WPQueryShortcodeView extends PostListShortcodeView
+{
+    /**
+     * @param $q a WP_Query object (instead of a list of items in the
+     * parent class)
+     */
+    public function as_html ($q)
+    {
+        $in_the_loop = new _InTheLoopHelper($q);
+        try {
+            $in_the_loop->enter();
+            return parent::as_html($q);
+        } finally {
+            $in_the_loop->leave();
+        }
+    }
+
+    protected function _set_results ($q)
+    {
+        $this->q = $q;
+    }
+
+    protected function _has_results ()
+    {
+        return $this->q->have_posts();
+    }
+
+    protected function _next_result ()
+    {
+        $this->q->the_post();
+        global $post;
+        return $post;
+    }
+
+    // TODO: Override no_results_as_html(), item_as_html() to rummage in
+    // get_template_part( 'loop-templates/content', $SOMETHING )
 }
