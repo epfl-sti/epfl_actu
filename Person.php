@@ -6,6 +6,8 @@ if (! defined('ABSPATH')) {
     die('Access denied.');
 }
 
+use \Exception;
+
 require_once(__DIR__ . "/Lab.php");
 use \EPFL\WS\Labs\Lab;
 
@@ -53,7 +55,12 @@ function is_form_new ()
                      "/post-new.php");
 }
 
-class SCIPERException extends \Exception { }
+class SCIPERException extends Exception {
+    function __construct ($sciper)
+    {
+        $this->sciper = $sciper;
+    }
+}
 
 class PersonNotFoundException extends SCIPERException
 {
@@ -61,7 +68,7 @@ class PersonNotFoundException extends SCIPERException
     {
         return sprintf(
             ___('Person with SCIPER %d not found'),
-            $this->message);
+            $this->sciper);
 
     }
 }
@@ -71,7 +78,7 @@ class PersonAlreadyExistsException extends SCIPERException
     {
         return sprintf(
             ___('A person with SCIPER %d already exists'),
-            $this->message);
+            $this->sciper);
     }
 }
 
@@ -81,7 +88,7 @@ class DuplicatePersonException extends SCIPERException
     {
         return sprintf(
             ___('Multiple persons found with SCIPER %d'),
-            $this->message);
+            $this->sciper);
     }
 }
 
@@ -274,9 +281,7 @@ class Person extends TypedPost
     {
         $entries = LDAPClient::query_by_sciper($this->get_sciper());
         if (! $entries) {
-            throw new PersonNotFoundException(
-                sprintf(___('Person with SCIPER %d not found'),
-                        $this->get_sciper()));
+            throw new PersonNotFoundException($this->get_sciper());
         }
         $entry = $entries[0];
 
@@ -522,6 +527,15 @@ class Person extends TypedPost
                 'post_status' => 'archive'));
         }
     }
+
+    public function sync_or_inactivate ()
+    {
+        try {
+            $this->sync();
+        } catch (PersonNotFoundException $e) {
+            $this->set_inactive();
+        }
+    }
 }
 
 /**
@@ -736,7 +750,7 @@ class PersonController extends CustomPostTypeController
             // Not fatal, we'll try again later
             error_log(sprintf("LDAPException: %s", $e->getMessage()));
             static::admin_error($post_id, $e->getMessage());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Fatal - Undo save
             wp_delete_post($post_id, true);
             $message = method_exists($e, "as_text") ? $e->as_text() : $e->getMessage();
@@ -774,7 +788,7 @@ class PersonController extends CustomPostTypeController
         // Strictly speaking, this meta box has no state to change (for now).
         // Still, it sort of makes sense that here be the place where
         // we sync data from LDAP again.
-        Person::get($post_id)->sync();
+        Person::get($post_id)->sync_or_inactivate();
     }
 
     /**
@@ -948,7 +962,7 @@ class PersonController extends CustomPostTypeController
             ))
             ->run(function() {
                 Person::foreach(function($person) {
-                    $person->sync();
+                    $person->sync_or_inactivate();
                 });
             });
     }
