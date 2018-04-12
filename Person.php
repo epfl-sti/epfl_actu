@@ -254,13 +254,14 @@ class Person extends TypedPost
     public function sync ()
     {
         if ($this->_synced_already) { return; }
+        $this->_synced_already = true;
+
         $this->update_from_ldap();
         $this->import_image_from_people();
         if (! $this->get_bio()) {
             $this->update_bio_from_people();
         }
 
-        $this->_synced_already = true;
         $more_meta = apply_filters('epfl_person_additional_meta', array(), $this);
         if ($more_meta) {
             $this->_update_meta($more_meta);
@@ -511,6 +512,15 @@ class Person extends TypedPost
           'alt'   => $alt,
           'title' => $alt
         ));
+    }
+
+    public function set_inactive ()
+    {
+        if (get_post_status_object('archive')) {
+	    wp_update_post(array(
+                'ID' => $this->wp_post()->ID,
+                'post_status' => 'archive'));
+        }
     }
 }
 
