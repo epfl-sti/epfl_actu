@@ -43,12 +43,14 @@ class WPQueryShortcode extends Shortcode
     function render_button_script ()
     {
         ?>
+          <script type="text/javascript">
         QTags.addButton(
             "wpquery_shortcode",
             "WPQuery",
             function() {
                   QTags.insertContent("[WPQuery type=\"epfl-actu,post\" tags=\"INST=IGM\" categories=\"in-the-media\" format=\"video\"]");
             });
+          </script>
         <?php
     }
 
