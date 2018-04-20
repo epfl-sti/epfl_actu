@@ -75,8 +75,10 @@ class _WPQueryBuilder
         $results = $q->get_posts();
         if (count($results) > 1) {
             throw new UnicityException(sprintf(
-                "%s returned %d results",
-                $this->moniker(), count($results)));
+                "%s returned %d results (%s",
+                $this->moniker(), count($results),
+                var_export(array_map(function($post) { return $post->ID; }, $results),
+                          true)));
         }
         return $results[0];
     }
@@ -673,6 +675,11 @@ abstract class APIChannelPost extends TypedPost
     function get_api_id () { return $this->api_id; }
     function get_translation_id () { return $this->translation_id; }
 
+    const LANGUAGE_SLUG = "language";
+    function get_language () {
+        return get_post_meta($this->ID, self::LANGUAGE_SLUG, true);
+    }
+
     /**
      * Populated piecemeal at @link sync time by the various
      * _update_* and _set_* methods; fetched all at once by
@@ -754,15 +761,11 @@ abstract class APIChannelPost extends TypedPost
 
         // "absolute_slug" is common to both APIs
         $this->_post_meta["absolute_slug"] = $api_result["absolute_slug"];
-        $lang = $this->_get_language($api_result);
-        $this->_post_meta["language"] = $lang;
+        $lang = $this->_get_api_language($api_result);
+        $this->_post_meta[self::LANGUAGE_SLUG] = $lang;
 
         $this->_update_post_meta($api_result);
         $this->_update_image_meta($api_result);
-        // Polylang
-        if (function_exists("pll_set_post_language")) {
-            pll_set_post_language($this->ID, $lang);
-        }
 
         $update_post_args = array(
             "ID"            => $this->ID,
@@ -780,9 +783,20 @@ abstract class APIChannelPost extends TypedPost
         wp_update_post($update_post_args);
         AutoFields::of(get_called_class())->append(array_keys($this->_post_meta));
 
+        // Polylang
+        if (function_exists("pll_set_post_language")) {
+            pll_set_post_language($this->ID, $lang);
+        }
+        if (function_exists("pll_save_post_translations") &&
+            count($translations = $this->_get_translations()))
+        {
+            error_log("pll_save_post_translations(" . var_export($translations, true) . ")");  // XXX
+            pll_save_post_translations($translations);
+        }
+
         $auto_categories = $this->get_auto_category_class()::find(
             $api_result[$this->get_auto_category_id_key()],
-            /* $lang_hint = */ $this->_get_language($api_result));
+            /* $lang_hint = */ $this->_get_api_language($api_result));
         $auto_category_ids = array_map(function($cat) { return $cat->ID(); }, $auto_categories);
         _debug(sprintf("Appending %s to post %d", var_export($auto_category_ids, true), $this->ID));
         wp_set_post_categories(
@@ -791,7 +805,7 @@ abstract class APIChannelPost extends TypedPost
             /* $append = */ true);
     }
 
-    function _get_language ($api_result) {
+    function _get_api_language ($api_result) {
         return ($api_result["language"] ? $api_result["language"] :
                 $api_result["lang"]);
     }
@@ -814,6 +828,20 @@ abstract class APIChannelPost extends TypedPost
             }
         }
         return $this->_post_meta;
+    }
+
+    protected function _get_translations ()
+    {
+        $translations = array();
+        $q = new _WPQueryBuilder($this->get_post_type());
+        foreach ($q->by_meta(array("api_id" => $this->get_api_id()))->results()
+                 as $post) {
+            $lang = static::get($post)->get_language();
+            if ($lang) {
+                $translations[$lang] = $post->ID;
+            }
+        }
+        return $translations;
     }
 
     const MAX_HEIGHT_META = "epfl_external_img_max_height";
