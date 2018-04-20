@@ -505,11 +505,7 @@ abstract class TypedPost extends Post
      */
     public static function foreach ($callback)
     {
-        $all = new \WP_Query(array(
-            'post_type'      => static::get_post_type(),
-            'posts_per_page' => -1
-        ));
-
+        $all = (new _WPQueryBuilder(static::get_post_type()))->results();
         $in_the_loop = new _InTheLoopHelper($all);
         try {
             $in_the_loop->enter();
