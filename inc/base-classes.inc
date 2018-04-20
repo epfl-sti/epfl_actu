@@ -37,7 +37,7 @@ function _debug ($msg)
     // error_log($msg);
 }
 
-class UnicityException extends \Exception {}
+class UnicityException extends Exception {}
 
 /**
  * A helper class to prepare and invoke custom WP_Query objects.
@@ -69,10 +69,19 @@ class _WPQueryBuilder
         return $this;
     }
 
+    function wp_query ()
+    {
+        if (! $this->query) {
+            throw new Exception("Can only call one of ->wp_query, ->result or ->results");
+        }
+        $retval = new WP_Query($this->query);
+        unset($this->query);
+        return $retval;
+    }
+
     function result ()
     {
-        $q = new WP_Query($this->query);
-        $results = $q->get_posts();
+        $results = $this->wp_query()->get_posts();
         if (count($results) > 1) {
             throw new UnicityException(sprintf(
                 "%s returned %d results (%s",
@@ -88,8 +97,7 @@ class _WPQueryBuilder
         if (! $query["posts_per_page"]) {
             $query["posts_per_page"] = -1;
         }
-        $q = new WP_Query($this->query);
-        return $q->get_posts();
+        $this->wp_query()->get_posts();
     }
 
     function moniker ($set_it = null) {
@@ -505,7 +513,7 @@ abstract class TypedPost extends Post
      */
     public static function foreach ($callback)
     {
-        $all = (new _WPQueryBuilder(static::get_post_type()))->results();
+        $all = (new _WPQueryBuilder(static::get_post_type()))->wp_query();
         $in_the_loop = new _InTheLoopHelper($all);
         try {
             $in_the_loop->enter();
