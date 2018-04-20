@@ -37,6 +37,71 @@ function _debug ($msg)
     // error_log($msg);
 }
 
+class UnicityException extends \Exception {}
+
+/**
+ * A helper class to prepare and invoke custom WP_Query objects.
+ */
+class _WPQueryBuilder
+{
+    function __construct ($query)
+    {
+        if (is_string($query)) {
+            $query = array('post_type' => $query);
+        }
+        $this->query = $query;
+    }
+
+    function by_meta ($meta_array)
+    {
+        if (! $this->query["meta_query"]) {
+            $this->query["meta_query"] = array('relation' => 'AND');
+        }
+
+        foreach ($meta_array as $k => $v) {
+            array_push($this->query["meta_query"], array(
+                'key'     => $k,
+                'value'   => $v,
+                'compare' => '='
+            ));
+        }
+
+        return $this;
+    }
+
+    function result ()
+    {
+        $q = new WP_Query($this->query);
+        $results = $q->get_posts();
+        if (count($results) > 1) {
+            throw new UnicityException(sprintf(
+                "%s returned %d results",
+                $this->moniker(), count($results)));
+        }
+        return $results[0];
+    }
+
+    function results ()
+    {
+        if (! $query["posts_per_page"]) {
+            $query["posts_per_page"] = -1;
+        }
+        $q = new WP_Query($this->query);
+        return $q->get_posts();
+    }
+
+    function moniker ($set_it = null) {
+        if ($set_it !== null) {
+            $this->moniker = $set_it;
+            return $this;    // Chainable
+        } elseif ($this->moniker) {
+            return $this->moniker;
+        } else {
+            return "<" . var_export($this->query, true) . ">";
+        }
+    }
+}
+
 /**
  * Abstract base classes for taxonomies whose terms have an URL as metadata.
  *
@@ -399,24 +464,9 @@ abstract class TypedPost extends Post
      */
     static protected function _get_by_primary_key ($unique_key_array)
     {
-        $meta_query = array('relation' => 'AND');
-        foreach ($unique_key_array as $k => $v) {
-            array_push($meta_query, array(
-                'key'     => $k,
-                'value'   => $v,
-                'compare' => '='
-            ));
-        }
-
         $theclass = get_called_class();
-        $search_query = new WP_Query(array(
-           'post_type'  => $theclass::get_post_type(),
-           'meta_query' => $meta_query
-        ));
-        $results = $search_query->get_posts();
-        if (0 === sizeof($results)) { return null; }
-
-        $that = new $theclass($results[0]->ID);
+        $q = new _WPQueryBuilder($theclass::get_post_type());
+        $that = new $theclass($q->by_meta($unique_key_array)->result()->ID);
         foreach ($unique_key_array as $k => $v) {
             $that->$k = $v;
         }
