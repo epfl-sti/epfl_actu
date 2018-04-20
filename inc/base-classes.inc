@@ -1089,7 +1089,7 @@ class _CustomPostTypeControllerColumn
             }
             return $newcolumns;
         } else {
-            wp_die("Unsupported value for ->hook(): " . var_export($this->insert_after, true));
+            wp_die("Unsupported value for ->insert_after: " . var_export($this->insert_after, true));
         }
     }
 
