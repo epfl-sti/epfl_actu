@@ -704,12 +704,14 @@ abstract class APIChannelPost extends TypedPost
 
         // "absolute_slug" is common to both APIs
         $this->_post_meta["absolute_slug"] = $api_result["absolute_slug"];
+        $lang = $this->_get_language($api_result);
+        $this->_post_meta["language"] = $lang;
 
         $this->_update_post_meta($api_result);
         $this->_update_image_meta($api_result);
         // Polylang
         if (function_exists("pll_set_post_language")) {
-            pll_set_post_language($this->ID, $this->_get_language($api_result));
+            pll_set_post_language($this->ID, $lang);
         }
 
         $update_post_args = array(
