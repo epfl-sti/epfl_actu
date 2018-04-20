@@ -97,7 +97,7 @@ class _WPQueryBuilder
         if (! $query["posts_per_page"]) {
             $query["posts_per_page"] = -1;
         }
-        $this->wp_query()->get_posts();
+        return $this->wp_query()->get_posts();
     }
 
     function moniker ($set_it = null) {
