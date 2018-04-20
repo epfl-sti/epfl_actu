@@ -794,7 +794,6 @@ abstract class APIChannelPost extends TypedPost
         if (function_exists("pll_save_post_translations") &&
             count($translations = $this->_get_translations()))
         {
-            error_log("pll_save_post_translations(" . var_export($translations, true) . ")");  // XXX
             pll_save_post_translations($translations);
         }
 
