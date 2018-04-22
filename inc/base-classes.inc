@@ -2030,10 +2030,11 @@ abstract class PostListShortcodeView extends ListTemplatedShortcodeView
  * filter-based customization proposed by the grandparent class @link
  * ListTemplatedShortcodeView, the rendering of a shortcode that uses
  * a subclass of WPQueryShortcodeView can be customized using files
- * whose names are like `loop-templates/content-none.php`,
- * `loop-templates/content-${post_format}.php`,
+ * whose names are like `loop-templates/content-${post_format}.php`,
  * `loop-templates/content-${post_type}.php` and
- * `loop-templates/content.php` as a fallback for the latter two.
+ * `loop-templates/content.php` (by decreasing order of precedence, in
+ * case the result set is not empty); or
+ * `loop-templates/content-none.php`, when there are no results.
  *
  * @see https://understrap.com/
  */
