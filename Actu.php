@@ -70,18 +70,18 @@ class Actu extends \EPFL\WS\Base\APIChannelPost
         return ActuCategory::class;
     }
 
-    static function get_auto_category_id_key () {
-        return "news_category_id";
+    static function extract_auto_category_id ($api_result) {
+        return $api_result["news_category_id"];
     }
 
-    static function get_api_id_key ()
+    static function extract_api_id ($api_result)
     {
-        return "news_id";
+        return $api_result["news_id"];
     }
 
-    static function get_image_url_key ()
+    static function extract_image_url ($api_result)
     {
-        return "news_thumbnail_absolute_url";
+        return $api_result["news_thumbnail_absolute_url"];
     }
 
     /**
@@ -143,11 +143,11 @@ class Actu extends \EPFL\WS\Base\APIChannelPost
         }
     }
 
-    protected function _get_excerpt ($api_result)
+    protected function extract_excerpt ($api_result)
     {
         return $api_result["subtitle"];
     }
-    protected function _get_content ($api_result)
+    protected function extract_content ($api_result)
     {
         return $api_result["text"];
     }

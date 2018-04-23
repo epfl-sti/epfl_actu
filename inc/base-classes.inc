@@ -602,16 +602,15 @@ class _InTheLoopHelper
 abstract class APIChannelPost extends TypedPost
 {
     /**
-     * @return The name of the primary key component for the API ID,
+     * @return The primary key component for the API ID,
      *         i.e. either "news_id" or "event_id"
      */
-    static abstract function get_api_id_key ();
+    static abstract function extract_api_id ($api_result);
 
     /**
-     * @return The name of key in API results whose value is the
-     *         picture URL.
+     * @return The picture URL
      */
-    static abstract function get_image_url_key ();
+    static abstract function extract_image_url ($api_result);
 
     /**
      * @return The @link APIAutoCategory class that instances of
@@ -620,11 +619,10 @@ abstract class APIChannelPost extends TypedPost
     static abstract function get_auto_category_class ();
 
     /**
-     * @return The key in the JSON returned in the API, whose value
-     *         is an integer ID pointing to the correct instance
+     * @return The integer ID pointing to the correct instance
      *         of @link get_auto_category_class
      */
-    static abstract function get_auto_category_id_key ();
+    static abstract function extract_auto_category_id ($api_result);
 
     /**
      * Extract as much information as desired from $api_result and
@@ -648,7 +646,7 @@ abstract class APIChannelPost extends TypedPost
     /**
      * @return the value of the "post_content" standard (non-meta) WordPress field.
      */
-    abstract protected function _get_content ($api_result);
+    abstract protected function extract_content ($api_result);
 
     /**
      * @return the value of the "post_title" standard (non-meta) WordPress field.
@@ -656,7 +654,7 @@ abstract class APIChannelPost extends TypedPost
      * Both APIs happen to use the same field, however this method is
      * singled out for overloading in case of need.
      */
-    protected function _get_title ($api_result)
+    protected function extract_title ($api_result)
     {
         return $api_result["title"];
     }
@@ -668,7 +666,7 @@ abstract class APIChannelPost extends TypedPost
      * The base class does nothing. If your API has excerpts (e.g.,
      * Actu), override in the subclass.
      */
-    protected function _get_excerpt ($api_result) {
+    protected function extract_excerpt ($api_result) {
         return null;
     }
 
@@ -748,12 +746,13 @@ abstract class APIChannelPost extends TypedPost
      */
     static function sync ($api_result)
     {
-        if (! (array_key_exists(static::get_api_id_key(), $api_result) &&
+        $api_id = static::extract_api_id($api_result);
+        if (! ($api_id &&
                array_key_exists("translation_id", $api_result))) {
             throw new Exception("Invalid API result: " . var_export($api_result, true));
         }
         $that = static::_get_or_create(array(
-            "api_id"         => $api_result[static::get_api_id_key()],
+            "api_id"         => $api_id,
             "translation_id" => $api_result["translation_id"]));
         $that->_sync($api_result);
         return $that;
@@ -765,7 +764,7 @@ abstract class APIChannelPost extends TypedPost
 
         // "absolute_slug" is common to both APIs
         $this->_post_meta["absolute_slug"] = $api_result["absolute_slug"];
-        $lang = $this->_get_api_language($api_result);
+        $lang = $this->_extract_language($api_result);
         $this->_post_meta[self::LANGUAGE_SLUG] = $lang;
 
         $this->_update_post_meta($api_result);
@@ -774,12 +773,12 @@ abstract class APIChannelPost extends TypedPost
         $update_post_args = array(
             "ID"            => $this->ID,
             "post_type"     => $this->get_post_type(),
-            "post_title"    => $this->_get_title($api_result),
-            "post_content"  => $this->_get_content($api_result),
+            "post_title"    => $this->extract_title($api_result),
+            "post_content"  => $this->extract_content($api_result),
             "meta_input"    => $this->_post_meta
         );
 
-        $excerpt = $this->_get_excerpt($api_result);
+        $excerpt = $this->extract_excerpt($api_result);
         if ($excerpt) {
             $update_post_args["post_excerpt"] = $excerpt;
         }
@@ -798,8 +797,8 @@ abstract class APIChannelPost extends TypedPost
         }
 
         $auto_categories = $this->get_auto_category_class()::find(
-            $api_result[$this->get_auto_category_id_key()],
-            /* $lang_hint = */ $this->_get_api_language($api_result));
+            $this->extract_auto_category_id($api_result),
+            /* $lang_hint = */ $this->_extract_language($api_result));
         $auto_category_ids = array_map(function($cat) { return $cat->ID(); }, $auto_categories);
         _debug(sprintf("Appending %s to post %d", var_export($auto_category_ids, true), $this->ID));
         wp_set_post_categories(
@@ -808,7 +807,7 @@ abstract class APIChannelPost extends TypedPost
             /* $append = */ true);
     }
 
-    function _get_api_language ($api_result) {
+    private function _extract_language ($api_result) {
         return ($api_result["language"] ? $api_result["language"] :
                 $api_result["lang"]);
     }
@@ -866,21 +865,19 @@ abstract class APIChannelPost extends TypedPost
      * Extract the image-related metadata from $api_result and
      * stash them into $this->_post_meta.
      *
-     * The base class obtains and stashes the thumbnail from the key
-     * named by @link get_image_url_key, and then probes the maximum
-     * image size server-side (see @link get_image_url for details on
-     * this feature of EPFL Actu and Memento). Subclasses may decide
-     * to override the method, and even forego calling the parent::
+     * The base class obtains and stashes the thumbnail from @link
+     * extract_image_url, and then probes the maximum image size
+     * server-side (see @link get_image_url for details on this
+     * feature of EPFL Actu and Memento). Subclasses may decide to
+     * override the method, and even forego calling the parent::
      * altogether, if they know better what image to use (e.g. YouTube
      * thumbnail for Actus with videos).
      *
      */
     protected function _update_image_meta ($api_result)
     {
-        $key = $this->get_image_url_key();
-        $image_url = $api_result[$key];
-        if (! $image_url) {
-            _debug("No key $key for post ID " . $this->ID);
+        if (! ($image_url = $this->extract_image_url($api_result))) {
+            _debug("Cannot extract image for post ID " . $this->ID);
             return;
         }
         $this->_set_thumbnail_url($image_url);

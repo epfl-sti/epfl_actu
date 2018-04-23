@@ -66,23 +66,30 @@ class Memento extends \EPFL\WS\Base\APIChannelPost
         return MementoCategory::class;
     }
 
-    static function get_auto_category_id_key () {
-        return "event_category_id";
+    static function extract_auto_category_id ($api_result) {
+        return $api_result["event_category_id"];
     }
 
-    static function get_api_id_key ()
+    static function extract_api_id ($api_result)
     {
-        return "event_id";
+        return $api_result["event_id"];
     }
 
-    static function get_image_url_key ()
+    static function extract_image_url ($api_result)
     {
-        return "event_visual_absolute_url";
+        return $api_result["event_visual_absolute_url"];
     }
 
-    protected function _get_content ($api_result)
+    protected function extract_content ($api_result)
     {
         return $api_result["description"];
+    }
+
+    const TRANSLATION_ID_META = "translation_id";
+
+    public function get_translation_id ()
+    {
+        return get_post_meta($this->ID, self::TRANSLATION_ID_META, true);
     }
 
     /**
