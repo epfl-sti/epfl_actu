@@ -698,10 +698,6 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
         return null;
     }
 
-    var $ID;
-    private $api_id;
-    private $translation_id;
-
     function get_api_id () { return $this->api_id; }
     function get_translation_id () { return $this->translation_id; }
 
