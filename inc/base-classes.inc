@@ -110,7 +110,7 @@ class _WPQueryBuilder
             return $this->moniker;
         } else {
             $q = ($this->query ? $this->query : $this->_saved_query);
-            return "<" . var_export($$q, true) . ">";
+            return "<" . var_export($q, true) . ">";
         }
     }
 }
