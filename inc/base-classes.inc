@@ -69,12 +69,14 @@ class _WPQueryBuilder
         return $this;
     }
 
+    private $_saved_query;
     function wp_query ()
     {
         if (! $this->query) {
             throw new Exception("Can only call one of ->wp_query, ->result or ->results");
         }
         $retval = new WP_Query($this->query);
+        $this->_saved_query = $this->query;
         unset($this->query);
         return $retval;
     }
@@ -107,7 +109,8 @@ class _WPQueryBuilder
         } elseif ($this->moniker) {
             return $this->moniker;
         } else {
-            return "<" . var_export($this->query, true) . ">";
+            $q = ($this->query ? $this->query : $this->_saved_query);
+            return "<" . var_export($$q, true) . ">";
         }
     }
 }
