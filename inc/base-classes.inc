@@ -709,7 +709,6 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
     }
 
     function get_api_id () { return $this->api_id; }
-    function get_translation_id () { return $this->translation_id; }
 
     /**
      * Populated piecemeal at @link sync time by the various
