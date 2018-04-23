@@ -12,7 +12,7 @@ require_once(__DIR__ . "/Lab.php");
 use \EPFL\WS\Labs\Lab;
 
 require_once(__DIR__ . "/inc/base-classes.inc");
-use \EPFL\WS\Base\TypedPost;
+use \EPFL\WS\Base\UniqueKeyTypedPost;
 use \EPFL\WS\Base\CustomPostTypeController;
 
 require_once(__DIR__ . "/inc/ldap.inc");
@@ -92,7 +92,7 @@ class DuplicatePersonException extends SCIPERException
     }
 }
 
-class Person extends TypedPost
+class Person extends UniqueKeyTypedPost
 {
     const SLUG = "epfl-person";
 
@@ -183,23 +183,7 @@ class Person extends TypedPost
 
     public static function find_by_sciper ($sciper)
     {
-        $search_query = new \WP_Query(array(
-            'post_type' => Person::get_post_type(),
-            'meta_query' => array(array(
-                'key'     => self::SCIPER_META,
-                'value'   => $sciper,
-                'compare' => '='
-            ))));
-
-        $results = $search_query->get_posts();
-        if (sizeof($results) > 1) {
-            throw new DuplicatePersonException($sciper);
-        }
-        if (sizeof($results)) {
-            return static::get($results[0]);
-        } else {
-            return null;
-        }
+        return static::_get_by_unique_key(array(self::SCIPER_META => $sciper));
     }
 
     function get_title ()

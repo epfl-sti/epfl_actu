@@ -16,7 +16,7 @@ require_once(__DIR__ . "/inc/ldap.inc");
 use \EPFL\WS\LDAPClient;
 
 require_once(__DIR__ . "/inc/base-classes.inc");
-use \EPFL\WS\Base\TypedPost;
+use \EPFL\WS\Base\UniqueKeyTypedPost;
 use \EPFL\WS\Base\CustomPostTypeController;
 
 require_once(__DIR__ . "/inc/auto-fields.inc");
@@ -43,7 +43,7 @@ class LabUnicityException extends \Exception { }
  *
  * Labs represented in WordPress as a custom post type.
  */
-class Lab extends TypedPost
+class Lab extends UniqueKeyTypedPost
 {
     const SLUG = "epfl-lab";
 
@@ -88,7 +88,7 @@ class Lab extends TypedPost
 
     static function get_by_unique_id ($unique_id)
     {
-        return static::_get_by_primary_key(array(
+        return static::_get_by_unique_key(array(
             self::UNIQUE_ID_META => $unique_id
         ));
     }

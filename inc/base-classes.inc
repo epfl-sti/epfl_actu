@@ -454,57 +454,10 @@ abstract class TypedPost extends Post
      */
     static abstract function get_post_type ();
 
-    /**
-     * Protected constructor
-     */
-    protected function __construct ($id)
-    {
-        $this->ID = $id;
-    }
-
     function _belongs ()
     {
         return ($this->wp_post()->post_type ===
                 get_called_class()::get_post_type());
-    }
-
-    /**
-     * Retrieve one post per its primary key components.
-     *
-     * @param $unique_key_array A PHP associative array whose keys
-     * are the names of WordPress "meta" fields that compose the Post's
-     * unique identity, and whose values are the corresponding values.
-     */
-    static protected function _get_by_primary_key ($unique_key_array)
-    {
-        $theclass = get_called_class();
-        $q = new _WPQueryBuilder($theclass::get_post_type());
-        $that = new $theclass($q->by_meta($unique_key_array)->result()->ID);
-        foreach ($unique_key_array as $k => $v) {
-            $that->$k = $v;
-        }
-        return $that;
-    }
-
-    /**
-     * Like @link _get_by_primary_key, except create a new WordPress
-     * post if searching by $unique_key_array yields no results.
-     */
-    static protected function _get_or_create ($unique_key_array)
-    {
-        $that = static::_get_by_primary_key($unique_key_array);
-        if ($that !== null) { return $that; }
-
-        $theclass = get_called_class();
-        $id = wp_insert_post(array(
-            "post_type" => $theclass::get_post_type(),
-            "post_status" => "publish",
-            "meta_input" => $unique_key_array), true);
-        $that = new $theclass($id);
-        foreach ($unique_key_array as $k => $v) {
-            $that->$k = $v;
-        }
-        return $that;
     }
 
     /**
@@ -530,6 +483,78 @@ abstract class TypedPost extends Post
         } finally {
             $in_the_loop->leave();
         }
+    }
+}
+
+/**
+ * A class of Posts that can be referenced by some other kind of
+ * unique key than the WordPress post ID.
+ */
+abstract class UniqueKeyTypedPost extends TypedPost
+{
+    /**
+     * Overridden to store unique key elements as fields of
+     * constructed objects (when constructing from said unique key).
+     *
+     * @param $unique_keys An array whose keys and values constitute
+     * the unique key used for retrieving this object (if construction
+     * occurs through @link _get_by_unique_key or @link
+     * _get_or_create); will be omitted if the object is instead
+     * constructed from its WordPress post ID (using e.g. @link get).
+     */
+    protected function __construct ($id, $unique_keys = null)
+    {
+        parent::__construct($id);
+        if (! $unique_keys) return;
+        foreach ($unique_keys as $k => $v) {
+            $this->$k = $v;
+        }
+    }
+
+    /**
+     * Retrieve one post per its unique key components.
+     *
+     * @param $unique_keys A PHP associative array similar to what
+     *                     the @link WP_Query constructor expects
+     */
+    static protected function _get_by_unique_key ($unique_keys)
+    {
+        $theclass = get_called_class();
+        $q = new _WPQueryBuilder(static::get_post_type());
+        static::_query_by_unique_keys($q, $unique_keys);
+        $result = $q->result();
+        if ($result) {
+            return new $theclass($result->ID, $unique_keys);
+        } else {
+            return null;
+        }
+    }
+
+    static protected function _query_by_unique_keys($q, $unique_keys)
+    {
+        $q->by_meta($unique_keys);
+    }
+
+    /**
+     * Like @link _get_by_unique_key, except create a new WordPress
+     * post if searching by $unique_key_array yields no results.
+     */
+    static protected function _get_or_create ($unique_keys)
+    {
+        $that = static::_get_by_unique_key($unique_keys);
+        if ($that !== null) { return $that; }
+
+        $theclass = get_called_class();
+        $insert_post_args = array(
+            "post_type" => $theclass::get_post_type(),
+            "post_status" => "publish");
+        static::_insert_by_unique_keys($insert_post_args, $unique_keys);
+        $id = wp_insert_post($insert_post_args, true);
+        return new $theclass($id, $unique_keys);
+    }
+
+    static protected function _insert_by_unique_keys (&$insert_post_args, $unique_keys) {
+        $insert_post_args["meta_input"] = $unique_keys;
     }
 }
 
@@ -602,7 +627,7 @@ class _InTheLoopHelper
  * == 'epfl-actu' or 'epfl-memento').
  */
 
-abstract class APIChannelPost extends TypedPost
+abstract class APIChannelPost extends UniqueKeyTypedPost
 {
     /**
      * @return The primary key component for the API ID,
@@ -692,50 +717,6 @@ abstract class APIChannelPost extends TypedPost
      */
     protected $_post_meta;
 
-    /**
-     * Private constructor — Call @link get or @link sync instead
-     */
-    protected function __construct ($id, $api_id = null, $translation_id = null)
-    {
-        parent::__construct($id);
-        if ($api_id !== null) {
-            $this->api_id = $api_id;
-        } else {
-            $this->api_id = get_post_meta($id, "api_id", true);
-        }
-        if ($translation_id !== null) {
-            $this->translation_id = $translation_id;
-        } else {
-            $this->translation_id = get_post_meta($id, "translation_id", true);
-        }
-    }
-
-    /**
-     * Retrieve one post, only if it does exist.
-     *
-     * @return an instance of this class or null.
-     */
-    static function get ($post_or_post_id)
-    {
-        $theclass = get_called_class();
-        $expected_post_type = $theclass::get_post_type();
-        if (is_object($post_or_post_id)) {
-            if ($post_or_post_id->post_type !== $expected_post_type) return;
-            $post_id = $post_or_post_id->ID;
-        } else {
-            $post_id = $post_or_post_id;
-            if (get_post_type($post_id) !== $expected_post_type) return;
-        }
-
-        $api_id         = get_post_meta($post_id, "api_id",         true);
-        $translation_id = get_post_meta($post_id, "translation_id", true);
-        $that = new $theclass($post_id, $api_id, $translation_id);
-        if (is_object($post_or_post_id)) {
-            $that->_wp_post = $post_or_post_id;
-        }
-        return $that;
-    }
-
     const THUMBNAIL_META  = "epfl_external_thumbnail";
 
     /**
@@ -744,7 +725,7 @@ abstract class APIChannelPost extends TypedPost
      * @param $api_result One of the API results returned by
      *        @link ActuAPIClient#fetch
      *
-     * @return The object instance that corresponds to the primary keys
+     * @return The object instance that corresponds to the unique keys
      *         present in $api_result
      */
     static function sync ($api_result)
