@@ -652,6 +652,16 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
      */
     static abstract function extract_auto_category_id ($api_result);
 
+    const API_ID_SLUG   = "api_id";
+    const HOMEPAGE_SLUG = "absolute_slug";
+    // TODO: In /api/v1, there is no translation ID in an Actu result anymore.
+    const TRANSLATION_ID_SLUG = "translation_id";
+    const LANGUAGE_SLUG = "language";
+
+    function get_language () {
+        return get_post_meta($this->ID, self::LANGUAGE_SLUG, true);
+    }
+
     /**
      * Extract as much information as desired from $api_result and
      * stash it into $this->_post_meta.
@@ -664,7 +674,7 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
      */
     protected function _update_post_meta ($api_result)
     {
-        $this->_post_meta["absolute_slug"] = $api_result["absolute_slug"];
+        $this->_post_meta[self::HOMEPAGE_SLUG]       = $api_result["absolute_slug"];
         // So technically we've been through a decode/encode cycle and
         // we all know how harsh PHP can be to JSON... But we just want
         // to keep as much metadata as possible.
@@ -701,11 +711,6 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
     function get_api_id () { return $this->api_id; }
     function get_translation_id () { return $this->translation_id; }
 
-    const LANGUAGE_SLUG = "language";
-    function get_language () {
-        return get_post_meta($this->ID, self::LANGUAGE_SLUG, true);
-    }
-
     /**
      * Populated piecemeal at @link sync time by the various
      * _update_* and _set_* methods; fetched all at once by
@@ -732,15 +737,16 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
             throw new Exception("Invalid API result: " . var_export($api_result, true));
         }
         $that = static::_get_or_create(array(
-            "api_id"         => $api_id,
-            "translation_id" => $api_result["translation_id"]));
+            self::API_ID_SLUG         => $api_id,
+            // TODO: In /api/v1, there is no translation ID in an Actu result anymore.
+            self::TRANSLATION_ID_SLUG => $api_result["translation_id"]));
         $that->_sync($api_result);
         return $that;
     }
 
     public function _sync($api_result)
     {
-        $this->_init_post_meta();
+        $this->_post_meta = array();
 
         // "absolute_slug" is common to both APIs
         $this->_post_meta["absolute_slug"] = $api_result["absolute_slug"];
@@ -816,7 +822,7 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
     {
         $translations = array();
         $q = new _WPQueryBuilder($this->get_post_type());
-        foreach ($q->by_meta(array("api_id" => $this->get_api_id()))->results()
+        foreach ($q->by_meta(array(self::API_ID_SLUG => $this->get_api_id()))->results()
                  as $post) {
             $lang = static::get($post)->get_language();
             if ($lang) {
