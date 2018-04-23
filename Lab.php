@@ -206,12 +206,7 @@ class Lab extends UniqueKeyTypedPost
 
     public function get_unique_id ()
     {
-        $unique_id_meta = self::UNIQUE_ID_META;
-        if (! $this->$unique_id_meta) {
-            $this->$unique_id_meta = get_post_meta(
-                $this->ID, self::UNIQUE_ID_META, true);
-        }
-        return $this->$unique_id_meta;
+        return get_post_meta($this->ID, self::UNIQUE_ID_META, true);
     }
 
     public function get_lab_manager ()

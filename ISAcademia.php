@@ -145,12 +145,7 @@ class Course extends UniqueKeyTypedPost
 
     function get_permalink ()
     {
-        $meta = self::COURSE_HOMEURL_META;
-        if ($this->$meta) {
-             return $this->$meta;
-        } else {
-             return get_post_meta($this->ID, self::COURSE_HOMEURL_META, true);
-        }
+        return get_post_meta($this->ID, self::COURSE_HOMEURL_META, true);
     }
 }
 

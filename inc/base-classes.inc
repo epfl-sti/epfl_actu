@@ -489,33 +489,24 @@ abstract class TypedPost extends Post
 /**
  * A class of Posts that can be referenced by some other kind of
  * unique key than the WordPress post ID.
+ *
+ * The class provides "named constructors"
+ * @link _get_by_unique_key and @link _get_or_create (in addition to
+ * the parent class' @link get) which implement fetching/creating
+ * objects from an associative array containing the unique key,
+ * possiby composite (i.e. comprised of one or more keys and values).
  */
 abstract class UniqueKeyTypedPost extends TypedPost
 {
     /**
-     * Overridden to store unique key elements as fields of
-     * constructed objects (when constructing from said unique key).
-     *
-     * @param $unique_keys An array whose keys and values constitute
-     * the unique key used for retrieving this object (if construction
-     * occurs through @link _get_by_unique_key or @link
-     * _get_or_create); will be omitted if the object is instead
-     * constructed from its WordPress post ID (using e.g. @link get).
-     */
-    protected function __construct ($id, $unique_keys = null)
-    {
-        parent::__construct($id);
-        if (! $unique_keys) return;
-        foreach ($unique_keys as $k => $v) {
-            $this->$k = $v;
-        }
-    }
-
-    /**
      * Retrieve one post per its unique key components.
      *
-     * @param $unique_keys A PHP associative array similar to what
-     *                     the @link WP_Query constructor expects
+     * @param $unique_keys A data structure uniquely identifying the
+     *                     post to fetch from the database. In the
+     *                     base class, an array of "custom fields"
+     *                     ("meta" in WordPress parlance) is expected;
+     *                     see @link _query_by_unique_keys for detais
+     *                     (and a way to change that in a subclass).
      */
     static protected function _get_by_unique_key ($unique_keys)
     {
@@ -524,12 +515,33 @@ abstract class UniqueKeyTypedPost extends TypedPost
         static::_query_by_unique_keys($q, $unique_keys);
         $result = $q->result();
         if ($result) {
-            return new $theclass($result->ID, $unique_keys);
+            return new $theclass($result->ID);
         } else {
             return null;
         }
     }
 
+    /**
+     * The "search" semantics of the $unique_keys parameter to
+     * @link _get_by_unique_key
+     *
+     * This method is supposed to mutate $q to restrict the search to
+     * the one post object that has $unique_keys as its unique key (or
+     * composite unique key). The base class provides an implementation
+     * based on WordPress' "meta" a.k.a. "custom fields": that is,
+     * $unique_keys is assumed to be an array whose keys could be passed
+     * as the second argument to @link get_post_meta, and whose values
+     * would be the corresponding return values of same `get_post_meta`.
+     * However, a class that overrides _query_by_unique_keys could change
+     * the semantics of $unique_keys in any way it pleases. (See also @link
+     * _insert_by_unique_keys for the write case.)
+     *
+     * @param $q An instance of @link _WPQueryBuilder, that will be mutated
+     *           to restrict the search to $unique_keys
+     *
+     * @param $unique_keys Passed unmodified from @link _get_by_unique_key or
+     *                     @link _get_or_create
+     */
     static protected function _query_by_unique_keys($q, $unique_keys)
     {
         $q->by_meta($unique_keys);
@@ -537,7 +549,13 @@ abstract class UniqueKeyTypedPost extends TypedPost
 
     /**
      * Like @link _get_by_unique_key, except create a new WordPress
-     * post if searching by $unique_key_array yields no results.
+     * post if @link _get_by_unique_key yields no results.
+     *
+     * @param $unique_keys Same as in @link _get_by_unique_key - Again,
+     *                     the base class assumes an array of "meta"
+     *                     (a.k.a. "custom fields"), but by overriding
+     *                     @link _insert_by_unique_keys in a subclass
+     *                     one could use another data structure
      */
     static protected function _get_or_create ($unique_keys)
     {
@@ -550,9 +568,31 @@ abstract class UniqueKeyTypedPost extends TypedPost
             "post_status" => "publish");
         static::_insert_by_unique_keys($insert_post_args, $unique_keys);
         $id = wp_insert_post($insert_post_args, true);
-        return new $theclass($id, $unique_keys);
+        return new $theclass($id);
     }
 
+    /**
+     * The "insert" semantics of the $unique_keys parameter to @link _get_or_create
+     *
+     * This method can be overridden in a subclass to do to @link _get_or_create
+     * as overriding @link _query_by_unique_keys does to @link _get_by_unique_key.
+     * The base class interprets $insert_post_args as an array of WordPress "meta"
+     * (a.k.a. "custom fields") names and values.
+     *
+     * @param &$insert_post_args The array parameter that will be passed to
+     *                           @link wp_insert_post. The
+     *                           implementation is supposed to mutate
+     *                           it, so that to guarantee that once
+     *                           `wp_insert_post` is called with these
+     *                           parameters, the unique key be already
+     *                           written in full to the WordPress data
+     *                           store (i.e., a subsequent call
+     *                           to @link _get_by_unique_key with the
+     *                           same $unique_keys should retrieve the
+     *                           same WordPress post).
+     *
+     * @param $unique_keys Passed unmodified from @link _get_or_create
+     */
     static protected function _insert_by_unique_keys (&$insert_post_args, $unique_keys) {
         $insert_post_args["meta_input"] = $unique_keys;
     }
@@ -658,6 +698,10 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
     const TRANSLATION_ID_SLUG = "translation_id";
     const LANGUAGE_SLUG = "language";
 
+    function get_api_id () {
+        return get_post_meta($this->ID, self::API_ID_SLUG, true);
+    }
+
     function get_language () {
         return get_post_meta($this->ID, self::LANGUAGE_SLUG, true);
     }
@@ -674,6 +718,9 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
      */
     protected function _update_post_meta ($api_result)
     {
+        $this->_post_meta[self::API_ID_SLUG]         = $this->extract_api_id($api_result);
+        // TODO: In /api/v1, there is no translation ID in an Actu result anymore.
+        $this->_post_meta[self::TRANSLATION_ID_SLUG] = $api_result["translation_id"];
         $this->_post_meta[self::HOMEPAGE_SLUG]       = $api_result["absolute_slug"];
         // So technically we've been through a decode/encode cycle and
         // we all know how harsh PHP can be to JSON... But we just want
@@ -707,8 +754,6 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
     protected function extract_excerpt ($api_result) {
         return null;
     }
-
-    function get_api_id () { return $this->api_id; }
 
     /**
      * Populated piecemeal at @link sync time by the various
@@ -797,18 +842,10 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
                 $api_result["lang"]);
     }
 
-    private function _init_post_meta ()
-    {
-        $this->_post_meta = array(
-            "api_id"         => $this->api_id,
-            "translation_id" => $this->translation_id
-        );
-    }
-
     protected function _get_post_meta ()
     {
         if (! $this->_post_meta) {
-            $this->_init_post_meta();
+            $this->_post_meta = array();
             foreach (get_post_meta($this->ID) as $key => $array) {
                 // All meta keys are single-valued
                 $this->_post_meta[$key] = $array[0];
