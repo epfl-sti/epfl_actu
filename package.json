@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/epfl-sti/wordpress.plugin.ws/issues"
   },
-  "homepage": "https://github.com/epfl-sti/wordpress.plugin.ws#readme"
+  "homepage": "https://github.com/epfl-sti/wordpress.plugin.ws#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1"
+  }
 }
