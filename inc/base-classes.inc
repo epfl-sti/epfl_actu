@@ -795,8 +795,9 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
      * of the same article — At least, said damage is now reversible.
      * (If Polylang is not available, use the "language" meta instead.)
      */
-    static protected function _query_by_unique_keys ($unique_keys) {
-        if (! function_exists('pll_current_language')) {
+    static protected function _query_by_unique_keys ($unique_keys)
+    {
+        if (! static::_is_polylang_enabled_on_custom_post_type()) {
             return parent::_query_by_unique_keys($unique_keys);
         }
         $lang = $unique_keys[self::LANGUAGE_SLUG];
@@ -812,10 +813,21 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
      *
      * @see _query_by_unique_keys
      */
-    static protected function _insert_by_unique_keys ($unique_keys) {
+    static protected function _insert_by_unique_keys ($unique_keys)
+    {
         $id = parent::_insert_by_unique_keys($unique_keys);
         pll_set_post_language($id, $unique_keys[self::LANGUAGE_SLUG]);
         return $id;
+    }
+
+    public function _is_polylang_enabled_on_custom_post_type ()
+    {
+        global $polylang;
+        if ($polylang && ($types = $polylang->model->get_translated_post_types())) {
+            return (array_search(static::get_post_type(), $types) !== false);
+        } else {
+            return false;
+        }
     }
 
     public function _sync($api_result)
