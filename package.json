@@ -1,0 +1,19 @@
+{
+  "name": "epfl-ws",
+  "version": "1.0.0",
+  "description": "The EPFL-WS WordPress plugin (PHP + Vue.js)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/epfl-sti/wordpress.plugin.ws.git"
+  },
+  "author": "STI-IT Web <stiitweb@epfl.ch>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/epfl-sti/wordpress.plugin.ws/issues"
+  },
+  "homepage": "https://github.com/epfl-sti/wordpress.plugin.ws#readme"
+}
