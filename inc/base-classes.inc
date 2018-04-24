@@ -96,10 +96,16 @@ class _WPQueryBuilder
 
     function results ()
     {
-        if (! $query["posts_per_page"]) {
-            $query["posts_per_page"] = -1;
+        if (! $this->query["posts_per_page"]) {
+            $this->all();
         }
         return $this->wp_query()->get_posts();
+    }
+
+    function all ()
+    {
+        $this->query["posts_per_page"] = -1;
+        return $this;
     }
 
     function moniker ($set_it = null) {
@@ -469,7 +475,7 @@ abstract class TypedPost extends Post
      */
     public static function foreach ($callback)
     {
-        $all = (new _WPQueryBuilder(static::get_post_type()))->wp_query();
+        $all = (new _WPQueryBuilder(static::get_post_type()))->all()->wp_query();
         $in_the_loop = new _InTheLoopHelper($all);
         try {
             $in_the_loop->enter();
