@@ -652,10 +652,16 @@ class _InTheLoopHelper
 /**
  * Abstract base class for Actu and Memento posts
  *
+ * This class is for creating and continuously syncing "epfl-actu" and
+ * "epfl-memento" custom post types out of the corresponding EPFL Web
+ * services. Subclasses @link Actu and @link Memento exist and
+ * override suitable "protected virtual" methods to account for the
+ * slight differences existing between both APIs.
+ *
  * There is one instance of this class for every unique piece of news
- * (identified by the "news_id"/"event_id" and "translation_id" API
- * fields, and materialized as a WordPress "post" object of post_type
- * == 'epfl-actu' or 'epfl-memento').
+ * or event (identified, in the sense of @link _get_by_unique_key
+ * / @link _get_or_create, by their "news_id"/"event_id" and
+ * "language"/"lang" API fields).
  */
 
 abstract class APIChannelPost extends UniqueKeyTypedPost
