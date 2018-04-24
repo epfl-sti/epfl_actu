@@ -327,13 +327,13 @@ abstract class StreamTaxonomyController
                 ),
                 'rewrite'           => array( 'slug' => $taxonomy_slug ),
             ));
-        add_action("${taxonomy_slug}_add_form_fields", array(get_called_class(), "create_channel_widget"));
-        add_action( "${taxonomy_slug}_edit_form_fields", array(get_called_class(), "update_channel_widget"), 10, 2);
+        add_action("${taxonomy_slug}_add_form_fields", array(get_called_class(), "render_form_fields_for_create"));
+        add_action( "${taxonomy_slug}_edit_form_fields", array(get_called_class(), "render_form_fields_for_update"), 10, 2);
         add_action( "created_${taxonomy_slug}", array(get_called_class(), 'edited_channel'), 10, 2 );
         add_action( "edited_${taxonomy_slug}", array(get_called_class(), 'edited_channel'), 10, 2 );
     }
 
-    static function create_channel_widget ($taxonomy)
+    static function render_form_fields_for_create ($unused_taxonomy_slug)
     {
         self::render_channel_widget(array("placeholder" => static::get_placeholder_api_url(), "size" => 40, "type" => "text"));
     }
@@ -351,7 +351,7 @@ abstract class StreamTaxonomyController
         return $default_labels[$key];
     }
 
-    static function update_channel_widget ($term, $unused_taxonomy_slug)
+    static function render_form_fields_for_update ($term, $unused_taxonomy_slug)
     {
         $taxonomy_class = static::get_taxonomy_class();
         $current_url = (new $taxonomy_class($term))->get_url();
