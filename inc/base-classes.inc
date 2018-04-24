@@ -720,8 +720,6 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
     protected function _update_post_meta ($api_result)
     {
         $this->_post_meta[self::API_ID_SLUG]         = $this->extract_api_id($api_result);
-        // TODO: In /api/v1, there is no translation ID in an Actu result anymore.
-        $this->_post_meta[self::TRANSLATION_ID_SLUG] = $api_result["translation_id"];
         $this->_post_meta[self::HOMEPAGE_SLUG]       = $api_result["absolute_slug"];
         // So technically we've been through a decode/encode cycle and
         // we all know how harsh PHP can be to JSON... But we just want
