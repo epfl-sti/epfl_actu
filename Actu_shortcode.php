@@ -111,7 +111,7 @@ class ActuShortCode {
       $this->ws->log( $error );
     }
 
-    $display_html = $this->display_templated($actus->results);
+    $display_html = $this->display_templated(array_reverse($actus->results));
 
     // This print out the queryed url, useful for now
     echo "<!-- epfl-actu url: " . $url . " -->";
