@@ -588,6 +588,7 @@ abstract class UniqueKeyTypedPost extends TypedPost
      * @return The newly created post ID as an integer
      */
     static protected function _insert_by_unique_keys ($unique_keys) {
+        $theclass = get_called_class();
         return wp_insert_post(array(
             "post_type"   => $theclass::get_post_type(),
             "post_status" => "publish",
