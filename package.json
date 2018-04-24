@@ -17,7 +17,22 @@
   },
   "homepage": "https://github.com/epfl-sti/wordpress.plugin.ws#readme",
   "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-helper-vue-jsx-merge-props": "^2.0.3",
+    "babel-plugin-syntax-jsx": "^6.18.0",
+    "babel-plugin-transform-vue-jsx": "^3.7.0",
+    "babel-preset-env": "^1.6.1",
+    "babelify": "^8.0.0",
     "gulp": "^3.9.1",
-    "gulp-watch": "^5.0.0"
+    "gulp-bro": "^1.0.3",
+    "gulp-rename": "^1.2.2",
+    "gulp-sourcemaps": "^2.6.4",
+    "gulp-uglify": "^3.0.0",
+    "gulp-watch": "^5.0.0",
+    "node-sass-tilde-importer": "^1.0.2",
+    "postcss-cssnext": "^3.1.0",
+    "unassertify": "^2.1.1",
+    "vue": "^2.5.16",
+    "vueify": "^9.4.1"
   }
 }
