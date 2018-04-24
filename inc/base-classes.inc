@@ -599,8 +599,8 @@ abstract class UniqueKeyTypedPost extends TypedPost
 /**
  * A helper to help us pretend that we are @link in_the_loop .
  *
- * While there is telling whether being "in the loop" will help us in
- * any way whatsoever with procuring sex and/or drugs, it does help
+ * While there is no telling whether being "in the loop" will help us
+ * in any way whatsoever with procuring sex and/or drugs, it does help
  * with WordPress avoiding a so-called "N+1 query problem" with
  * thumbnails.
  *
