@@ -4,7 +4,8 @@
   "description": "The EPFL-WS WordPress plugin (PHP + Vue.js)",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "postinstall": "gulp",
+    "watch": "gulp watch"
   },
   "repository": {
     "type": "git",

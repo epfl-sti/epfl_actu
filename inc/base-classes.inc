@@ -13,22 +13,22 @@ if (! defined('ABSPATH')) {
 use \WP_Query;
 use \Exception;
 
-require_once(dirname(__FILE__) . "/i18n.inc");
+require_once(__DIR__ . "/i18n.inc");
 use function \EPFL\WS\___;
 use function \EPFL\WS\__x;
 
-require_once(dirname(__FILE__) . "/batch.inc");
+require_once(__DIR__ . "/batch.inc");
 use function \EPFL\WS\run_every;
 use \EPFL\WS\BatchTask;
 
-require_once(dirname(__FILE__) . "/image-size.inc");
+require_once(__DIR__ . "/image-size.inc");
 use function \EPFL\WS\get_image_size;
 
-require_once(dirname(__FILE__) . "/auto-fields.inc");
+require_once(__DIR__ . "/auto-fields.inc");
 use \EPFL\WS\AutoFields;
 use \EPFL\WS\AutoFieldsController;
 
-require_once(dirname(__FILE__) . "/activation.inc");
+require_once(__DIR__ . "/activation.inc");
 use function \EPFL\WS\plugin_activation_hook;
 use function \EPFL\WS\plugin_deactivation_hook;
 
@@ -238,7 +238,7 @@ abstract class APIChannelTaxonomy extends StreamTaxonomy
 {
     function sync ()
     {
-        require_once (dirname(__FILE__) . "/ActuAPI.inc");
+        require_once (__DIR__ . "/ActuAPI.inc");
         $client = new \EPFL\WS\Actu\ActuAPIClient($this);
         foreach ($client->fetch() as $api_result) {
             $post_class = $this->get_post_class();
@@ -372,7 +372,9 @@ abstract class StreamTaxonomyController
                 <input id="<?php echo self::CHANNEL_WIDGET_URL_SLUG; ?>" name="<?php echo self::CHANNEL_WIDGET_URL_SLUG; ?>" type="text" size="40" value="<?php echo $current_url; ?>" />
                 <p class="description"><?php echo self::_get_wp_admin_label("url_legend_long"); ?></p>
             </td>
-        </tr><?php
+        </tr>
+        <tr><td><auto-category-widget></auto-category-widget></td></tr>
+        <?php
     }
 
     const CHANNEL_WIDGET_URL_SLUG = 'epfl_channel_url';
@@ -393,6 +395,7 @@ abstract class StreamTaxonomyController
         $taxonomy_class = static::get_taxonomy_class();
         $stream = new $taxonomy_class($term_id);
         $stream->set_url($_POST[self::CHANNEL_WIDGET_URL_SLUG]);
+        // TODO: Read and save the state of the auto-category-widget
         $stream->sync();
     }
 }
@@ -1066,6 +1069,12 @@ abstract class CustomPostTypeController extends Controller
         return $_columns[$slug];
     }
 
+    function get_post_type ()
+    {
+        $model_class = static::get_model_class();
+        return $model_class::get_post_type();
+    }
+
     /**
      * Add a column in the list view that shows thumbnails
      */
@@ -1602,6 +1611,8 @@ abstract class APIChannelPostController extends StreamPostController
         add_filter("post_thumbnail_html",
                    array(get_called_class(), "filter_post_thumbnail_html"), 10, 5);
         static::add_thumbnail_column();
+        add_action("admin_init",
+                   array(get_called_class(), "maybe_activate_auto_category_widget"));
     }
 
     /**
@@ -1671,6 +1682,14 @@ abstract class APIChannelPostController extends StreamPostController
         if ($orig_size = $epfl_post->get_max_size()) {
             printf("<p>Size: %dx%d</p>", $orig_size["width"], $orig_size["height"]);
         }
+    }
+
+    static function maybe_activate_auto_category_widget ()
+    {
+        global $typenow;
+        if ($typenow !== static::get_post_type()) return;
+        require_once(__DIR__ . "/auto-category-widget.inc");
+        \EPFL\WS\AutoCategoryWidget\AutoCategoryWidgetController::hook();
     }
 }
 
