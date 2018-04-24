@@ -510,15 +510,10 @@ abstract class UniqueKeyTypedPost extends TypedPost
      */
     static protected function _get_by_unique_key ($unique_keys)
     {
+        $result = static::_query_by_unique_keys($unique_keys)->result();
+        if (! $result) return null;
         $theclass = get_called_class();
-        $q = new _WPQueryBuilder(static::get_post_type());
-        static::_query_by_unique_keys($q, $unique_keys);
-        $result = $q->result();
-        if ($result) {
-            return new $theclass($result->ID);
-        } else {
-            return null;
-        }
+        return new $theclass($result->ID);
     }
 
     /**
@@ -536,15 +531,16 @@ abstract class UniqueKeyTypedPost extends TypedPost
      * the semantics of $unique_keys in any way it pleases. (See also @link
      * _insert_by_unique_keys for the write case.)
      *
-     * @param $q An instance of @link _WPQueryBuilder, that will be mutated
-     *           to restrict the search to $unique_keys
-     *
      * @param $unique_keys Passed unmodified from @link _get_by_unique_key or
      *                     @link _get_or_create
+     *
+     * @return An instance of @link _WPQueryBuilder that returns only the
+     *         target post
+     *
      */
-    static protected function _query_by_unique_keys($q, $unique_keys)
+    static protected function _query_by_unique_keys($unique_keys)
     {
-        $q->by_meta($unique_keys);
+        return (new _WPQueryBuilder(static::get_post_type()))->by_meta($unique_keys);
     }
 
     /**
@@ -563,12 +559,7 @@ abstract class UniqueKeyTypedPost extends TypedPost
         if ($that !== null) { return $that; }
 
         $theclass = get_called_class();
-        $insert_post_args = array(
-            "post_type" => $theclass::get_post_type(),
-            "post_status" => "publish");
-        static::_insert_by_unique_keys($insert_post_args, $unique_keys);
-        $id = wp_insert_post($insert_post_args, true);
-        return new $theclass($id);
+        return new $theclass(static::_insert_by_unique_keys($unique_keys));
     }
 
     /**
@@ -576,25 +567,25 @@ abstract class UniqueKeyTypedPost extends TypedPost
      *
      * This method can be overridden in a subclass to do to @link _get_or_create
      * as overriding @link _query_by_unique_keys does to @link _get_by_unique_key.
-     * The base class interprets $insert_post_args as an array of WordPress "meta"
+     * The base class interprets $unique_keys as an array of WordPress "meta"
      * (a.k.a. "custom fields") names and values.
      *
-     * @param &$insert_post_args The array parameter that will be passed to
-     *                           @link wp_insert_post. The
-     *                           implementation is supposed to mutate
-     *                           it, so that to guarantee that once
-     *                           `wp_insert_post` is called with these
-     *                           parameters, the unique key be already
-     *                           written in full to the WordPress data
-     *                           store (i.e., a subsequent call
-     *                           to @link _get_by_unique_key with the
-     *                           same $unique_keys should retrieve the
-     *                           same WordPress post).
+     * Base and overridden implementations shall call `wp_insert_post`
+     * or similar and guarantee that once _insert_by_unique_keys
+     * returns, the unique key be already written in full to the
+     * WordPress data store (i.e., a subsequent call to @link
+     * _get_by_unique_key with the same $unique_keys should retrieve
+     * the same WordPress post).
      *
-     * @param $unique_keys Passed unmodified from @link _get_or_create
+     * @param $unique_keys Passed unmodified from @link _get_or_creata
+     *
+     * @return The newly created post ID as an integer
      */
-    static protected function _insert_by_unique_keys (&$insert_post_args, $unique_keys) {
-        $insert_post_args["meta_input"] = $unique_keys;
+    static protected function _insert_by_unique_keys ($unique_keys) {
+        return wp_insert_post(array(
+            "post_type"   => $theclass::get_post_type(),
+            "post_status" => "publish",
+            "meta_input"  => $unique_keys));
     }
 }
 
