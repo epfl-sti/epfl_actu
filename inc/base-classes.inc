@@ -697,16 +697,16 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
      */
     static abstract function extract_auto_category_id ($api_result);
 
-    const API_ID_SLUG   = "api_id";
-    const HOMEPAGE_SLUG = "absolute_slug";
-    const LANGUAGE_SLUG = "language";
+    const API_ID_META   = "api_id";
+    const HOMEPAGE_META = "absolute_slug";
+    const LANGUAGE_META = "language";
 
     function get_api_id () {
-        return get_post_meta($this->ID, self::API_ID_SLUG, true);
+        return get_post_meta($this->ID, self::API_ID_META, true);
     }
 
     function get_language () {
-        return get_post_meta($this->ID, self::LANGUAGE_SLUG, true);
+        return get_post_meta($this->ID, self::LANGUAGE_META, true);
     }
 
     /**
@@ -721,8 +721,8 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
      */
     protected function _update_post_meta ($api_result)
     {
-        $this->_post_meta[self::API_ID_SLUG]         = $this->extract_api_id($api_result);
-        $this->_post_meta[self::HOMEPAGE_SLUG]       = $api_result["absolute_slug"];
+        $this->_post_meta[self::API_ID_META]         = $this->extract_api_id($api_result);
+        $this->_post_meta[self::HOMEPAGE_META]       = $api_result["absolute_slug"];
         // So technically we've been through a decode/encode cycle and
         // we all know how harsh PHP can be to JSON... But we just want
         // to keep as much metadata as possible.
@@ -782,8 +782,8 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
             throw new Exception("Invalid API result: " . var_export($api_result, true));
         }
         $that = static::_get_or_create(array(
-            self::API_ID_SLUG   => $api_id,
-            self::LANGUAGE_SLUG => $lang));
+            self::API_ID_META   => $api_id,
+            self::LANGUAGE_META => $lang));
         $that->_sync($api_result);
         return $that;
     }
@@ -801,8 +801,8 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
         if (! static::_is_polylang_enabled_on_custom_post_type()) {
             return parent::_query_by_unique_keys($unique_keys);
         }
-        $lang = $unique_keys[self::LANGUAGE_SLUG];
-        unset($unique_keys[self::LANGUAGE_SLUG]);
+        $lang = $unique_keys[self::LANGUAGE_META];
+        unset($unique_keys[self::LANGUAGE_META]);
         $q = parent::_query_by_unique_keys($unique_keys);
         $q->query["lang"] = $lang;
         return $q;
@@ -817,7 +817,7 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
     static protected function _insert_by_unique_keys ($unique_keys)
     {
         $id = parent::_insert_by_unique_keys($unique_keys);
-        pll_set_post_language($id, $unique_keys[self::LANGUAGE_SLUG]);
+        pll_set_post_language($id, $unique_keys[self::LANGUAGE_META]);
         return $id;
     }
 
@@ -838,7 +838,7 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
         // "absolute_slug" is common to both APIs
         $this->_post_meta["absolute_slug"] = $api_result["absolute_slug"];
         $lang = $this->_extract_language($api_result);
-        $this->_post_meta[self::LANGUAGE_SLUG] = $lang;
+        $this->_post_meta[self::LANGUAGE_META] = $lang;
 
         $this->_update_post_meta($api_result);
         $this->_update_image_meta($api_result);
@@ -901,7 +901,7 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
     {
         $translations = array();
         $q = new _WPQueryBuilder($this->get_post_type());
-        foreach ($q->by_meta(array(self::API_ID_SLUG => $this->get_api_id()))->results()
+        foreach ($q->by_meta(array(self::API_ID_META => $this->get_api_id()))->results()
                  as $post) {
             $lang = static::get($post)->get_language();
             if ($lang) {
