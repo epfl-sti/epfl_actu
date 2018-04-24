@@ -102,7 +102,7 @@ class Memento extends \EPFL\WS\Base\APIChannelPost
                   "event_start_time", "event_end_time",
                   "event_theme", "event_speaker",
                   "event_place_and_room", "event_url_place_and_room",
-                  "event_canceled_reason"]
+                  "event_canceled_reason", "translation_id"]
                  as $keep_this_as_meta)
         {
             if ($api_result[$keep_this_as_meta]) {

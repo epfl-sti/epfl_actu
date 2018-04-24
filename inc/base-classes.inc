@@ -691,8 +691,6 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
 
     const API_ID_SLUG   = "api_id";
     const HOMEPAGE_SLUG = "absolute_slug";
-    // TODO: In /api/v1, there is no translation ID in an Actu result anymore.
-    const TRANSLATION_ID_SLUG = "translation_id";
     const LANGUAGE_SLUG = "language";
 
     function get_api_id () {
@@ -773,16 +771,46 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
     static function sync ($api_result)
     {
         $api_id = static::extract_api_id($api_result);
-        if (! ($api_id &&
-               array_key_exists("translation_id", $api_result))) {
+        $lang   = static::_extract_language($api_result);
+        if (! ($api_id && $lang)) {
             throw new Exception("Invalid API result: " . var_export($api_result, true));
         }
         $that = static::_get_or_create(array(
-            self::API_ID_SLUG         => $api_id,
-            // TODO: In /api/v1, there is no translation ID in an Actu result anymore.
-            self::TRANSLATION_ID_SLUG => $api_result["translation_id"]));
+            self::API_ID_SLUG   => $api_id,
+            self::LANGUAGE_SLUG => $lang));
         $that->_sync($api_result);
         return $that;
+    }
+
+    /**
+     * Overridden to use Polylang to search by language (if available)
+     *
+     * Doing this greatly reduces the damage when a misconfigured
+     * Polylang starts syncing all the meta keys between translations
+     * of the same article — At least, said damage is now reversible.
+     * (If Polylang is not available, use the "language" meta instead.)
+     */
+    static protected function _query_by_unique_keys ($unique_keys) {
+        if (! function_exists('pll_current_language')) {
+            return parent::_query_by_unique_keys($unique_keys);
+        }
+        $lang = $unique_keys[self::LANGUAGE_SLUG];
+        unset($unique_keys[self::LANGUAGE_SLUG]);
+        $q = parent::_query_by_unique_keys($unique_keys);
+        $q->query["lang"] = $lang;
+        return $q;
+    }
+
+    /**
+     * Overridden to set the Polylang language of newly created posts
+     * in-database
+     *
+     * @see _query_by_unique_keys
+     */
+    static protected function _insert_by_unique_keys ($unique_keys) {
+        $id = parent::_insert_by_unique_keys($unique_keys);
+        pll_set_post_language($id, $unique_keys[self::LANGUAGE_SLUG]);
+        return $id;
     }
 
     public function _sync($api_result)
@@ -834,7 +862,7 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
             /* $append = */ true);
     }
 
-    private function _extract_language ($api_result) {
+    private static function _extract_language ($api_result) {
         return ($api_result["language"] ? $api_result["language"] :
                 $api_result["lang"]);
     }
