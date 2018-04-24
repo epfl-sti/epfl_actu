@@ -54,9 +54,8 @@ class MementoShortcode extends Shortcode
         }
 
         // Debug: $ws->debug( $events );
-
         $view = new MementoShortcodeView($this->attrs);
-        return $view->as_html($events);
+        return $view->as_html(array_reverse($events));
     }
 
     function get_api_url ()
