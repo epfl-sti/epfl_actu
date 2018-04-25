@@ -2054,7 +2054,7 @@ abstract class ListTemplatedShortcodeView
 
     protected function _next_result ()
     {
-        return array_pop($this->_items);
+        return array_shift($this->_items);
     }
 
     protected function get_outer_div_classes ()
