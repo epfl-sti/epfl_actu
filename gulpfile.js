@@ -21,14 +21,31 @@ const gulp          = require('gulp'),
       tildeImporter = require('node-sass-tilde-importer'),
       rename        = require('gulp-rename')
 
+/**
+ * When one runs one of the following commands,
+ *
+ *   gulp
+ *   gulp all
+ *
+ * or
+ *
+ *   npm i
+ *
+ * the default rule (which is to build everything) kicks in.
+ */
 gulp.task('default', ['auto-category-widget'])
 gulp.task('all', ['default'])
 
-// Run:
-// gulp auto-category
-// to browserify all Vue and JS files for the auto-category-widget into
-// assets/auto-category-widget{,.min}.js and
-// assets/auto-category-widget{,.min}.css
+/**
+ * Run:
+ *
+ *   gulp auto-category
+ *
+ *
+ * to browserify all Vue and JS files for the auto-category-widget into
+ * `assets/auto-category-widget{,.min}.js` and
+ * `assets/auto-category-widget{,.min}.css`
+ */
 gulp.task('auto-category-widget', function() {
     const vue_entrypoint = gulp.src('vue/auto-category-widget.js')
 
@@ -63,6 +80,19 @@ gulp.task('auto-category-widget', function() {
         .pipe(assetsDest());
 })
 
+/**
+ * Run:
+ *
+ *   gulp watch
+ *
+ * or
+ *
+ *   npm run watch
+ *
+ * to keep rebuilding everything as source files change (note:
+ * reloading the browser, e.g. with browsersync, is *not* provided as
+ * a feature here)
+ */
 gulp.task('watch', ['default'], function() {
     gulp.watch(['vue/**/*'], ['auto-category-widget'])
 })
