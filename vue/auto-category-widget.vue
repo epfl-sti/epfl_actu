@@ -4,8 +4,8 @@
 <script>
 export default {
   el: 'auto-category-widget',
-  props: {
-    banner: () => "Vue"
-  }
+  data: () => ({
+    banner: "Vue"
+  })
 }
 </script>
