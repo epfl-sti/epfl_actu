@@ -144,7 +144,8 @@ class Person extends UniqueKeyTypedPost
         return get_post_meta($this->ID, self::PUBLICATION_LINK_META, true);
     }
 
-    public function set_publication_link ($link) {
+    public function set_publication_link ($link)
+    {
         $this->_update_meta(array(
             self::PUBLICATION_LINK_META => $link
         ));
@@ -267,7 +268,8 @@ class Person extends UniqueKeyTypedPost
         if (! $entries) {
             throw new PersonNotFoundException($this->get_sciper());
         }
-        $entry = $entries[0];
+
+        $best_entry = $entries[0];
 
         $meta = array();
 
@@ -275,42 +277,42 @@ class Person extends UniqueKeyTypedPost
             $meta[self::TITLE_CODE_META] = $title->code;
         }
 
-        if ($given_name = $entry["givenname"][0]) {
+        if ($given_name = $best_entry["givenname"][0]) {
             $meta[self::GIVEN_NAME_META] = $given_name;
         }
 
-        if ($surname = $entry["sn"][0]) {
+        if ($surname = $best_entry["sn"][0]) {
             $meta[self::SURNAME_META] = $surname;
         }
 
-        if ($mail = $entry["mail"][0]) {
+        if ($mail = $best_entry["mail"][0]) {
             $meta[self::EMAIL_META] = $mail;
         }
 
-        if ($profile = $entry["labeleduri"][0]) {
+        if ($profile = $best_entry["labeleduri"][0]) {
             $meta[self::PROFILE_URL_META] = explode(" ", $profile)[0];
         }
 
-        if ($postaladdress = $entry["postaladdress"][0]) {
+        if ($postaladdress = $best_entry["postaladdress"][0]) {
             $meta[self::POSTAL_ADDRESS_META] = $postaladdress;
         }
 
-        if ($roomnumber = $entry["roomnumber"][0]) {
+        if ($roomnumber = $best_entry["roomnumber"][0]) {
           $meta[self::ROOM_META] = $roomnumber;
         }
 
-        if ($telephonenumber = $entry["telephonenumber"][0]) {
+        if ($telephonenumber = $best_entry["telephonenumber"][0]) {
             $meta[self::PHONE_META] = $telephonenumber;
         }
 
-        if ($dn = $entry["dn"]) {
+        if ($dn = $best_entry["dn"]) {
             $meta[self::DN_META] = $dn;
             $bricks = explode(',', $dn);
             // construct a unit string, e.g. EPFL / STI / STI-SG / STI-IT
             $meta[self::UNIT_QUAD_META] = strtoupper(explode('=', $bricks[4])[1]) . " / " . strtoupper(explode('=', $bricks[3])[1]) . " / " . strtoupper(explode('=', $bricks[2])[1]) . " / " . strtoupper(explode('=', $bricks[1])[1]);
         }
 
-        $unit = $entry["ou"][0];
+        $unit = $best_entry["ou"][0];
         $lab = $this->get_lab();
         if ($lab) {
             $lab->sync();
@@ -328,7 +330,7 @@ class Person extends UniqueKeyTypedPost
             'ID'         => $this->ID,
             // We want a language-neutral post_title so we can't
             // work in the greeting - Filters will be used for that instead.
-            'post_title' => $entry['cn'][0],
+            'post_title' => $best_entry['cn'][0],
         );
         wp_update_post($update);
         $this->_update_meta($meta);

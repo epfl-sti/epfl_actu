@@ -28,10 +28,18 @@ class LDAPClient
     const SEARCH_ALL_UNITS         = "(objectClass=EPFLorganizationalUnit)";
     const SEARCH_ALL_PEOPLE        = "(objectClass=Person)";
 
+    /**
+     * @return All appearances of $sciper in the School directory, sorted by
+     *         accréditation order (meaning "best" unit first)
+     */
     static function query_by_sciper ($sciper)
     {
-        return self::_do_ldap_search(
+        $entries = self::_do_ldap_search(
             sprintf(self::SEARCH_PERSON_BY_SCIPER, $sciper));
+        usort($entries, function($a, $b) {
+            return $a["epflaccredorder"] <=> $b["epflaccredorder"];
+        });
+        return $entries;
     }
 
     static function query_by_unit_name ($unit_name) {
