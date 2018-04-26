@@ -373,7 +373,7 @@ abstract class StreamTaxonomyController
                 <p class="description"><?php echo self::_get_wp_admin_label("url_legend_long"); ?></p>
             </td>
         </tr>
-        <tr><td><auto-category-widget></auto-category-widget></td></tr>
+        <tr id="auto-category-widget"></tr>
         <?php
     }
 
