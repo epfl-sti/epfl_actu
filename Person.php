@@ -342,10 +342,10 @@ class Person extends UniqueKeyTypedPost
     }
 
     /**
-     * @return a Lab object if this person is the owner of their lab,
+     * @return a Lab object if this person is the head of their lab,
      * false if not, and null if the data is incomplete.
      */
-    public function is_lab_owner ()
+    public function is_head_of_unit ()
     {
         $lab = $this->get_lab();
         if (! $lab) { return null; }
@@ -752,7 +752,7 @@ class PersonController extends CustomPostTypeController
         $title = $person->get_title();
         $greeting = $title ? sprintf("%s ", $title->as_greeting()) : "";
         ?><h1><?php echo $greeting; the_title(); ?></h1><?php
-        if ($lab = $person->is_lab_owner()) {
+        if ($lab = $person->is_head_of_unit()) {
           printf(
               '<h2>%s, <a href="/wp-admin/post.php?post=%d&action=edit">%s</a></h2>',
               $title->localize(),
