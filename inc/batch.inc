@@ -70,33 +70,40 @@ class BatchTask
     function run ($callable)
     {
         error_log($this->banner);
-        $started = microtime(true);
+        $this->started = microtime(true);
         try {
             call_user_func($callable);
-            $failed = null;
+            $this->failed = null;
         } catch (\Throwable $e) {
-            $failed = $e;
+            $this->failed = $e;
         } catch (\Exception $e) {
             // Sigh. http://php.net/manual/en/language.errors.php7.php#119652
-            $failed = $e;
+            $this->failed = $e;
         }
-        $finished = microtime(true);
-        $duration = $finished - $started;
+        $this->finished = microtime(true);
+        $this->prometheus_export();
         error_log(sprintf(
             "%s, duration: %.03ds, status: %s",
             $this->banner,
-            $duration,
-            ($failed ? $failed->getMessage() : "OK")));
-        if (! ($this->prometheus_labels &&
-               class_exists("WPPrometheusExporter"))) { return; }
+            $this->finished - $this->started,
+            ($this->failed ? ("ERROR - " . $this->failed->getMessage()) : "OK")));
+    }
+
+    function prometheus_export ()
+    {
+        if (! ($this->prometheus_labels)) return;
+        if (! class_exists("WPPrometheusExporter")) {
+            // error_log("WARNING: no WPPrometheusExporter, cannot log");
+            return;
+        }
         (new WPPrometheusExporter('epfl_ws_batch_duration', $this->prometheus_labels))
-            ->update($duration);
+            ->update($this->finished - $this->started);
         (new WPPrometheusExporter('epfl_ws_batch_success', $this->prometheus_labels))
-            ->update($failed ? 0 : 1);
-        if (! $failed) {
+            ->update($this->failed ? 0 : 1);
+        if (! $this->failed) {
             (new WPPrometheusExporter('epfl_ws_batch_last_success',
                                       $this->prometheus_labels))
-                ->update($finished);
+                ->update($this->finished);
         }
     }
 }
