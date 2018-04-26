@@ -123,6 +123,11 @@ class Actu extends \EPFL\WS\Base\APIChannelPost
     protected function _update_image_meta ($api_result)
     {
         parent::_update_image_meta($api_result);
+        if ($this->_get_post_meta()[self::THUMBNAIL_META]) {
+            // Assume a hand-picked image is a better choice than a
+            // YouTube still
+            return;
+        }
         $youtube_id = $this->_extract_youtube_id($api_result);
         if ($youtube_id) {
             // The "right" thumbnail for a YouTube video is the one

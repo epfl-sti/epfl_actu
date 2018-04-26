@@ -937,9 +937,7 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
      * extract_image_url, and then probes the maximum image size
      * server-side (see @link get_image_url for details on this
      * feature of EPFL Actu and Memento). Subclasses may decide to
-     * override the method, and even forego calling the parent::
-     * altogether, if they know better what image to use (e.g. YouTube
-     * thumbnail for Actus with videos).
+     * override the method if they know better what image to use.
      *
      */
     protected function _update_image_meta ($api_result)
