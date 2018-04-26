@@ -13,7 +13,8 @@ if (! defined('ABSPATH')) {
 
 require_once(dirname(__FILE__) . "/i18n.inc");
 
-function run_every ($seconds, $callable, $right_now_for_debug = false) {
+function run_every ($slug, $seconds, $callable, $right_now_for_debug = false) {
+    $slug = "epfl-ws-batch-" . sanitize_title($slug);
     if ($right_now_for_debug) {
         // Run it as soon as possible, but not sooner
         add_action("init", function () use ($callable) {
@@ -22,11 +23,11 @@ function run_every ($seconds, $callable, $right_now_for_debug = false) {
         return;
     }
 
-    $slug = sprintf("epfl-ws-every-%d-s", $seconds);
+    $schedule_slug = sprintf("epfl-ws-every-%d-s", $seconds);
     add_filter(
         'cron_schedules',
-        function ($schedules) use ($seconds, $slug) {
-            $schedules[$slug] = array(
+        function ($schedules) use ($seconds, $schedule_slug) {
+            $schedules[$schedule_slug] = array(
                 'interval' => $seconds,
                 'display'  => sprintf(
                     ___('Every %d seconds (for epfl-ws)'), $seconds)
@@ -34,7 +35,7 @@ function run_every ($seconds, $callable, $right_now_for_debug = false) {
             return $schedules;
         });
     if (! wp_next_scheduled($slug)) {
-        wp_schedule_event( time(), $slug, $slug);            
+        wp_schedule_event(time(), $schedule_slug, $slug);
     }
     add_action($slug, $callable);
 }
@@ -122,4 +123,3 @@ add_action('plugins_loaded', function () {
         )
     );
 });
-

@@ -292,7 +292,8 @@ abstract class StreamTaxonomyController
         add_action('init', array(get_called_class(), '_do_register_taxonomy'));
 
         $taxonomy_class = static::get_taxonomy_class();
-        run_every(600, function () use ($taxonomy_class) {
+        run_every("StreamTaxonomyController-sync", 600,
+                  function () use ($taxonomy_class) {
             foreach ($taxonomy_class::get_all() as $stream) {
                 $stream_name   = $stream->as_wp_term()->name;
                 $stream_slug   = $stream->as_wp_term()->slug;

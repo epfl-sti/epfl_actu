@@ -142,7 +142,8 @@ class OrganizationalUnitController
     static function hook ()
     {
         add_action("admin_menu", array(get_called_class(), "setup_admin_menu"));
-        run_every(600, array(get_called_class(), "sync_all"));
+        run_every("OrganizationalUnitController::sync_all", 600,
+                  array(get_called_class(), "sync_all"));
     }
 
     static function setup_admin_menu ()
