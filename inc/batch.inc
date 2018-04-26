@@ -80,7 +80,8 @@ class BatchTask
             // Sigh. http://php.net/manual/en/language.errors.php7.php#119652
             $failed = $e;
         }
-        $duration = microtime(true) - $started;
+        $finished = microtime(true);
+        $duration = $finished - $started;
         error_log(sprintf(
             "%s, duration: %.03ds, status: %s",
             $this->banner,
@@ -95,7 +96,7 @@ class BatchTask
         if (! $failed) {
             (new WPPrometheusExporter('epfl_ws_batch_last_success',
                                       $this->prometheus_labels))
-                ->update($started);
+                ->update($finished);
         }
     }
 }
