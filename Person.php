@@ -739,6 +739,9 @@ class PersonController extends CustomPostTypeController
         }
         self::add_meta_box('publication_link', ___('Infoscience URL'), 'after-editor');
         (new AutoFieldsController(Person::class))->add_meta_boxes();
+
+        // https://wordpress.stackexchange.com/a/90745/132235
+        remove_meta_box('slugdiv', Person::get_post_type(), 'normal');
     }
 
     static function render_meta_box_find_by_sciper ($unused_post)
