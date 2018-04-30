@@ -264,6 +264,16 @@ class Person extends UniqueKeyTypedPost
         return get_post_meta($this->ID, self::RESEARCH_INTERESTS_META, true);
     }
 
+    public function set_research_interests ($newval)
+    {
+        update_post_meta($this->ID, self::RESEARCH_INTERESTS_META, $newval);
+    }
+
+    public function unset_research_interests ()
+    {
+        delete_post_meta($this->ID, self::RESEARCH_INTERESTS_META);
+    }
+
     public function sync ()
     {
         if ($this->_synced_already) { return; }
