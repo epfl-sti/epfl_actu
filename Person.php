@@ -117,7 +117,8 @@ class Person extends UniqueKeyTypedPost
     const KEYWORDS_META           = 'research_keywords';
     const RESEARCH_INTERESTS_META = 'research_interests_html';
 
-    static function _is_user_editable_field ($field) {
+    static function _is_user_editable_field ($field)
+    {
         return (false !== array_search($field, array(
             self::PUBLICATION_LINK_META,
             self::KEYWORDS_META,
@@ -479,11 +480,12 @@ class Person extends UniqueKeyTypedPost
         $auto_fields = AutoFields::of(get_called_class());
         $more_auto_fields = array();
         foreach ($meta_array as $k => $v) {
-            if (is_array($v)) {
-                delete_post_meta($this->ID, $k);
-                foreach ($v as $vitem) {
-                    add_post_meta($this->ID, $k, $vitem);
-                }
+            if (! is_array($v)) {
+                $v = [$v];
+            }
+            delete_post_meta($this->ID, $k);
+            foreach ($v as $vitem) {
+                add_post_meta($this->ID, $k, $vitem);
             }
             if (! $this->_is_user_editable_field($k)) {
                 array_push($more_auto_fields, $k);
@@ -593,6 +595,9 @@ class PersonController extends CustomPostTypeController
               ->make_sortable(array('meta_key' => 'publication_link'))
               ->hook_after('unit');
 
+        add_filter("is_protected_meta",
+                   array(get_called_class(), 'additional_protected_metas'), 10, 3);
+
         static::add_editor_css("
 #after-editor-sortables {
   padding-top: 1em;
@@ -655,7 +660,7 @@ class PersonController extends CustomPostTypeController
                 'hierarchical'       => false,
                 'taxonomies'         => array('category', 'post_tag'),
                 'menu_icon'          => 'dashicons-welcome-learn-more',  // Mortar hat
-                'supports'           => array( 'editor', 'thumbnail' ),
+                'supports'           => array('editor', 'thumbnail', 'custom-fields'),
                 'register_meta_box_cb' => array(get_called_class(), 'add_meta_boxes')
             ));
     }
@@ -736,6 +741,7 @@ class PersonController extends CustomPostTypeController
             self::add_meta_box('find_by_sciper', ___('Find person'));
         } else {
             self::add_meta_box('person_details', ___('Person details'));
+            self::add_meta_box('research_interests', ___('Research interests'), 'after-editor');
         }
         self::add_meta_box('publication_link', ___('Infoscience URL'), 'after-editor');
         (new AutoFieldsController(Person::class))->add_meta_boxes();
@@ -801,6 +807,24 @@ class PersonController extends CustomPostTypeController
         // Still, it sort of makes sense that here be the place where
         // we sync data from LDAP again.
         Person::get($post_id)->sync_or_inactivate();
+    }
+
+
+    /**
+     * Display the "research_interests_html" custom field in an HTML editor.
+     */
+    static function render_meta_box_research_interests ($post)
+    {
+        if (! ($person = Person::get($post))) return;
+
+        $interests = $person->get_research_interests();
+
+        // https://wordpress.stackexchange.com/a/117253/132235
+        wp_editor($interests, 'epfl_research_interests_editor', array(
+            'wpautop'       => true,
+            'media_buttons' => false,
+            'teeny'         => true
+        ));
     }
 
     /**
@@ -960,6 +984,27 @@ class PersonController extends CustomPostTypeController
 }
 </style>
         <?php
+    }
+
+    /**
+     * Make it so "research_interests_html" and "publication_link"
+     * don't appear as mutable custom fields.
+     *
+     * These fields can be edited out of their own meta boxes instead
+     * (see @link render_meta_box_research_interests and @link
+     * render_meta_box_publication_link).
+     *
+     * This static method is installed as a filter on @link
+     * is_protected_meta at @link hook time.
+     */
+    static function additional_protected_metas ($is_protected,
+                                                $meta_key, $unused_meta_type)
+    {
+        global $post;
+        if (! Person::get($post)) return $is_protected;
+        if ($meta_key === Person::KEYWORDS_META) return false;
+        if (Person::_is_user_editable_field($meta_key)) return true;
+        return $is_protected;
     }
 
     /**
