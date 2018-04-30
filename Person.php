@@ -111,8 +111,18 @@ class Person extends UniqueKeyTypedPost
     const TITLE_CODE_META         = 'title_code';
     const LAB_UNIQUE_ID_META      = 'epfl_person_lab_id';
     const THUMBNAIL_META          = 'epfl_person_external_thumbnail';
-    // User-editable field
+
+    // User-editable fields
     const PUBLICATION_LINK_META   = 'publication_link';
+    const KEYWORDS_META           = 'research_keywords';
+    const RESEARCH_INTERESTS_META = 'research_interests_html';
+
+    static function _is_user_editable_field ($field) {
+        return (false !== array_search($field, array(
+            self::PUBLICATION_LINK_META,
+            self::KEYWORDS_META,
+            self::RESEARCH_INTERESTS_META)));
+    }
 
     static function get_post_type ()
     {
@@ -241,6 +251,16 @@ class Person extends UniqueKeyTypedPost
     public function get_unit_long ()
     {
         return get_post_meta($this->ID, self::UNIT_QUAD_META, true);
+    }
+
+    public function get_research_keywords ()
+    {
+        return get_post_meta($this->ID, self::KEYWORDS_META, true);
+    }
+
+    public function get_research_interests ()
+    {
+        return get_post_meta($this->ID, self::RESEARCH_INTERESTS_META, true);
     }
 
     public function sync ()
@@ -457,6 +477,7 @@ class Person extends UniqueKeyTypedPost
     private function _update_meta($meta_array)
     {
         $auto_fields = AutoFields::of(get_called_class());
+        $more_auto_fields = array();
         foreach ($meta_array as $k => $v) {
             if (is_array($v)) {
                 delete_post_meta($this->ID, $k);
@@ -464,9 +485,11 @@ class Person extends UniqueKeyTypedPost
                     add_post_meta($this->ID, $k, $vitem);
                 }
             }
-            update_post_meta($this->ID, $k, $v);
-            $auto_fields->append(array($k));
+            if (! $this->_is_user_editable_field($k)) {
+                array_push($more_auto_fields, $k);
+            }
         }
+        $auto_fields->append($more_auto_fields);
     }
 
     public function get_title_as_text ()
