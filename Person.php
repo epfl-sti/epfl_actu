@@ -734,11 +734,10 @@ class PersonController extends CustomPostTypeController
     {
         if (is_form_new()) {
             self::add_meta_box('find_by_sciper', ___('Find person'));
-            self::add_meta_box('show_publication_link', ___('Infoscience URL'), 'after-editor');
         } else {
-            self::add_meta_box('show_person_details', ___('Person details'));
-            self::add_meta_box('show_publication_link', ___('Infoscience URL'), 'after-editor');
+            self::add_meta_box('person_details', ___('Person details'));
         }
+        self::add_meta_box('publication_link', ___('Infoscience URL'), 'after-editor');
         (new AutoFieldsController(Person::class))->add_meta_boxes();
     }
 
@@ -769,7 +768,7 @@ class PersonController extends CustomPostTypeController
         }
     }
 
-    static function render_meta_box_show_person_details ($the_post)
+    static function render_meta_box_person_details ($the_post)
     {
         global $post; $post = $the_post; setup_postdata($post);
         $person = Person::get($post->ID);
@@ -793,7 +792,7 @@ class PersonController extends CustomPostTypeController
         the_post_thumbnail();
     }
 
-    static function save_meta_box_show_person_details ($post_id, $post, $is_update)
+    static function save_meta_box_person_details ($post_id, $post, $is_update)
     {
         // Strictly speaking, this meta box has no state to change (for now).
         // Still, it sort of makes sense that here be the place where
@@ -804,7 +803,7 @@ class PersonController extends CustomPostTypeController
     /**
      * Render publication_link meta boxes after the editor.
      */
-    static function render_meta_box_show_publication_link ($post)
+    static function render_meta_box_publication_link ($post)
     {
         if ($post->post_type !== Person::get_post_type()) return;
         $person = Person::get($post->ID);
@@ -818,7 +817,7 @@ class PersonController extends CustomPostTypeController
             </div>';
     }
 
-    static function save_meta_box_show_publication_link ($post_id, $post, $is_update)
+    static function save_meta_box_publication_link ($post_id, $post, $is_update)
     {
         if (! ($infoscience_link = $_POST['publication_link'])) { return; }
         Person::get($post_id)->set_publication_link($infoscience_link);
