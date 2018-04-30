@@ -814,11 +814,12 @@ class PersonController extends CustomPostTypeController
     static function save_meta_box_person_details ($post_id, $post, $is_update)
     {
         // Strictly speaking, this meta box has no state to change (for now).
-        // Still, it sort of makes sense that here be the place where
-        // we sync data from LDAP again.
-        Person::get($post_id)->sync_or_inactivate();
+        // However, it makes sense to schedule a sync from here, so that
+        // it only happens on existing Person records (with a SCIPER set)
+        add_action('save_post', array(Person::get($post_id), 'sync'));
     }
 
+    const RESEARCH_INTERESTS_METABOX_FIELD = 'epfl_ws_research_interests';
 
     /**
      * Display the "research_interests_html" custom field in an HTML editor.
@@ -830,11 +831,26 @@ class PersonController extends CustomPostTypeController
         $interests = $person->get_research_interests();
 
         // https://wordpress.stackexchange.com/a/117253/132235
-        wp_editor($interests, 'epfl_research_interests_editor', array(
+        wp_editor($interests, static::RESEARCH_INTERESTS_METABOX_FIELD, array(
             'wpautop'       => true,
             'media_buttons' => false,
             'teeny'         => true
         ));
+    }
+
+    static function save_meta_box_research_interests ($post_id, $post, $is_update)
+    {
+        error_log("save_meta_box_research_interests of $post_id");  // XXX
+        if (! ($person = Person::get($post))) {
+            error_log("Hmm, saving meta box for nonexisting Person? ($post_id)");
+            return;
+        }
+        // https://wordpress.stackexchange.com/a/117253/132235 ditto
+        if ($newval = $_POST[static::RESEARCH_INTERESTS_METABOX_FIELD]) {
+            $person->set_research_interests($newval);
+        } else {
+            $person->unset_research_interests();
+        }
     }
 
     /**
