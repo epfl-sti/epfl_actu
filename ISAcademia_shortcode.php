@@ -146,8 +146,14 @@ h3 a:hover{color:#8972d5;}
 .francais .diet_icon{background-position:-90px 0;}
 .anglais .diet_icon{background-position:-108px 0;}
 .allemand .diet_icon{background-position:-72px 0;}
+.franglais .diet_icon{background-position:-166px 0;}
+.italien .diet_icon{background-position: -148px 0;}
 .winter .little_icon{background-position:-54px 0;}
 .sun .little_icon{background-position:-18px 0;}
+.printemps .little_icon{background-position:0 0;}
+.automne .little_icon{background-position:-36px 0;}
+.legende{font-family:Georgia,'Times New Roman',Times,serif;font-style:italic;font-size:12px;font-weight:bold;width:5px;float:left;padding-right:20px;}
+.img_legende{float:left;width:17px;height:17px;padding-right:20px;}
 </style>
 EOT;
       $isacademia .= $isacrapycss;
