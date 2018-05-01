@@ -69,6 +69,7 @@ class Related
      */    
     function get_posts_by_type_and_format ()
     {
+        $retval = array();
         foreach ($this->get_posts() as $post) {
             $type = $post->post_type;
             if (! array_key_exists($type, $retval)) {
