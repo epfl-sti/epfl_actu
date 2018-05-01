@@ -41,8 +41,7 @@ class Related
                 'field'    => 'id',
                 'terms'    => array_map(function($t) { return $t->term_id; },
                                         $this->get_tags())
-            )),
-            'suppress_filters' => true);
+            )));
         return (new \WP_Query())->query(
             array_merge_recursive($default_query_args, $extra_query_args));
    }
