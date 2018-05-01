@@ -35,6 +35,7 @@ class ISAcademiaShortCode {
                                         'detail'   => '', // &detail=S > name of course with link + teachers, &detail=M > the same + description and language, &detail=L > the same + curriculum + academic year
                                         'url'      => '', // if user wants to use its own URL from https://jahia.epfl.ch/external-content/course-plan
                                         'isaurl'   => '', // for the course plan "plan d'étude" https://isa.epfl.ch/pe/plan_etude_bama_cyclemaster_gm_en.html
+                                        'legend'   => false, // to display the legend
                                       ], $atts, $tag);
 
     $lang     = esc_attr($isacademia_atts['lang']);
@@ -46,6 +47,7 @@ class ISAcademiaShortCode {
     $detail   = esc_attr($isacademia_atts['detail']);
     $url      = esc_attr($isacademia_atts['url']);
     $isaurl   = esc_attr($isacademia_atts['isaurl']);
+    $legend   = esc_attr($isacademia_atts['legend']);
 
     $isacademiaws = false;
 
@@ -70,15 +72,21 @@ class ISAcademiaShortCode {
       $isacademiaws = true;
     }
 
-    // fetch isacademia's html
-    if ( (!$isacademiaws && $isacademiaurl = $this->ws->validate_url( $url, "people.epfl.ch" )) ||
-      ($isacademiaws && $isacademiaurl = $this->ws->validate_url( $isaurl, "isa.epfl.ch" )) )
+    // https://jahia.epfl.ch/contenu-externe/liste-automatique-de-cours
+    if (!$isacademiaws && $isacademiaurl = $this->ws->validate_url( $url, "people.epfl.ch" ))
+    {
+      $isacademia = "<!-- epfl-isacademia src URL: " . $isacademiaurl . " -->\n" ;
+      $isacademia .= $this->ws->get_items( $isacademiaurl );
+      return "<div class=\"isacademia-transcluded\">" . $isacademia . "</div>";
+    }
+    // https://jahia.epfl.ch/contenu-externe/plan-de-cours
+    elseif ($isacademiaws && $isacademiaurl = $this->ws->validate_url( $isaurl, "isa.epfl.ch" ))
     {
       $isacademia = "<!-- epfl-isacademia src URL: " . $isacademiaurl . " -->\n" ;
       // Well, if someone have the time + envy of cleaning this mess, he's welcome
       // In order to GTD, https://github.com/painty/CSS-Used-ChromeExt was used
       // to export the needed CSS from the courses list of jahia, and inline
-      // imported here - some cleanup needed !
+      // imported here - some cleanup needed (wp_register_style / wp_enqueue_scripts)
       $isacrapycss = <<<EOT
 <style>
 /*! CSS Used from: http://static.epfl.ch/latest/styles/sti-built.css */
@@ -159,12 +167,18 @@ EOT;
       $isacademia .= $isacrapycss;
       $isadata = $this->ws->get_items( $isacademiaurl ); // add , array('timeout' => 10) in case of timeout
       $isacademia .= @iconv("ISO-8859-1//TRANSLIT","UTF-8",$isadata);
+
+      if (!$legend || !$isalegendurl = $this->ws->validate_url( $legend, "isa.epfl.ch" )) {
+        return "<div class=\"container isacademia-transcluded\"><div class=\"row\"><div class=\"col-md-12\">" . $isacademia . "</div></div></div>";
+      } else {
+        return "<div class=\"container isacademia-transcluded\"><div class=\"row\"><div class=\"col-md-8\">" . $isacademia . "</div><div class=\"col-md-4\">" . $this->ws->get_items( $isalegendurl ) . "</div></div></div>";
+      }
+
     } else {
       $error = new WP_Error( 'epfl-ws-isacademia-shortcode', 'URL not validated', 'URL: ' . $url . ' returned an error' );
       $this->ws->log( $error );
     }
 
-    return "<div class=\"isacademia-transcluded\">" . $isacademia . "</div>";
   }
 
   /*
