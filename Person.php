@@ -584,15 +584,9 @@ class PersonController extends CustomPostTypeController
         (new AutoFieldsController(Person::class))->hook();
 
         /* Customize the edit form */
-        add_action( 'edit_form_after_title',
-                   array(get_called_class(), 'meta_boxes_above_editor'));
-        add_action( 'edit_form_after_editor',
-                   array(get_called_class(), 'meta_boxes_after_editor'));
+        static::hook_meta_boxes();
         add_action('admin_head',
                    array(get_called_class(), 'render_css_for_meta_boxes'));
-
-        add_action(sprintf('save_post_%s', Person::get_post_type()),
-                   array(get_called_class(), 'save_meta_boxes'), 10, 3);
 
         static::add_thumbnail_column();
         static::column('unit')
@@ -742,6 +736,9 @@ class PersonController extends CustomPostTypeController
      * using "meta boxes".
      *
      * Called as the 'register_meta_box_cb' at @link register_post_type time.
+     * Register the Person meta boxes using the superclass' @link add_meta_box,
+     * which in turn calls back our render_meta_box_foo and save_meta_box_foo
+     * methods.
      *
      * @see https://code.tutsplus.com/tutorials/how-to-create-custom-wordpress-writemeta-boxes--wp-20336
      */
@@ -816,7 +813,7 @@ class PersonController extends CustomPostTypeController
         // Strictly speaking, this meta box has no state to change (for now).
         // However, it makes sense to schedule a sync from here, so that
         // it only happens on existing Person records (with a SCIPER set)
-        add_action('save_post', array(Person::get($post_id), 'sync'));
+        static::call_sync_on_save();
     }
 
     const RESEARCH_INTERESTS_METABOX_FIELD = 'epfl_ws_research_interests';
@@ -905,100 +902,6 @@ class PersonController extends CustomPostTypeController
         }
     }
 
-    /**
-     * Simpler version of the WordPress add_meta_box function
-     *
-     * @param $slug Unique name for this meta box. The render function
-     * is the method called "render_meta_box_$slug", and the save function
-     * is the method called "save_meta_box_$slug" (for the latter see
-     * @link save_meta_boxes)
-     *
-     * @param $title The human-readable title for the meta box
-     *
-     * @param $position The position to render the meta box at;
-     *        defaults to "above-editor" (see @link meta_boxes_above_editor).
-     *        Can be set to any legal value for the $priority argument
-     *        to the WordPress add_meta_box function, in particular "default"
-     *        to render the meta box after the editor.
-     */
-    static function add_meta_box ($slug, $title, $position = null)
-    {
-        if (! $position) $position = 'above-editor';
-        $klass = get_called_class();
-        $meta_box_name = self::get_meta_box_name($slug);
-        add_meta_box($meta_box_name, $title,
-                     function () use ($meta_box_name, $klass, $slug) {
-                         wp_nonce_field($meta_box_name, $meta_box_name);
-                         global $post;
-                         call_user_func(
-                             array($klass, "render_meta_box_$slug"),
-                             $post);
-                     },
-                     null, $position);
-    }
-
-    private static function get_meta_box_name ($slug)
-    {
-        return sprintf("%s-nonce-meta_box_%s", Person::get_post_type(), $slug);
-    }
-
-    /**
-     * Call the save_meta_box_$slug for any and all meta box that is
-     * posting information.
-     *
-     * Any and all nonces present in $_REQUEST, for which a corresponding
-     * class method exists, are checked; then the class method is called,
-     * unless already done in this request cycle.
-     */
-    static function save_meta_boxes ($post_id, $post, $is_update)
-    {
-        // Bail if we're doing an auto save
-        if (defined( 'DOING_AUTOSAVE' ) && \DOING_AUTOSAVE) return;
-        foreach ($_REQUEST as $k => $v) {
-            $matched = array();
-            if (preg_match(sprintf('/%s-nonce-meta_box_([a-zA-Z0-9_]+)$/',
-                                   Person::get_post_type()),
-                           $k, $matched)) {
-                $save_method_name = "save_meta_box_" . $matched[1];
-                if (method_exists(get_called_class(), $save_method_name)) {
-                    if (! wp_verify_nonce($v, $k)) {
-                        wp_die(___("Nonce check failed"));
-                    } elseif (! current_user_can('edit_post')) {
-                        wp_die(___("Permission denied: edit person"));
-                    } elseif (self::$saved_meta_boxes[$k]) {
-                        // Break out of silly recursion: we call
-                        // writer functions such as wp_insert_post()
-                        // and wp_update_post(), which call us back
-                        return;
-                    } else {
-                        self::$saved_meta_boxes[$k] = true;
-                        call_user_func(
-                            array(get_called_class(), $save_method_name),
-                            $post_id, $post, $is_update);
-                    }
-                }
-            }
-        }  // End foreach
-    }
-    static private $saved_meta_boxes = array();
-
-    /**
-     * Render all meta boxes configured to show up above the editor.
-     */
-    static function meta_boxes_above_editor ($post)
-    {
-        if ($post->post_type !== Person::get_post_type()) return;
-        do_meta_boxes(get_current_screen(), 'above-editor', $post);
-    }
-
-    /**
-     * Render all meta boxes configured to show up after the editor.
-     */
-    static function meta_boxes_after_editor ($post)
-    {
-        if ($post->post_type !== Person::get_post_type()) return;
-        do_meta_boxes(get_current_screen(), 'after-editor', $post);
-    }
 
     static function render_css_for_meta_boxes ()
     {

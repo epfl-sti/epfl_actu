@@ -1003,11 +1003,6 @@ abstract class APIChannelPost extends UniqueKeyTypedPost
 abstract class Controller
 {
     /**
-     * @return The model class for this controller
-     */
-    abstract static function get_model_class ();
-
-    /**
      * Arrange for a nonfatal error to be shown in a so-called "admin notice."
      */
     static protected function admin_error ($post_id, $text)
@@ -1042,7 +1037,7 @@ abstract class Controller
 
 add_action('admin_notices',
            array(Controller::class, '_render_admin_errors_if_any'));
-    
+
 /**
  * Abstract base class for the controller of a model class that
  * consists of a custom post type that itself derives from abstract
@@ -1053,6 +1048,11 @@ add_action('admin_notices',
  */
 abstract class CustomPostTypeController extends Controller
 {
+    /**
+     * @return The model class for this controller
+     */
+    abstract static function get_model_class ();
+
     static $_columns;
     /**
      * Add or mutate a column in the WP_List_Table list view in wp-admin
@@ -1118,16 +1118,19 @@ td.column-thumbnail img {
     {
         $model_class = static::get_model_class();
         add_action(
-            sprintf('save_post_%s', $model_class::get_post_type()),
+            'save_post',  // *Not* save_post_$post_type, so that one
+                          // may ::call_sync_on_save() also from
+                          // within a save_meta_box_foo method
             function ($post_id, $post, $is_update) use ($model_class) {
+                $model_obj = $model_class::get($post);
+                if (! $model_obj) return;
                 if (CustomPostTypeController::$_syncing_on_save === $post_id) {
                     return;  // Break out of possible recursion
                 }
                 $syncing_on_save_orig = CustomPostTypeController::$_syncing_on_save;
                 try {
                     CustomPostTypeController::$_syncing_on_save = $post_id;
-                    $model_obj = $model_class::get($post);
-                    if ($model_obj) { $model_obj->sync(); }
+                    $model_obj->sync();
                 } finally {
                     CustomPostTypeController::$_syncing_on_save = $syncing_on_save_orig;
                 };
@@ -1139,6 +1142,115 @@ td.column-thumbnail img {
         add_action('admin_head', function () use ($css) {
             echo "<style>$css</style>";
         });
+    }
+
+    /**
+     * Hook the meta box business for this class.
+     *
+     * Intended to be called from the hook() method of a Controller that
+     * uses meta boxes.
+     *
+     * Note: calling this class method is necessary, but typically not
+     * sufficient, to enable metabox functionality. One must also call
+     * @link add_meta_box once or more, typically from the
+     * `register_meta_box_cb` callback passed to @link
+     * register_post_type.
+     */
+    static function hook_meta_boxes ()
+    {
+        add_action('edit_form_after_title',
+                   array(get_called_class(), 'meta_boxes_above_editor'));
+        add_action( 'edit_form_after_editor',
+                   array(get_called_class(), 'meta_boxes_after_editor'));
+        add_action(sprintf('save_post_%s', static::get_post_type()),
+                   array(get_called_class(), 'save_meta_boxes'), 10, 3);
+    }
+
+    /**
+     * Render all meta boxes configured to show up above the editor.
+     */
+    static function meta_boxes_above_editor ($post)
+    {
+        if ($post->post_type !== static::get_post_type()) return;
+        do_meta_boxes(get_current_screen(), 'above-editor', $post);
+    }
+
+    /**
+     * Render all meta boxes configured to show up after the editor.
+     */
+    static function meta_boxes_after_editor ($post)
+    {
+        if ($post->post_type !== static::get_post_type()) return;
+        do_meta_boxes(get_current_screen(), 'after-editor', $post);
+    }
+
+    /**
+     * Simpler version of the WordPress add_meta_box function
+     *
+     * @param $slug Unique name for this meta box. The render function
+     * is the method called "render_meta_box_$slug", and the save function
+     * is the method called "save_meta_box_$slug" (for the latter see
+     * @link save_meta_boxes)
+     *
+     * @param $title The human-readable title for the meta box
+     *
+     * @param $position The position to render the meta box at;
+     *        defaults to "above-editor" (see @link meta_boxes_above_editor).
+     *        Can be set to any legal value for the $priority argument
+     *        to the WordPress add_meta_box function, in particular "default"
+     *        to render the meta box after the editor.
+     */
+    static function add_meta_box ($slug, $title, $position = 'above-editor')
+    {
+        $callback = array(get_called_class(), "render_meta_box_$slug");
+        $meta_box_name = sprintf("%s-nonce-meta_box_%s", static::get_post_type(), $slug);
+        add_meta_box($meta_box_name, $title,
+                     function () use ($meta_box_name, $callback) {
+                         wp_nonce_field($meta_box_name, $meta_box_name);
+                         global $post;
+                         call_user_func($callback, $post);
+                     },
+                     null, $position);
+    }
+
+    static private $saved_meta_boxes = array();
+    /**
+     * Call the save_meta_box_$slug method for any and all meta box that is
+     * posting information.
+     *
+     * Any and all nonces present in $_REQUEST, for which a corresponding
+     * class method exists, are checked; then the class method is called,
+     * unless already done in this request cycle.
+     */
+    static function save_meta_boxes ($post_id, $post, $is_update)
+    {
+        // Bail if we're doing an auto save
+        if (defined( 'DOING_AUTOSAVE' ) && \DOING_AUTOSAVE) return;
+        foreach ($_REQUEST as $k => $v) {
+            $matched = array();
+            if (preg_match(sprintf('/%s-nonce-meta_box_([a-zA-Z0-9_]+)$/',
+                                   static::get_post_type()),
+                           $k, $matched)) {
+                $save_method_name = "save_meta_box_" . $matched[1];
+                if (method_exists(get_called_class(), $save_method_name)) {
+                    if (! wp_verify_nonce($v, $k)) {
+                        wp_die(___("Nonce check failed"));
+                    } elseif (! current_user_can('edit_post')) {
+                        wp_die(___("Permission denied: edit " . static::get_post_type()));
+                    } elseif (self::$saved_meta_boxes[$k]) {
+                        // Break out of silly recursion: we call
+                        // writer functions such as wp_insert_post()
+                        // and wp_update_post(), which call us back
+                        return;
+                    } else {
+                        self::$saved_meta_boxes[$k] = true;
+                        call_user_func(
+                            array(get_called_class(), $save_method_name),
+                            $post_id, $post, $is_update);
+                    }
+                }
+            }
+        }  // End foreach
     }
 }
 
@@ -2086,7 +2198,7 @@ abstract class PostListShortcodeView extends ListTemplatedShortcodeView
             ($subtitle = get_the_subtitle($wp_post, "", "", false))) {
             $html .= '<p class=\"subtitle\">' . $linkpre . $subtitle . $linkpost . '</p>';
         }
-        
+
         if ($img = get_the_post_thumbnail($wp_post)) {
             $html .= $linkpre . $img . $linkpost;
         }
