@@ -38,6 +38,10 @@ require_once(dirname(__FILE__) . "/inc/batch.inc");
 use function \EPFL\WS\run_every;
 use \EPFL\WS\BatchTask;
 
+require_once(dirname(__FILE__) . "/inc/related.inc");
+use \EPFL\WS\Related\Related;
+use \EPFL\WS\Related\RelatedController;
+
 function ends_with($haystack, $needle)
 {
     $length = strlen($needle);
@@ -272,6 +276,32 @@ class Person extends UniqueKeyTypedPost
     public function unset_research_interests ()
     {
         delete_post_meta($this->ID, self::RESEARCH_INTERESTS_META);
+    }
+
+    public function get_attribution_tag ()
+    {
+        return sprintf("ATTRIBUTION=SCIPER:%d", $this->get_sciper());
+    }
+
+    public function attributions ()
+    {
+        if (! $this->_attributions) {
+            $this->_attributions = new Related($this->get_attribution_tag());
+        }
+        return $this->_attributions;
+    }
+
+    public function get_mentioned_tag ()
+    {
+        return sprintf("MENTIONED=SCIPER:%d", $this->get_sciper());
+    }
+
+    public function mentioned ()
+    {
+        if (! $this->_mentioned) {
+            $this->_mentioned = new Related($this->get_mentioned_tag());
+        }
+        return $this->_mentioned;
     }
 
     public function sync ()
@@ -748,6 +778,7 @@ class PersonController extends CustomPostTypeController
             self::add_meta_box('find_by_sciper', ___('Find person'));
         } else {
             self::add_meta_box('person_details', ___('Person details'));
+            self::add_meta_box('person_related', ___('Related Content'));
             self::add_meta_box('research_interests', ___('Research interests'), 'after-editor');
         }
         self::add_meta_box('publication_link', ___('Infoscience URL'), 'after-editor');
@@ -782,6 +813,15 @@ class PersonController extends CustomPostTypeController
             error_log(sprintf("%s: %s", get_class($e), $message));
             wp_die($message);
         }
+    }
+
+    static function render_meta_box_person_related ($the_post)
+    {
+        $person = Person::get($the_post);
+        print sprintf(___('<h3>Tagged with <code>%s</code></h3>'), $person->get_attribution_tag());
+        RelatedController::render_for_meta_box($person->attributions());
+        print sprintf(___('<h3>Tagged with <code>%s</code></h3>'), $person->get_mentioned_tag());
+        RelatedController::render_for_meta_box($person->mentioned());
     }
 
     static function render_meta_box_person_details ($the_post)
