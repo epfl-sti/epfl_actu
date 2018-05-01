@@ -2182,7 +2182,7 @@ abstract class PostListShortcodeView extends ListTemplatedShortcodeView
     public function item_as_html ($wp_post)
     {
         $post_type = $wp_post->post_type;
-        $html .= '<div class="epfl-ws-shortcode $post_type" id="' . $wp_post->ID . '">';
+        $html .= sprintf('<div class="epfl-ws-shortcode %s" id="%s">', $post_type, $wp_post->ID);
 
         if ($url = get_the_permalink($wp_post)) {
             $linkpre = sprintf('<a href="%s">', $url);
