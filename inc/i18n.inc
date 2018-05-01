@@ -11,3 +11,8 @@ function __x($text, $context)
 {
     return _x($text, $context, "epfl-ws");
 }
+
+function __n($text, $plural, $number)
+{
+    return _n($text, $plural, $number, "epfl-ws");
+}

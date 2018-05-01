@@ -15,7 +15,7 @@ epfl-ws.pot:
 	find .. -name "*.php" -or -name "*.inc" \
 	| xargs \
 	  xgettext -L php --from-code=utf-8 \
-	  -d "epfl-ws" -k"__x" -k"___" -k"__e" -k"__id" \
+	  -d "epfl-ws" -k"__x:1,2c" -k"___" -k"__e" -k"__id" -k"__n:1,2" \
 	  --package-name=epfl-ws \
 	  --msgid-bugs-address=stiitweb@groupes.epfl.ch \
 	  -o epfl-ws.pot
