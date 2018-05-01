@@ -79,7 +79,84 @@ class ISAcademiaShortCode {
       ($isacademiaws && $isacademiaurl = $this->ws->validate_url( $isaurl, "isa.epfl.ch" )) )
     {
       $isacademia = "<!-- epfl-isacademia src URL: " . $isacademiaurl . " -->\n" ;
-      $isacademia .= $this->ws->get_items( $isacademiaurl ); // add , array('timeout' => 10) in case of timeout
+      // Well, if someone have the time + envy of cleaning this mess, he's welcome
+      // In order to GTD, https://github.com/painty/CSS-Used-ChromeExt was used
+      // to export the needed CSS from the courses list of jahia, and inline
+      // imported here - some cleanup needed !
+      $isacrapycss = <<<EOT
+<style>
+/*! CSS Used from: http://static.epfl.ch/latest/styles/sti-built.css */
+body{margin:0;}
+a{background-color:transparent;-webkit-text-decoration-skip:objects;}
+a:active,a:hover{outline-width:0;}
+img{border-style:none;}
+.clear{clear:both;}
+body{padding:0;background:#fff;color:#454545;font:normal 1em/1.2em Arial,Helvetica,Verdana,sans-serif;}
+h3{margin-top:1.5em;color:#000;font:bold 1.2em/1.4em Arial,Helvetica,Verdana,sans-serif;}
+h4{margin-top:1.5em;color:#000;font:bold 1.1em/1.4em Arial,Helvetica,Verdana,sans-serif;}
+a{color:#000;text-decoration:none;}
+a:focus{outline:0;}
+i{font-style:italic;}
+img{height:auto;max-width:100%;max-height:100%;vertical-align:middle;}
+@media print{
+*{box-shadow:none!important;text-shadow:none!important;}
+a,a:visited{text-decoration:underline;}
+a[href]:after{content:" (" attr(href) ")";}
+img{page-break-inside:avoid;}
+img{max-width:100%!important;}
+h3{orphans:3;widows:3;}
+h3{page-break-after:avoid;}
+}
+/*! CSS Used from: http://sti.epfl.ch/templates/epfl/css/facultes/sti.css */
+.local-color{background-color:#8972d5;}
+h3 a:hover{color:#8972d5;}
+.local-color-light{background-color:#5d41a2;}
+.francais .diet_icon{background-position:-90px -144px;}
+.anglais .diet_icon{background-position:-108px -144px;}
+.allemand .diet_icon{background-position:-72px -144px;}
+.winter .little_icon{background-position:-54px -144px;}
+.sun .little_icon{background-position:-18px -144px;}
+/*! CSS Used from: http://sti.epfl.ch/templates/epfl/css/legacy.css */
+#content .line-up{border-top:1px solid #000;padding-top:1px;}
+#content .line-down{border-bottom:1px dotted #000;padding-top:1px;}
+#content .first-line{background:url(//www.epfl.ch/img/main-navigation.png) repeat;margin-bottom:4px;margin-top:1px;height:38px;width:100%;}
+#content .line{margin-bottom:3px;margin-top:2px;width:100%;}
+#content .langue{width:15px;height:38px;display:block;float:left;}
+#content .cours-title{width:75px;float:left;}
+#content .cours-name{padding-top:3px;width:220px;float:left;}
+#content .cours-code{width:75px;float:left;}
+#content .cours{width:220px;float:left;font-size:11px;}
+#content .section{width:60px;float:left;}
+#content .section-name{width:60px;float:left;}
+#content .enseignement{width:85px;float:left;}
+#content .enseignement-name{float:left;line-height:13px;margin-bottom:2px;width:85px;}
+#content .bachlor{width:70px;height:100%;border-left:1px solid #fff;float:left;}
+#content .bachlor-color{float:left;}
+#content .examen{width:80px;border-left:1px solid #fff;float:left;font-size:11px;}
+#content .credit{width:66px;height:100%;border-left:1px solid #fff;float:left;}
+.titre{font-family:Georgia,'Times New Roman',Times,serif;font-style:italic;font-size:11px;}
+.titre_bachlor{font-family:Georgia,'Times New Roman',Times,serif;font-style:italic;font-size:11px;text-align:center;}
+.bold{font-weight:bold;}
+.cep{width:20px;text-align:center;float:left;}
+.red-color{background-color:#e2001a;color:#fff;width:68px;float:left;padding-left:1px;}
+.credit-time{text-align:right;padding-right:10px;margin-top:18px;font-weight:bold;font-size:11px;}
+.exam-icon{width:18px;margin-left:3px;min-height:38px;float:left;}
+.exam-icon .little_icon{margin-right:2px;}
+.bachlor-text{text-align:center;padding-bottom:2px;margin-top:18px;color:#fff;font-size:11px;}
+#content .cours-name a{font-size:13px;font-weight:bold;text-decoration:none;color:#000;background:url(//www.epfl.ch/img/underline.gif) repeat-x 0 14px;}
+#content .cours-name a:hover{background-image:url(//www.epfl.ch/img/underline-hover.png);}
+.diet_icon{background:url(//www.epfl.ch/img/icons-plancours.png) no-repeat scroll 0 0 rgba(0,0,0,0);border:medium none;float:left;height:18px;margin-right:0;width:14px;}
+.little_icon{background:url(//www.epfl.ch/img/icons-plancours.png) no-repeat scroll 0 0 rgba(0,0,0,0);border:medium none;float:left;height:18px;margin-right:1px;width:18px;}
+.francais .diet_icon{background-position:-90px 0;}
+.anglais .diet_icon{background-position:-108px 0;}
+.allemand .diet_icon{background-position:-72px 0;}
+.winter .little_icon{background-position:-54px 0;}
+.sun .little_icon{background-position:-18px 0;}
+</style>
+EOT;
+      $isacademia .= $isacrapycss;
+      $isadata = $this->ws->get_items( $isacademiaurl ); // add , array('timeout' => 10) in case of timeout
+      $isacademia .= @iconv("ISO-8859-1//TRANSLIT","UTF-8",$isadata);
     } else {
       $error = new WP_Error( 'epfl-ws-isacademia-shortcode', 'URL not validated', 'URL: ' . $url . ' returned an error' );
       $this->ws->log( $error );
