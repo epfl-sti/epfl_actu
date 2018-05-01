@@ -2266,9 +2266,12 @@ abstract class WPQueryShortcodeView extends PostListShortcodeView
     const UNDERSTRAP_LOOP_TEMPLATE_SLUG = "loop-templates/content";
 
     protected function has_template ($short_name) {
-        if (! $short_name) return;
-        return locate_template(
-            self::UNDERSTRAP_LOOP_TEMPLATE_SLUG . "-" . $short_name . ".php");
+        if ($short_name) {
+            $template_filename = self::UNDERSTRAP_LOOP_TEMPLATE_SLUG . "-" . $short_name . ".php";
+        } else {
+            $template_filename = self::UNDERSTRAP_LOOP_TEMPLATE_SLUG . ".php";
+        }
+        return locate_template($template_filename);
     }
 
     protected function render_template ($short_name) {
@@ -2300,9 +2303,12 @@ abstract class WPQueryShortcodeView extends PostListShortcodeView
             get_post_format($wp_post),
             $wp_post->post_type,
         ) as $maybe_template) {
-            if ($this->has_template($maybe_template)) {
+            if ($maybe_template && $this->has_template($maybe_template)) {
                 return $this->render_template($maybe_template);
             }
+        }
+        if ($this->has_template(null)) {
+            return $this->render_template(null);
         }
         return parent::item_as_html($wp_post);
     }
