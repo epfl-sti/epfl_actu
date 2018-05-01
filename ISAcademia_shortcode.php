@@ -2,7 +2,6 @@
 
 namespace EPFL\WS\ISAcademia;
 
-
 use WP_Error;
 
 class ISAcademiaShortCode {
@@ -34,9 +33,7 @@ class ISAcademiaShortCode {
                                         'cursus'   => '', // cursus ba|ma|phd
                                         'display'  => '', // sorting, display=byprof
                                         'detail'   => '', // &detail=S > name of course with link + teachers, &detail=M > the same + description and language, &detail=L > the same + curriculum + academic year
-
                                         'url'      => '', // if user wants to use its own URL from https://jahia.epfl.ch/external-content/course-plan
-
                                         'isaurl'   => '', // for the course plan "plan d'étude" https://isa.epfl.ch/pe/plan_etude_bama_cyclemaster_gm_en.html
                                       ], $atts, $tag);
 
@@ -71,7 +68,6 @@ class ISAcademiaShortCode {
     // if user set the isaurl, he wants a "plan d'étude"
     if  ($isaurl)  {
       $isacademiaws = true;
-      $url = $isacademiaurl;
     }
 
     // fetch isacademia's html
@@ -163,9 +159,7 @@ EOT;
     }
 
     return "<div class=\"isacademia-transcluded\">" . $isacademia . "</div>";
-
   }
-
 
   /*
    * Add the IS-Academia button to TinyMCE
