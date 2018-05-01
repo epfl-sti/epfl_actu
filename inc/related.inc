@@ -20,6 +20,43 @@ class Related
         $this->tag_name = $tag_name;
     }
 
+    public function get_posts ($extra_query_args = null)
+    {
+        if ($extra_query_args !== null) {
+            return $this->_do_get_posts($extra_query_args);
+        }
+        if (! property_exists($this, '_posts')) {
+            $this->_posts = $this->_do_get_posts();
+        }
+        return $this->_posts;
+    }
+
+    private function _do_get_posts ($extra_query_args = array())
+    {
+        $default_query_args = array(
+            'post_type'        => 'any',
+            'posts_per_page'   => -1,
+            'tax_query'        => array(array(
+                'taxonomy' => 'post_tag',
+                'field'    => 'id',
+                'terms'    => array_map(function($t) { return $t->term_id; },
+                                        $this->get_tags())
+            )));
+        return (new \WP_Query())->query(
+            array_merge_recursive($default_query_args, $extra_query_args));
+   }
+
+    function get_tags ()
+    {
+        if (! property_exists($this, '_tags')) {
+            $this->_tags = (new \WP_Term_Query())->query(array(
+                'taxonomy'   => 'post_tag',
+                'hide_empty' => false,
+                'name'       => $this->tag_name));
+        }
+        return $this->_tags;
+    }
+
     /**
      * @return A two-level associative array whose first-level keys
      *         are post types (custom or not), second-level keys are
@@ -29,30 +66,11 @@ class Related
      *         its `supports` list, and "standard" for a post that
      *         does support `post-formats`, but for which that
      *         particular instance doesn't have a post format.
-     */
-    public function posts ()
+     */    
+    function get_posts_by_type_and_format ()
     {
-        if (! property_exists($this, '_posts')) {
-            $this->_posts = $this->_do_get_posts();
-        }
-        return $this->_posts;
-    }
-
-    private function _do_get_posts ()
-    {
-        $q = new \WP_Query();
-        $posts = $q->query(array(
-            'post_type'        => 'any',
-            'posts_per_page'   => -1,
-            'tax_query'        => array(array(
-                'taxonomy' => 'post_tag',
-                'field'    => 'id',
-                'terms'    => array_map(function($t) { return $t->term_id; },
-                                        $this->get_tags())
-            )),
-            'suppress_filters' => true
-        ));
-        foreach ($posts as $post) {
+        $retval = array();
+        foreach ($this->get_posts() as $post) {
             $type = $post->post_type;
             if (! array_key_exists($type, $retval)) {
                 $retval[$type] = array();
@@ -69,17 +87,6 @@ class Related
             array_push($retval[$type][$format], $post->post_title);
         }
         return $retval;
-    }
-
-    function get_tags ()
-    {
-        if (! property_exists($this, '_tags')) {
-            $this->_tags = (new \WP_Term_Query())->query(array(
-                'taxonomy'   => 'post_tag',
-                'hide_empty' => false,
-                'name'       => $this->tag_name));
-        }
-        return $this->_tags;
     }
 
     // TODO: metadata (i.e., terms) can have tags too
@@ -107,7 +114,7 @@ class RelatedController
 {
     static function render_for_meta_box ($related_instance)
     {
-        $posts = $related_instance->posts();
+        $posts = $related_instance->get_posts_by_type_and_format();
         if (! $posts) {
             echo __x("None", "related posts");
             return;
