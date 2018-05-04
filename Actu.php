@@ -150,7 +150,12 @@ class Actu extends \EPFL\WS\Base\APIChannelPost
 
     protected function extract_excerpt ($api_result)
     {
-        return $api_result["subtitle"];
+        $excerpt = $api_result["subtitle"];
+        if (preg_match("/^<p>(.{1,$max_subtitle_length})<\/p>/", $api_result["subtitle"], $matched)) {
+            return trim($matched[1]);
+        } else {
+            return $excerpt;  // May contain <br>'s
+        }
     }
     protected function extract_content ($api_result)
     {
