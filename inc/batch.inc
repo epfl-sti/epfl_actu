@@ -86,7 +86,7 @@ class BatchTask
             "%s, duration: %.03ds, status: %s",
             $this->banner,
             $this->finished - $this->started,
-            ($this->failed ? ("ERROR - " . $this->failed->getMessage()) : "OK")));
+            ($this->failed ? ("ERROR - " . $this->failed->getMessage() . "\n" . $this->failed->getTraceAsString()) : "OK")));
     }
 
     function prometheus_export ()
