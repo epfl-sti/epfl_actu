@@ -89,8 +89,8 @@ class BatchTask
             ($this->failed                              ?
              sprintf("ERROR - %s at %s line %d\n%s",
                      $this->failed->getMessage(),
-                     $this->failed->file,
-                     $this->failed->line,
+                     $this->failed->getFile(),
+                     $this->failed->getLine(),
                      $this->failed->getTraceAsString()) :
              "OK")));
     }
