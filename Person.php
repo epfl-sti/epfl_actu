@@ -877,7 +877,6 @@ class PersonController extends CustomPostTypeController
 
     static function save_meta_box_research_interests ($post_id, $post, $is_update)
     {
-        error_log("save_meta_box_research_interests of $post_id");  // XXX
         if (! ($person = Person::get($post))) {
             error_log("Hmm, saving meta box for nonexisting Person? ($post_id)");
             return;
