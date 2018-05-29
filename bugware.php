@@ -17,8 +17,7 @@ add_action('edit_form_top', '\EPFL\WS\Bugware\add_pll_nonce_for_tags');
  * translated by Polylang, and using the create-a-tag-as-you-type
  * functionality in the right-hand-side “Tags” meta box, Polylang will
  * check an XSRF nonce that it did not send in the first place.
- * This causes tags to be half-created (i.e. they miss the Polylang
- * metadata), rendering them unusable e.g. in a WP_Query.
+ * This results in a spurious error page.
  */
 function add_pll_nonce_for_tags () {
     wp_nonce_field( 'pll_language', '_pll_nonce' );
