@@ -1053,6 +1053,21 @@ abstract class CustomPostTypeController extends Controller
      */
     abstract static function get_model_class ();
 
+    static function hook ()
+    {
+        add_action("admin_enqueue_scripts", array(get_called_class(), "_editor_css"));
+    }
+
+    static function _editor_css ($hook)
+    {
+        if (! ('post.php' === $hook &&
+               static::get_model_class()::get($_GET["post"])) ) return;
+        wp_register_style(
+            'ws-editor',
+            plugins_url( 'ws-editor.css', __DIR__ ) );
+        wp_enqueue_style('ws-editor');
+    }
+
     static $_columns;
     /**
      * Add or mutate a column in the WP_List_Table list view in wp-admin
@@ -1447,6 +1462,7 @@ abstract class StreamPostController extends CustomPostTypeController
 
     static function hook ()
     {
+        parent::hook();
         add_action('init', array(get_called_class(), 'register_post_type'));
 
         plugin_activation_hook(array(get_called_class(), "register_caps"));
@@ -1458,7 +1474,6 @@ abstract class StreamPostController extends CustomPostTypeController
 
         // Behavior of epfl-ws posts in the wp-admin area
         static::configure_rendering_in_edit_form();
-        add_action("admin_enqueue_scripts", array(get_called_class(), "editor_css"));
         static::auto_fields_controller()->hook();
         add_action('admin_init', array(get_called_class(), 'make_subtitles_readonly_in_admin'), 0);
 
@@ -1627,16 +1642,6 @@ abstract class StreamPostController extends CustomPostTypeController
     <?php echo $wp_post->post_content; ?>
 	</div>
         <?php
-    }
-
-    static function editor_css ($hook)
-    {
-        if (! ('post.php' === $hook &&
-               static::get_model_class()::get($_GET["post"])) ) return;
-        wp_register_style(
-            'ws-editor',
-            plugins_url( 'ws-editor.css', __FILE__ ) );
-        wp_enqueue_style('ws-editor');
     }
 
     /**
