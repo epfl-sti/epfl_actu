@@ -140,20 +140,22 @@ class AutoFieldsController {
         $meta = get_post_meta($post->ID);
         echo "<table>\n";
         foreach (AutoFields::of($this->model_class)->get() as $key) {
+            echo "<tr><td>$key</td>\n";
             // All meta keys are single-valued
             $value = $meta[$key][0];
-            if (gettype($value) != "string") {
+            if (preg_match('/^.*_(.*?)$/', $key, $matched)
+                and method_exists($this, $method = ("render_meta_field_td_" .
+                                                    $matched[1])))
+            {
+                $this->$method($key, $value);
+            } elseif (gettype($value) != "string") {
                 $value_html = "<pre>" . gettype($value) . "</pre>";
             } elseif ($this->_is_sciper_type($key)) {
                 $value_html = $this->sciper_link($value);
             } else {
-                $max_length = 120;
-                if (strlen($value) > $max_length) {
-                    $value = substr($value, 0, $max_length) . "...";
-                }
-                $value_html = htmlspecialchars($value);
+                $this->render_meta_field_td($value);
             }
-            echo "<tr><td>$key</td><td>$value_html</td></tr>\n";
+            echo "</tr>\n";
         }
         echo "</table>\n";
     }
@@ -175,6 +177,54 @@ class AutoFieldsController {
             return sprintf(
                 '%d <a href="/wp-admin/post-new.php?post_type=epfl-person&SCIPER=%d">(Create)</a>',
                 $sciper, $sciper);
+        }
+    }
+
+    const MAX_RENDER_LENGTH = 120;
+
+    protected function _htmlify ($value, $max_length = NULL) {
+        if ($max_length === NULL) {
+            $max_length = static::MAX_RENDER_LENGTH;
+        }
+        if (strlen($value) > $max_length) {
+            $value = substr($value, 0, $max_length) . "...";
+        }
+        return htmlspecialchars($value);
+    }
+
+    function render_meta_field_td ($value) {
+        echo "<td>" . $this->_htmlify($value) . "</td>";
+    }
+
+
+    function render_meta_field_td_url ($key, $value) {
+        echo '<td><a href="' . $this->_htmlify($value, 500) .'">' . $this->_htmlify($value) . "</td>";
+    }
+
+    function render_meta_field_td_epoch ($key, $value) {
+        $this->render_meta_field_td($value);
+        if (! preg_match('/^[1-9][0-9]*$/', $value)) return;
+        $value_human = strftime('%c', $value);
+        echo "<td>$value_human</td>";
+    }
+
+    static protected $_json_button_count = 0;
+    function render_meta_field_td_json ($key, $value) {
+        $this->render_meta_field_td($value);
+        if (NULL !== json_decode($value)) {
+            $button_id = "autofields_json_button" . static::$_json_button_count++;
+            echo "<td><button id=\"$button_id\">" . ___("<code>console.log()</code> it"). "</button></td>\n";
+?>
+<script>
+jQuery(function($) {
+  $('#<?php echo $button_id; ?>').click(function(e) {
+    e.stopPropagation();
+    console.log('<?php echo "$key ="; ?>', JSON.parse("<?php echo preg_replace('/([\\"])/', '\\\\${1}', $value); ?>"));
+    return false;
+  });
+});
+</script>
+<?php
         }
     }
 
