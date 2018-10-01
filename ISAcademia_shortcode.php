@@ -90,7 +90,6 @@ class ISAcademiaShortCode {
       $isacrapycss = <<<EOT
 <style>
 /*! CSS Used from: http://static.epfl.ch/latest/styles/sti-built.css */
-body{margin:0;}
 a{background-color:transparent;-webkit-text-decoration-skip:objects;}
 a:active,a:hover{outline-width:0;}
 img{border-style:none;}
