@@ -2,3 +2,7 @@ img.actu-thumbnail {
     float: left;
     margin: 4px 1em 4px 1em;
 }
+
+div.people-picture img {
+    max-width: 80%;
+}

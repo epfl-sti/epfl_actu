@@ -602,6 +602,7 @@ class PersonController extends CustomPostTypeController
 
     static function hook ()
     {
+        parent::hook();
         add_action( 'init', array(get_called_class(), 'register_post_type'));
 
         /* Behavior of Persons on the main site */
@@ -843,9 +844,12 @@ class PersonController extends CustomPostTypeController
           printf('<h2>%s</h2>', $title_str);
         }
         printf(
-            '<h2><a href="/epfl-person/%d">SCIPER %d</a> (<a href="https://people.epfl.ch/%d">school directory</a>)</h2>',
-            $sciper, $sciper, $sciper);
-        the_post_thumbnail();
+            '<h2><a href="/epfl-person/%d">SCIPER %d</a> (<a href="https://people.epfl.ch/%d">school directory</a>)</h2>' .
+            "\n" .
+            '<div class="people-picture">%s</div>' .
+            "\n",
+            $sciper, $sciper, $sciper,
+            get_the_post_thumbnail());
     }
 
     static function save_meta_box_person_details ($post_id, $post, $is_update)
@@ -877,7 +881,6 @@ class PersonController extends CustomPostTypeController
 
     static function save_meta_box_research_interests ($post_id, $post, $is_update)
     {
-        error_log("save_meta_box_research_interests of $post_id");  // XXX
         if (! ($person = Person::get($post))) {
             error_log("Hmm, saving meta box for nonexisting Person? ($post_id)");
             return;
