@@ -8,172 +8,809 @@ msgid ""
 msgstr ""
 "Project-Id-Version: epfl-ws\n"
 "Report-Msgid-Bugs-To: stiitweb@groupes.epfl.ch\n"
-"POT-Creation-Date: 2018-01-06 19:26+0100\n"
+"POT-Creation-Date: 2018-09-14 18:56+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: ../ldap.inc:14
-msgid "This PHP doesn't support LDAP"
+#: ../inc/base-classes.inc:355
+msgid "Channel API URL"
 msgstr ""
 
-#: ../ldap.inc:29
-#, php-format
-msgid "Unable to bind to LDAP server %s (error: %s)"
+#: ../inc/base-classes.inc:356
+msgid "Source URL of the JSON data."
 msgstr ""
 
-#: ../ldap.inc:38
-#, php-format
-msgid "ldap_search error: %s"
+#: ../inc/base-classes.inc:1082
+msgid "Thumbnail"
 msgstr ""
 
-#: ../ldap.inc:43
-#, php-format
-msgid "ldap_get_entries error: %s"
-msgstr ""
-
-#: ../Person.php:53 ../Person.php:179
-#, php-format
-msgid "Person with SCIPER %d not found"
-msgstr ""
-
-#: ../Person.php:63
-#, php-format
-msgid "A person with SCIPER %d already exists"
-msgstr ""
-
-#: ../Person.php:73
-#, php-format
-msgid "Multiple persons found with SCIPER %d"
-msgstr ""
-
-#: ../Person.php:267
-msgid "People"
-msgstr ""
-
-#: ../Person.php:268 ../Person.php:270
-msgid "Person"
-msgstr ""
-
-#: ../Person.php:269
-msgid "EPFL People"
-msgstr ""
-
-#: ../Person.php:271
-msgid "Add New"
-msgstr ""
-
-#: ../Person.php:272
-msgid "Add New Person"
-msgstr ""
-
-#: ../Person.php:273
-msgid "New Person"
-msgstr ""
-
-#: ../Person.php:274
-msgid "Edit Person"
-msgstr ""
-
-#: ../Person.php:275
-msgid "View Person"
-msgstr ""
-
-#: ../Person.php:276
-msgid "All People"
-msgstr ""
-
-#: ../Person.php:277
-msgid "Search People"
-msgstr ""
-
-#: ../Person.php:278
-msgid "No persons found."
-msgstr ""
-
-#: ../Person.php:279
-msgid "No persons found in Trash."
-msgstr ""
-
-#: ../Person.php:281
-msgid "Noteworthy people"
-msgstr ""
-
-#: ../Person.php:349
-msgid "Find person"
-msgstr ""
-
-#: ../Person.php:351
-msgid "Person details"
-msgstr ""
-
-#: ../Person.php:357
-msgid "SCIPER"
-msgstr ""
-
-#: ../Person.php:494
+#: ../inc/base-classes.inc:1237
 msgid "Nonce check failed"
 msgstr ""
 
-#: ../Person.php:496
-msgid "Permission denied: edit person"
+#: ../inc/base-classes.inc:1239
+msgid "Permission denied: edit "
 msgstr ""
 
-#: ../scrape.inc:21
+#: ../inc/base-classes.inc:1861
+msgctxt "API category name not set"
+msgid "(Not set)"
+msgstr ""
+
+#: ../inc/base-classes.inc:2121
+msgctxt "ListShortcode"
+msgid "No results"
+msgstr ""
+
+#: ../inc/auto-fields.inc:119
+msgid "Automatic Custom Fields"
+msgstr ""
+
+#: ../inc/scrape.inc:21
 #, php-format
 msgid "Unable to parse DOM retreived from %s"
 msgstr ""
 
-#: ../scrape.inc:40
+#: ../inc/scrape.inc:40
 #, php-format
 msgid "CURL exception while downloading %s: %s"
 msgstr ""
 
-#: ../scrape.inc:45
+#: ../inc/scrape.inc:45
 #, php-format
 msgid "HTTP Error code %d received while downloading %s"
 msgstr ""
 
-#: ../title.inc:38
+#: ../inc/title.inc:38
 msgid "Full Professor"
 msgstr ""
 
-#: ../title.inc:39
+#: ../inc/title.inc:39
 msgid "Associate Professor"
 msgstr ""
 
-#: ../title.inc:40
+#: ../inc/title.inc:40
 msgid "Tenure Track Assistant Professor"
 msgstr ""
 
-#: ../title.inc:41
+#: ../inc/title.inc:41
 msgid "SNSF-funded  Professor"
 msgstr ""
 
-#: ../title.inc:42
+#: ../inc/title.inc:42
 msgid "Adjunct Professor"
 msgstr ""
 
-#: ../title.inc:43
+#: ../inc/title.inc:43
 msgid "Senior Scientist"
 msgstr ""
 
-#: ../title.inc:44
+#: ../inc/title.inc:44
 msgid "Lecturer"
 msgstr ""
 
-#: ../title.inc:45
+#: ../inc/title.inc:45
 msgid "Scientist"
 msgstr ""
 
-#: ../title.inc:105
+#: ../inc/title.inc:105
+msgctxt "greeting"
 msgid "Professor"
 msgstr ""
 
-#: ../title.inc:107
+#: ../inc/title.inc:107
+msgctxt "greeting"
 msgid "Doctor"
+msgstr ""
+
+#: ../inc/title.inc:114
+msgctxt "greeting"
+msgid "Prof."
+msgstr ""
+
+#: ../inc/title.inc:116
+msgctxt "greeting"
+msgid "Dr."
+msgstr ""
+
+#: ../inc/related.inc:119
+msgctxt "related posts"
+msgid "None"
+msgstr ""
+
+#: ../inc/related.inc:129
+#, php-format
+msgid "%d post"
+msgid_plural "%d posts"
+msgstr[0] ""
+msgstr[1] ""
+
+#: ../inc/related.inc:132
+#, php-format
+msgid "%d post of type %s"
+msgid_plural "%d posts of type %s"
+msgstr[0] ""
+msgstr[1] ""
+
+#: ../inc/related.inc:141
+#, php-format
+msgid " (%d video)"
+msgid_plural " (%d videos)"
+msgstr[0] ""
+msgstr[1] ""
+
+#: ../inc/ldap.inc:16
+msgid "This PHP doesn't support LDAP"
+msgstr ""
+
+#: ../inc/ldap.inc:75
+#, php-format
+msgid "Unable to bind to LDAP server %s (error: %s)"
+msgstr ""
+
+#: ../inc/ldap.inc:92
+#, php-format
+msgid "ldap_search error: %s"
+msgstr ""
+
+#: ../inc/ldap.inc:97
+#, php-format
+msgid "ldap_get_entries error: %s"
+msgstr ""
+
+#: ../inc/batch.inc:33
+#, php-format
+msgid "Every %d seconds (for epfl-ws)"
+msgstr ""
+
+#: ../widgets/Map.php:24
+msgid "Show a EPFL Map from plan.epfl.ch"
+msgstr ""
+
+#: ../widgets/Map.php:42
+msgctxt "epfl-ws"
+msgid "Lookup:"
+msgstr ""
+
+#: ../widgets/Map.php:46
+msgctxt "epfl-ws"
+msgid "e.g. office number (\"MA A2 424\") or a Sciper number (\"133134\")."
+msgstr ""
+
+#: ../widgets/widget2shortcode.php:49
+msgid "No widget specified!"
+msgstr ""
+
+#: ../widgets/widget2shortcode.php:56
+#, php-format
+msgid "Widget not found — %s"
+msgstr ""
+
+#: ../ISAcademia.php:79
+msgctxt "taxonomy general name"
+msgid "ISAcademia Feeds"
+msgstr ""
+
+#: ../ISAcademia.php:80
+msgctxt "taxonomy singular name"
+msgid "ISAcademia Feed"
+msgstr ""
+
+#: ../ISAcademia.php:81
+msgid "Search ISAcademia Feeds"
+msgstr ""
+
+#: ../ISAcademia.php:82
+msgid "All ISAcademia Feeds"
+msgstr ""
+
+#: ../ISAcademia.php:83
+msgid "Edit ISAcademia Feed"
+msgstr ""
+
+#: ../ISAcademia.php:84
+msgid "Update ISAcademia Feed"
+msgstr ""
+
+#: ../ISAcademia.php:85
+msgid "Add ISAcademia Feed"
+msgstr ""
+
+#: ../ISAcademia.php:86
+msgid "New ISAcademia Feed"
+msgstr ""
+
+#: ../ISAcademia.php:87
+msgid "ISAcademia Feeds"
+msgstr ""
+
+#: ../ISAcademia.php:90
+msgid "ISAcademia starting URL"
+msgstr ""
+
+#: ../ISAcademia.php:91
+msgid "EPFL-WS will start scraping courses at this URL."
+msgstr ""
+
+#: ../ISAcademia.php:167
+msgctxt "post type general name"
+msgid "Courses"
+msgstr ""
+
+#: ../ISAcademia.php:168
+msgctxt "post type singular name"
+msgid "Course"
+msgstr ""
+
+#: ../ISAcademia.php:169
+msgctxt "admin menu"
+msgid "EPFL Courses"
+msgstr ""
+
+#: ../ISAcademia.php:170
+msgctxt "add new on admin bar"
+msgid "Course"
+msgstr ""
+
+#: ../ISAcademia.php:171 ../Lab.php:296
+msgctxt "add new lab"
+msgid "Add New"
+msgstr ""
+
+#: ../ISAcademia.php:172
+msgid "Add New Course"
+msgstr ""
+
+#: ../ISAcademia.php:173
+msgid "New Course"
+msgstr ""
+
+#: ../ISAcademia.php:174
+msgid "Edit Course"
+msgstr ""
+
+#: ../ISAcademia.php:175
+msgid "View Course"
+msgstr ""
+
+#: ../ISAcademia.php:176
+msgid "All Courses"
+msgstr ""
+
+#: ../ISAcademia.php:177
+msgid "Search Course"
+msgstr ""
+
+#: ../ISAcademia.php:178
+msgid "No courses found."
+msgstr ""
+
+#: ../ISAcademia.php:179
+msgid "No courses found in Trash."
+msgstr ""
+
+#: ../ISAcademia.php:182
+msgid "Courses out of ISAcademia"
+msgstr ""
+
+#: ../OrganizationalUnit.php:153
+msgid "EPFL Institutes and Sections"
+msgstr ""
+
+#: ../OrganizationalUnit.php:154
+msgid "EPFL Insts &amp; Sections"
+msgstr ""
+
+#: ../OrganizationalUnit.php:165
+msgid ""
+"\n"
+"        <p>💡 To create a new institute or section:\n"
+"         <ol>\n"
+"          <li>First create a page or post,</li>\n"
+"          <li>then add an <code>epfl_dn</code> custom field to it.</li>\n"
+"         </ol>\n"
+"        </p>\n"
+"        "
+msgstr ""
+
+#: ../OrganizationalUnit.php:280
+msgctxt "OrganizationalUnitTable"
+msgid "Title"
+msgstr ""
+
+#: ../OrganizationalUnit.php:281
+msgctxt "OrganizationalUnitTable"
+msgid "Labs"
+msgstr ""
+
+#: ../OrganizationalUnit.php:282
+msgctxt "OrganizationalUnitTable"
+msgid "Categories"
+msgstr ""
+
+#: ../OrganizationalUnit.php:283
+msgctxt "OrganizationalUnitTable"
+msgid "Tags"
+msgstr ""
+
+#: ../Lab.php:273
+msgid "Lab abbreviation"
+msgstr ""
+
+#: ../Lab.php:276
+msgid "Members"
+msgstr ""
+
+#: ../Lab.php:292
+msgctxt "post type general name"
+msgid "Labs"
+msgstr ""
+
+#: ../Lab.php:293
+msgctxt "post type singular name"
+msgid "Lab"
+msgstr ""
+
+#: ../Lab.php:294
+msgctxt "admin menu"
+msgid "EPFL Labs"
+msgstr ""
+
+#: ../Lab.php:295
+msgctxt "add new on admin bar"
+msgid "Lab"
+msgstr ""
+
+#: ../Lab.php:297
+msgid "Add New Lab"
+msgstr ""
+
+#: ../Lab.php:298
+msgid "New Lab"
+msgstr ""
+
+#: ../Lab.php:299
+msgid "Edit Lab"
+msgstr ""
+
+#: ../Lab.php:300
+msgid "View Lab"
+msgstr ""
+
+#: ../Lab.php:301
+msgid "All Labs"
+msgstr ""
+
+#: ../Lab.php:302
+msgid "Search Lab"
+msgstr ""
+
+#: ../Lab.php:303
+msgid "No labs found."
+msgstr ""
+
+#: ../Lab.php:304
+msgid "No labs found in Trash."
+msgstr ""
+
+#: ../Lab.php:306
+msgid "EPFL labs and research groups"
+msgstr ""
+
+#: ../Memento.php:171
+msgctxt "taxonomy general name"
+msgid "Event Channels"
+msgstr ""
+
+#: ../Memento.php:172
+msgctxt "taxonomy singular name"
+msgid "Event Channel"
+msgstr ""
+
+#: ../Memento.php:173
+msgid "Search Event Channels"
+msgstr ""
+
+#: ../Memento.php:174
+msgid "All Event Channels"
+msgstr ""
+
+#: ../Memento.php:175
+msgid "Edit Event Channel"
+msgstr ""
+
+#: ../Memento.php:176
+msgid "Update Event Channel"
+msgstr ""
+
+#: ../Memento.php:177
+msgid "Add Event Channel"
+msgstr ""
+
+#: ../Memento.php:178 ../Actu.php:208
+msgid "New Channel Name"
+msgstr ""
+
+#: ../Memento.php:179
+msgid "Event Channels"
+msgstr ""
+
+#: ../Memento.php:182
+msgid "Memento Channel API URL"
+msgstr ""
+
+#: ../Memento.php:183
+msgid ""
+"Source URL of the JSON data. Use <a href=\"https://wiki.epfl.ch/api-rest-"
+"actu-memento/memento\" target=\"_blank\">memento-doc</a> for details."
+msgstr ""
+
+#: ../Memento.php:213
+msgctxt "post type general name"
+msgid "EPFL Events"
+msgstr ""
+
+#: ../Memento.php:214
+msgctxt "post type singular name"
+msgid "EPFL Events"
+msgstr ""
+
+#: ../Memento.php:215
+msgctxt "admin menu"
+msgid "EPFL Events"
+msgstr ""
+
+#: ../Memento.php:216
+msgctxt "add new on admin bar"
+msgid "EPFL Events"
+msgstr ""
+
+#: ../Memento.php:217
+msgid "View EPFL Event"
+msgstr ""
+
+#: ../Memento.php:218
+msgid "All EPFL Events for this site"
+msgstr ""
+
+#: ../Memento.php:219
+msgid "Search Events"
+msgstr ""
+
+#: ../Memento.php:220
+msgid "No events found."
+msgstr ""
+
+#: ../Memento.php:221
+msgid "No events found in Trash."
+msgstr ""
+
+#: ../Memento.php:224
+msgid "EPFL events from events.epfl.ch"
+msgstr ""
+
+#: ../Memento.php:247
+msgctxt "Memento API category"
+msgid "Conferences - Seminars"
+msgstr ""
+
+#: ../Memento.php:248
+msgctxt "Memento API category"
+msgid "Management Board meetings"
+msgstr ""
+
+#: ../Memento.php:249
+msgctxt "Memento API category"
+msgid "Miscellaneous"
+msgstr ""
+
+#: ../Memento.php:250
+msgctxt "Memento API category"
+msgid "Exhibitions"
+msgstr ""
+
+#: ../Memento.php:251
+msgctxt "Memento API category"
+msgid "Movies"
+msgstr ""
+
+#: ../Memento.php:252
+msgctxt "Memento API category"
+msgid "Celebrations"
+msgstr ""
+
+#: ../Memento.php:253
+msgctxt "Memento API category"
+msgid "Inaugural Lectures - Honorary Lectures"
+msgstr ""
+
+#: ../Memento.php:254
+msgctxt "Memento API category"
+msgid "Cultural events"
+msgstr ""
+
+#: ../Memento.php:255
+msgctxt "Memento API category"
+msgid "Sporting events"
+msgstr ""
+
+#: ../Memento.php:256
+msgctxt "Memento API category"
+msgid "Thesis defenses"
+msgstr ""
+
+#: ../Memento.php:257
+msgctxt "Memento API category"
+msgid "Academic Calendar"
+msgstr ""
+
+#: ../Memento.php:258
+msgctxt "Memento API category"
+msgid "Internal trainings"
+msgstr ""
+
+#: ../Memento.php:259
+msgctxt "Memento API category"
+msgid "Call for proposal"
+msgstr ""
+
+#: ../Memento.php:260
+msgctxt "Memento API category"
+msgid "Deadline"
+msgstr ""
+
+#: ../Memento.php:280
+msgid "Memento category name"
+msgstr ""
+
+#: ../Memento.php:281
+msgid ""
+"Setting this will cause matching posts from events.epfl.ch to automatically "
+"get classified into this category."
+msgstr ""
+
+#: ../Memento.php:282
+msgid "Memento category"
+msgstr ""
+
+#: ../Actu.php:201
+msgctxt "taxonomy general name"
+msgid "News Channels"
+msgstr ""
+
+#: ../Actu.php:202
+msgctxt "taxonomy singular name"
+msgid "News Channel"
+msgstr ""
+
+#: ../Actu.php:203
+msgid "Search News Channels"
+msgstr ""
+
+#: ../Actu.php:204
+msgid "All News Channels"
+msgstr ""
+
+#: ../Actu.php:205
+msgid "Edit News Channel"
+msgstr ""
+
+#: ../Actu.php:206
+msgid "Update News Channel"
+msgstr ""
+
+#: ../Actu.php:207
+msgid "Add News Channel"
+msgstr ""
+
+#: ../Actu.php:209
+msgid "News Channels"
+msgstr ""
+
+#: ../Actu.php:212
+msgid "Actu Channel API URL"
+msgstr ""
+
+#: ../Actu.php:213
+msgid ""
+"Source URL of the JSON data. Use <a href=\"https://wiki.epfl.ch/api-rest-"
+"actu-memento/actu\" target=\"_blank\">actu-doc</a> for details."
+msgstr ""
+
+#: ../Actu.php:243
+msgctxt "post type general name"
+msgid "EPFL News"
+msgstr ""
+
+#: ../Actu.php:244
+msgctxt "post type singular name"
+msgid "EPFL News"
+msgstr ""
+
+#: ../Actu.php:245
+msgctxt "admin menu"
+msgid "EPFL News"
+msgstr ""
+
+#: ../Actu.php:246
+msgctxt "add new on admin bar"
+msgid "EPFL News"
+msgstr ""
+
+#: ../Actu.php:247
+msgid "View EPFL News Item"
+msgstr ""
+
+#: ../Actu.php:248
+msgid "All EPFL News for this site"
+msgstr ""
+
+#: ../Actu.php:249
+msgid "Search News"
+msgstr ""
+
+#: ../Actu.php:250
+msgid "No news found."
+msgstr ""
+
+#: ../Actu.php:251
+msgid "No news found in Trash."
+msgstr ""
+
+#: ../Actu.php:254
+msgid "EPFL News from news.epfl.ch"
+msgstr ""
+
+#: ../Actu.php:290
+msgctxt "Actu API category"
+msgid "EPFL"
+msgstr ""
+
+#: ../Actu.php:291
+msgctxt "Actu API category"
+msgid "Education"
+msgstr ""
+
+#: ../Actu.php:292
+msgctxt "Actu API category"
+msgid "Research"
+msgstr ""
+
+#: ../Actu.php:293
+msgctxt "Actu API category"
+msgid "Innovation"
+msgstr ""
+
+#: ../Actu.php:294
+msgctxt "Actu API category"
+msgid "Campus Life"
+msgstr ""
+
+#: ../Actu.php:314
+msgid "Actu's category name"
+msgstr ""
+
+#: ../Actu.php:315
+msgid ""
+"Setting this will cause matching posts from news.epfl.ch to automatically "
+"get classified into this category."
+msgstr ""
+
+#: ../Actu.php:316
+msgid "Actu category"
+msgstr ""
+
+#: ../Person.php:74
+#, php-format
+msgid "Person with SCIPER %d not found"
+msgstr ""
+
+#: ../Person.php:84
+#, php-format
+msgid "A person with SCIPER %d already exists"
+msgstr ""
+
+#: ../Person.php:94
+#, php-format
+msgid "Multiple persons found with SCIPER %d"
+msgstr ""
+
+#: ../Person.php:671
+msgctxt "post type general name"
+msgid "People"
+msgstr ""
+
+#: ../Person.php:672
+msgctxt "post type singular name"
+msgid "Person"
+msgstr ""
+
+#: ../Person.php:673
+msgctxt "admin menu"
+msgid "EPFL People"
+msgstr ""
+
+#: ../Person.php:674
+msgctxt "add new on admin bar"
+msgid "Person"
+msgstr ""
+
+#: ../Person.php:675
+msgctxt "add new person"
+msgid "Add New"
+msgstr ""
+
+#: ../Person.php:676
+msgid "Add New Person"
+msgstr ""
+
+#: ../Person.php:677
+msgid "New Person"
+msgstr ""
+
+#: ../Person.php:678
+msgid "Edit Person"
+msgstr ""
+
+#: ../Person.php:679
+msgid "View Person"
+msgstr ""
+
+#: ../Person.php:680
+msgid "All People"
+msgstr ""
+
+#: ../Person.php:681
+msgid "Search People"
+msgstr ""
+
+#: ../Person.php:682
+msgid "No persons found."
+msgstr ""
+
+#: ../Person.php:683
+msgid "No persons found in Trash."
+msgstr ""
+
+#: ../Person.php:685
+msgid "Noteworthy people"
+msgstr ""
+
+#: ../Person.php:778
+msgid "Find person"
+msgstr ""
+
+#: ../Person.php:780
+msgid "Person details"
+msgstr ""
+
+#: ../Person.php:781
+msgid "Related Content"
+msgstr ""
+
+#: ../Person.php:782
+msgid "Research interests"
+msgstr ""
+
+#: ../Person.php:784
+msgid "Infoscience URL"
+msgstr ""
+
+#: ../Person.php:795
+msgid "SCIPER"
+msgstr ""
+
+#: ../Person.php:821 ../Person.php:823
+#, php-format
+msgid "<h3>Tagged with <code>%s</code></h3>"
+msgstr ""
+
+#: ../Person.php:906
+msgid "INFOSCIENCE URL"
 msgstr ""
