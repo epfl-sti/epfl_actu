@@ -552,6 +552,10 @@ class Person extends UniqueKeyTypedPost
 
     public function get_short_title_and_full_name ()
     {
+        // yes, you know why...
+        if ($this->get_sciper() == 101565) {
+            return "Dr. " . $this->get_full_name();
+        }
         if ($this->get_title()) {
             return $this->get_title()->as_short_greeting() . " " . $this->get_full_name();
         } else {
