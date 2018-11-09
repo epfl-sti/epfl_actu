@@ -204,9 +204,18 @@ class Person extends UniqueKeyTypedPost
 
     function get_title ()
     {
+        if ($title_code = $this->get_overridden_title()) return $title_code;
+
         $title_code = get_post_meta($this->ID, "title_code", true);
         return $title_code ? new Title($title_code) : null;
     }
+
+    function get_overridden_title ()
+    {
+        $title_code = get_post_meta($this->ID, "override_title_code", true);
+        return $title_code ? new Title($title_code) : null;
+    }
+
 
     public function get_dn ()
     {
@@ -552,10 +561,6 @@ class Person extends UniqueKeyTypedPost
 
     public function get_short_title_and_full_name ()
     {
-        // yes, you know why...
-        if ($this->get_sciper() == 101565) {
-            return "Dr. " . $this->get_full_name();
-        }
         if ($this->get_title()) {
             return $this->get_title()->as_short_greeting() . " " . $this->get_full_name();
         } else {
@@ -675,7 +680,8 @@ class PersonController extends CustomPostTypeController
     /**
      * Rewrite "Title" to "Name", as "Title" is used for academic rank.
      */
-    function _filter_title_column_name ($columns) {
+    function _filter_title_column_name ($columns)
+    {
         $columns['title'] = ___('Name');
         return $columns;
     }
@@ -939,9 +945,14 @@ class PersonController extends CustomPostTypeController
         Person::get($post_id)->set_publication_link($infoscience_link);
     }
 
-    static function render_rank_column ($person) {
-        if (! ($title = $person->get_title())) return;
-        echo $title->localize();
+    static function render_rank_column ($person)
+    {
+        echo $person->get_title_as_text();
+        if ($person->get_overridden_title()) {
+            echo "<br/><i>";
+            echo ___("Explicitly set");
+            echo "</i>";
+        }
     }
 
     /**
