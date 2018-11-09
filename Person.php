@@ -101,25 +101,26 @@ class Person extends UniqueKeyTypedPost
     const SLUG = "epfl-person";
 
     // Auto fields
-    const SCIPER_META             = 'sciper';
-    const DN_META                 = 'dn';
-    const GIVEN_NAME_META         = 'givenName';
-    const SURNAME_META            = 'surname';
-    const EMAIL_META              = 'mail';
-    const PROFILE_URL_META        = 'profile';
-    const POSTAL_ADDRESS_META     = 'postaladdress';
-    const ROOM_META               = 'room';
-    const PHONE_META              = 'phone';
-    const OU_META                 = 'epfl_ou';
-    const UNIT_QUAD_META          = 'unit_quad';
-    const TITLE_CODE_META         = 'title_code';
-    const LAB_UNIQUE_ID_META      = 'epfl_person_lab_id';
-    const THUMBNAIL_META          = 'epfl_person_external_thumbnail';
+    const SCIPER_META                = 'sciper';
+    const DN_META                    = 'dn';
+    const GIVEN_NAME_META            = 'givenName';
+    const SURNAME_META               = 'surname';
+    const EMAIL_META                 = 'mail';
+    const PROFILE_URL_META           = 'profile';
+    const POSTAL_ADDRESS_META        = 'postaladdress';
+    const ROOM_META                  = 'room';
+    const PHONE_META                 = 'phone';
+    const OU_META                    = 'epfl_ou';
+    const UNIT_QUAD_META             = 'unit_quad';
+    const TITLE_CODE_META            = 'title_code';
+    const OVERRIDDEN_TITLE_CODE_META = 'override_title_code';
+    const LAB_UNIQUE_ID_META         = 'epfl_person_lab_id';
+    const THUMBNAIL_META             = 'epfl_person_external_thumbnail';
 
     // User-editable fields
-    const PUBLICATION_LINK_META   = 'publication_link';
-    const KEYWORDS_META           = 'research_keywords';
-    const RESEARCH_INTERESTS_META = 'research_interests_html';
+    const PUBLICATION_LINK_META      = 'publication_link';
+    const KEYWORDS_META              = 'research_keywords';
+    const RESEARCH_INTERESTS_META    = 'research_interests_html';
 
     static function _is_user_editable_field ($field)
     {
@@ -206,13 +207,13 @@ class Person extends UniqueKeyTypedPost
     {
         if ($title_code = $this->get_overridden_title()) return $title_code;
 
-        $title_code = get_post_meta($this->ID, "title_code", true);
+        $title_code = get_post_meta($this->ID, self::TITLE_CODE_META, true);
         return $title_code ? new Title($title_code) : null;
     }
 
     function get_overridden_title ()
     {
-        $title_code = get_post_meta($this->ID, "override_title_code", true);
+        $title_code = get_post_meta($this->ID, self::OVERRIDDEN_TITLE_CODE_META, true);
         return $title_code ? new Title($title_code) : null;
     }
 
