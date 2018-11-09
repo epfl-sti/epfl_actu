@@ -607,35 +607,46 @@ class PersonController extends CustomPostTypeController
     static function hook ()
     {
         parent::hook();
-        add_action( 'init', array(get_called_class(), 'register_post_type'));
+
+        $thisclass = get_called_class();
+        add_action( 'init', array($thisclass, 'register_post_type'));
 
         /* Behavior of Persons on the main site */
         add_filter('post_thumbnail_html',
-                   array(get_called_class(), 'filter_post_thumbnail_html'), 10, 5);
+                   array($thisclass, 'filter_post_thumbnail_html'), 10, 5);
         add_filter('single_template',
-                   array(get_called_class(), 'maybe_use_default_template'), 99);
-
+                   array($thisclass, 'maybe_use_default_template'), 99);
         /* Behavior of Persons in the admin aera */
         (new AutoFieldsController(Person::class))->hook();
 
         /* Customize the edit form */
         static::hook_meta_boxes();
         add_action('admin_head',
-                   array(get_called_class(), 'render_css_for_meta_boxes'));
+                   array($thisclass, 'render_css_for_meta_boxes'));
+
+        add_filter("is_protected_meta",
+                   array($thisclass, 'additional_protected_metas'), 10, 3);
+
+        /* Customize the list view */
+        $post_type = static::get_post_type();
+        add_filter(
+            sprintf('manage_%s_posts_columns', $post_type),
+            array($thisclass, '_filter_title_column_name'));
 
         static::add_thumbnail_column();
+        static::column('rank')
+              ->set_title(__('Title'))
+              ->hook_after('title');
+
         static::column('unit')
               ->set_title(__('Unit'))
               ->make_sortable(array('meta_key' => 'unit_quad'))
-              ->hook_after('title');
+              ->hook_after('rank');
 
         static::column('publication')
               ->set_title(__('Pub.'))
               ->make_sortable(array('meta_key' => 'publication_link'))
               ->hook_after('unit');
-
-        add_filter("is_protected_meta",
-                   array(get_called_class(), 'additional_protected_metas'), 10, 3);
 
         static::add_editor_css("
 #after-editor-sortables {
@@ -658,7 +669,15 @@ class PersonController extends CustomPostTypeController
         });
 
         run_every("PersonController::sync_all", 600,
-                  array(get_called_class(), "sync_all"));
+                  array($thisclass, "sync_all"));
+    }
+
+    /**
+     * Rewrite "Title" to "Name", as "Title" is used for academic rank.
+     */
+    function _filter_title_column_name ($columns) {
+        $columns['title'] = ___('Name');
+        return $columns;
     }
 
     /**
@@ -918,6 +937,11 @@ class PersonController extends CustomPostTypeController
     {
         if (! ($infoscience_link = $_POST['publication_link'])) { return; }
         Person::get($post_id)->set_publication_link($infoscience_link);
+    }
+
+    static function render_rank_column ($person) {
+        if (! ($title = $person->get_title())) return;
+        echo $title->localize();
     }
 
     /**
