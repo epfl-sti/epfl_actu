@@ -42,7 +42,8 @@ class Title
             "PROF_TITULAIRE"   => __id("Adjunct Professor"),      // "Professeur titulaire"
             "MER"              => __id("Senior Scientist"),       // "Maître d'enseignement et de recherche"
             "CHARGE_DE_COURS"  => __id("Lecturer"),               // "Chargé de cours"
-            "POST_DOC"         => __id("Scientist")               // Post-doc / Collaborateur scientifique
+            "POST_DOC"         => __id("Scientist"),              // Post-doc / Collaborateur scientifique
+            "DOCTOR"           => __id("Doctor")                  // PhD holder not in a research position
         );
     }
 
@@ -116,5 +117,4 @@ class Title
             return __x("Dr.", "greeting");
         }
     }
-
 }
