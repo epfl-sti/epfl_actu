@@ -105,6 +105,7 @@ class Person extends UniqueKeyTypedPost
     const DN_META                    = 'dn';
     const GIVEN_NAME_META            = 'givenName';
     const SURNAME_META               = 'surname';
+    const DISPLAY_NAME_META          = 'displayName';
     const EMAIL_META                 = 'mail';
     const PROFILE_URL_META           = 'profile';
     const POSTAL_ADDRESS_META        = 'postaladdress';
@@ -348,6 +349,10 @@ class Person extends UniqueKeyTypedPost
             $meta[self::TITLE_CODE_META] = $title->code;
         }
 
+        if ($display_name = $best_entry["displayname"][0]) {
+            $meta[self::DISPLAY_NAME_META] = $display_name;
+        }
+
         if ($given_name = $best_entry["givenname"][0]) {
             $meta[self::GIVEN_NAME_META] = $given_name;
         }
@@ -401,7 +406,9 @@ class Person extends UniqueKeyTypedPost
             'ID'         => $this->ID,
             // We want a language-neutral post_title so we can't
             // work in the greeting - Filters will be used for that instead.
-            'post_title' => $best_entry['cn'][0],
+            // We were using the cn as post_title, but some person get some
+            // unofficial middlename. Hopefully the LDAP provide a displayname:
+            'post_title' => $best_entry['displayname'][0],
         );
         wp_update_post($update);
         $this->_update_meta($meta);
