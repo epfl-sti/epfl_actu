@@ -868,12 +868,13 @@ class PersonController extends CustomPostTypeController
         $person = Person::get($post->ID);
         $sciper = $person->get_sciper();
         $title = $person->get_title();
+        $localized_title = ($title) ? $title->localize() : "";
         $greeting = $title ? sprintf("%s ", $title->as_greeting()) : "";
         ?><h1><?php echo $greeting; the_title(); ?></h1><?php
         if ($lab = $person->is_head_of_unit()) {
           printf(
               '<h2>%s, <a href="/wp-admin/post.php?post=%d&action=edit">%s</a></h2>',
-              $title->localize(),
+              $localized_title,
               $lab->ID,
               $lab->get_abbrev()
           );
