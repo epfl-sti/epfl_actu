@@ -681,7 +681,7 @@ class PersonController extends CustomPostTypeController
                 basename(__DIR__) . '/languages');
         });
 
-        run_every("PersonController::sync_all", 600,
+        run_every("PersonController::sync_all", 3600,
                   array($thisclass, "sync_all"));
     }
 
