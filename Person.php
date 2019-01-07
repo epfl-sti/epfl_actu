@@ -450,12 +450,20 @@ class Person extends UniqueKeyTypedPost
 
     public function import_image_from_people ()
     {
-        $dom = $this->_get_people_dom();
-        $xpath = new \DOMXpath($dom);
-        $src_attr = $xpath->query("//div[@class=\"portrait\"]/img/@src")->item(0);
-        if (! $src_attr) return null;
-        $src = $src_attr->value;
-        $this->_update_meta(array(self::THUMBNAIL_META => $src));
+        // $dom = $this->_get_people_dom();
+        // $xpath = new \DOMXpath($dom);
+        // $src_attr = $xpath->query("//div[@class=\"portrait\"]/img/@src")->item(0);
+        // if (! $src_attr) return null;
+        // $src = $src_attr->value;
+        // $this->_update_meta(array(self::THUMBNAIL_META => $src));
+        
+        $image_url = "https://people.epfl.ch/private/common/photos/links/" . $this->get_sciper();
+        if (@getimagesize($image_url)) {
+            $this->_update_meta(array(self::THUMBNAIL_META => $image_url));
+        } else {
+            return null;
+        }
+        
         return $this;
     }
 
