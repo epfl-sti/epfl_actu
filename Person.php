@@ -322,9 +322,14 @@ class Person extends UniqueKeyTypedPost
 
         $this->update_from_ldap();
         $this->import_image_from_people();
+        // See INC0264101
+        // Just ignore the person's bio for now, until we get a cleaner way
+        // to fetch it.
+        /*
         if (! $this->get_bio()) {
             $this->update_bio_from_people();
         }
+        */
 
         $more_meta = apply_filters('epfl_person_additional_meta', array(), $this);
         if ($more_meta) {
@@ -461,6 +466,11 @@ class Person extends UniqueKeyTypedPost
 
     public function update_bio_from_people ()
     {
+        // See INC0264101
+        // Just ignore the person's bio for now, until we get a cleaner way
+        // to fetch it.
+        return true;
+        
         $dom = $this->_get_bio_dom();
         $xpath = new \DOMXpath($dom);
         $bio_nodes = $xpath->query("//div[@id='content']/h3[text()='Biography']/following-sibling::node()");
@@ -871,6 +881,7 @@ class PersonController extends CustomPostTypeController
         $localized_title = ($title) ? $title->localize() : "";
         $greeting = $title ? sprintf("%s ", $title->as_greeting()) : "";
         ?><h1><?php echo $greeting; the_title(); ?></h1><?php
+
         if ($lab = $person->is_head_of_unit()) {
           printf(
               '<h2>%s, <a href="/wp-admin/post.php?post=%d&action=edit">%s</a></h2>',
