@@ -57,12 +57,21 @@ class CourseTaxonomy extends StreamTaxonomy
 
     function sync ()
     {
+        return true;
+        /* For the sake of INC0270563:
+            - https://it.epfl.ch/backoffice/nav_to.do?uri=incident.do?sys_id=d1c29a73db96ef40914f9ec4db96192c
+           It desactivated the sync called by wp-cron mechanism.
+           View: wp cron event list --fields=hook,next_run --path=/srv/test/sti-dev.epfl.ch/htdocs
+           Trigger: wp cron event run epfl-ws-batch-streamtaxonomycontroller-sync --path=/srv/test/sti-dev.epfl.ch/htdocs
+        */
+        /*
         require_once (__DIR__ . "/inc/ISAcademiaAPI.inc");
         foreach (parse_getCours($this->get_url()) as $course_url) {
             $course = Course::get_or_create_by_url($course_url);
             $course->sync();
             $this->set_ownership($course);
         }
+        */
     }
 }
 
