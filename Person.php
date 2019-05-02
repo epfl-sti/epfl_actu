@@ -450,7 +450,7 @@ class Person extends UniqueKeyTypedPost
 
     public function import_image_from_people ()
     {
-        $image_url = "https://people.epfl.ch/private/common/photos/links/" . $this->get_sciper();
+        $image_url = "https://people.epfl.ch/private/common/photos/links/" . $this->get_sciper() . '.jpg';
         if (@getimagesize($image_url)) {
             $this->_update_meta(array(self::THUMBNAIL_META => $image_url));
         } else {
