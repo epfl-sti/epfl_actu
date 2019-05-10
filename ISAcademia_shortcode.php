@@ -165,12 +165,14 @@ h3 a:hover{color:#8972d5;}
 EOT;
       $isacademia .= $isacrapycss;
       $isadata = $this->ws->get_items( $isacademiaurl ); // add , array('timeout' => 10) in case of timeout
-      $isacademia .= @iconv("ISO-8859-1//TRANSLIT","UTF-8",$isadata);
+      $isacademia .= @iconv("ISO-8859-15//TRANSLIT","UTF-8",$isadata);
 
       if (!$legend || !$isalegendurl = $this->ws->validate_url( $legend, "isa.epfl.ch" )) {
         return "<div class=\"container isacademia-transcluded\"><div class=\"row\"><div class=\"col-md-12\">" . $isacademia . "</div></div></div>";
       } else {
-        return "<div class=\"container isacademia-transcluded\"><div class=\"row\"><div class=\"col-md-8\">" . $isacademia . "</div><div class=\"col-md-4\">" . $this->ws->get_items( $isalegendurl ) . "</div></div></div>";
+        $isalegenddata = $this->ws->get_items( $isalegendurl );
+        $isalegendrendered = @iconv("ISO-8859-15//TRANSLIT","UTF-8",$isalegenddata);
+        return "<div class=\"container isacademia-transcluded\"><div class=\"row\"><div class=\"col-md-8\">" . $isacademia . "</div><div class=\"col-md-4\">" . $isalegendrendered . "</div></div></div>";
       }
 
     } else {
