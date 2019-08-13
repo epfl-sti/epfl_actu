@@ -148,6 +148,9 @@ class AutoFieldsController {
                                                     $matched[1])))
             {
                 $this->$method($key, $value);
+            } elseif ($key === "profile" ||
+                      preg_match('/_(link|external_thumbnail)$/', $key)) {
+                $this->render_meta_field_td_url($key, $value);
             } elseif (gettype($value) != "string") {
                 $value_html = "<pre>" . gettype($value) . "</pre>";
             } elseif ($this->_is_sciper_type($key)) {
