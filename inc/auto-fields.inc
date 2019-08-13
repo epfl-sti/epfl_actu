@@ -148,6 +148,8 @@ class AutoFieldsController {
                                                     $matched[1])))
             {
                 $this->$method($key, $value);
+            } elseif (preg_match('/json/', $key)) {
+                $this->render_meta_field_td_json($key, $value);
             } elseif ($key === "profile" ||
                       preg_match('/_(link|external_thumbnail)$/', $key)) {
                 $this->render_meta_field_td_url($key, $value);
@@ -213,8 +215,12 @@ class AutoFieldsController {
 
     static protected $_json_button_count = 0;
     function render_meta_field_td_json ($key, $value) {
-        $this->render_meta_field_td($value);
-        if (NULL !== json_decode($value)) {
+        if (NULL === json_decode($value)) {
+            echo "<td><pre>";
+            echo $this->_htmlify($value, 20);
+            echo "</pre></td><td>(Malformed)<!-- $value --></td>";
+        } else {
+            $this->render_meta_field_td($value);
             $button_id = "autofields_json_button" . static::$_json_button_count++;
             echo "<td><button id=\"$button_id\">" . ___("<code>console.log()</code> it"). "</button></td>\n";
 ?>
